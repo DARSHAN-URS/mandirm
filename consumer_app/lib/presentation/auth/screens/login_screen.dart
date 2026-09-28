@@ -473,6 +473,22 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+  bool _useEmailOtp = true;
+
+  void _onSendEmailOtp() {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address'),
+          backgroundColor: AppColors.sacredCrimson,
+        ),
+      );
+      return;
+    }
+    context.read<AuthBloc>().add(SendEmailOtpEvent(email));
+  }
+
   Widget _buildEmailTab(bool isLoading) {
     return Form(
       key: _emailFormKey,
@@ -484,7 +500,7 @@ class _LoginScreenState extends State<LoginScreen>
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
-              hintText: 'Email address',
+              hintText: 'Enter your email address',
               prefixIcon: Icon(Icons.email_outlined, color: AppColors.saffronPrimary),
             ),
             validator: (value) {
@@ -497,64 +513,121 @@ class _LoginScreenState extends State<LoginScreen>
               return null;
             },
           ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              hintText: 'Password',
-              prefixIcon: const Icon(Icons.lock_outline, color: AppColors.saffronPrimary),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.textMutedLight,
+          const SizedBox(height: 8),
+          if (_useEmailOtp) ...[
+            Text(
+              'A 6-digit sacred verification OTP will be sent to your email via Resend',
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                color: AppColors.textSecondaryLight,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => setState(() => _useEmailOtp = false),
+                child: const Text(
+                  'Or use Password login',
+                  style: TextStyle(fontSize: 12),
                 ),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
               ),
             ),
-            validator: (value) {
-              if (value == null || value.length < 6) {
-                return 'Password must be at least 6 characters';
-              }
-              return null;
-            },
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                setState(() => _isSignUpMode = !_isSignUpMode);
-              },
-              child: Text(
-                _isSignUpMode
-                    ? 'Already have an account? Sign In'
-                    : 'New Devotee? Create Account',
-                style: const TextStyle(fontSize: 12),
-              ),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: isLoading ? null : _onSendEmailOtp,
+              child: isLoading
+                  ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.mark_email_read_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Get Sacred Email OTP',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
-          ),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: isLoading ? null : _onEmailAuthSubmit,
-            child: isLoading
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(
-                    _isSignUpMode ? 'Register Devotee' : 'Sign In with Email',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
+          ] else ...[
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                hintText: 'Password',
+                prefixIcon: const Icon(Icons.lock_outline, color: AppColors.saffronPrimary),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.textMutedLight,
                   ),
-          ),
+                  onPressed: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () => setState(() => _useEmailOtp = true),
+                  child: const Text(
+                    'Use Email OTP instead',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() => _isSignUpMode = !_isSignUpMode);
+                  },
+                  child: Text(
+                    _isSignUpMode
+                        ? 'Sign In with Password'
+                        : 'New Devotee? Register',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: isLoading ? null : _onEmailAuthSubmit,
+              child: isLoading
+                  ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      _isSignUpMode ? 'Register Devotee' : 'Sign In with Password',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+            ),
+          ],
           const SizedBox(height: 12),
         ],
       ),

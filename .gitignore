@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.g.dart
+*.freezed.dart
+
+# Node
+node_modules/
+.next/
+dist/
+.env.local
+.env*.local
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Supabase CLI
+.supabase/
+
+# Non-Flutter apps in this repo (maintained in separate repositories)
+/backend/
+/consumer_website/
+/admin_panel/
+/supabase/
+/docs/
+Puja-Platform-Features-and-Tasks.pdf

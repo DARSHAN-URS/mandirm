@@ -4,10 +4,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
-  );
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabaseKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  if (supabaseUrl.isNotEmpty && supabaseKey.isNotEmpty) {
+    try {
+      await Supabase.initialize(
+        url: supabaseUrl,
+        anonKey: supabaseKey, // ignore: deprecated_member_use
+      );
+    } catch (e) {
+      debugPrint('Supabase init warning: $e');
+    }
+  }
 
   runApp(const AstrologerApp());
 }
@@ -19,12 +28,13 @@ class AstrologerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Astrologer Portal',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6B35FF)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD97706)),
         useMaterial3: true,
       ),
       home: const Scaffold(
-        body: Center(child: Text('Astrologer Portal')),
+        body: Center(child: Text('Mandiram Astrologer Portal')),
       ),
     );
   }

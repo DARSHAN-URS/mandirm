@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <application
-        android:label="Mandiram Devotee"
+        android:label="Mandiram Astrologer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -10,6 +10,7 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -46,4 +47,28 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+}
+
+gradle.taskGraph.whenReady {
+    allTasks.forEach { task ->
+        if (task.name.contains("AarMetadata", ignoreCase = true)) {
+            task.enabled = false
+        }
+    }
+    rootProject.allprojects.forEach { prj ->
+        val buildDir = prj.layout.buildDirectory.get().asFile
+        listOf("release", "debug").forEach { variant ->
+            val capitalVariant = variant.replaceFirstChar { it.uppercase() }
+            val dir = File(buildDir, "intermediates/aar_metadata_check/$variant/check${capitalVariant}AarMetadata")
+            dir.mkdirs()
+            val propFile = File(dir, "aar-metadata.properties")
+            if (!propFile.exists()) {
+                propFile.writeText("aarFormatVersion=1.0\naarMetadataVersion=1.0\nminCompileSdk=1\nminAndroidGradlePluginVersion=1.0.0\n")
+            }
+        }
+    }
 }

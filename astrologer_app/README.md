@@ -1,4 +1,4 @@
-# Mandiram - Astrologer & Consultant Mobile Application
+# Mandirm - Astrologer & Consultant Mobile Application
 
 A cross-platform Flutter application for certified Vedic Astrologers, Pandits, and Spiritual Consultants to manage live consultations (Voice/Video/Chat via Agora RTC), accept consultation queues, view devotee birth charts (Kundli/Horoscope), and track consultation earnings.
 

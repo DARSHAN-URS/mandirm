@@ -33,6 +33,7 @@ dev_dependencies:
   mocktail: ^1.0.3
   build_runner: ^2.4.9
   injectable_generator: ^2.4.1
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -40,3 +41,23 @@ flutter:
     - assets/images/
     - assets/icons/
   fonts: []
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FEEC04"
+  adaptive_icon_foreground: "assets/images/app_icon_foreground.png"
+  web:
+    generate: true
+    image_path: "assets/images/app_icon.png"
+    background_color: "#FEEC04"
+    theme_color: "#FEEC04"
+  windows:
+    generate: true
+    image_path: "assets/images/app_icon.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/images/app_icon.png"

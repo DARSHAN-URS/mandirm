@@ -64,8 +64,8 @@ class SignUpWithEmailEvent extends AuthEvent {
   List<Object?> get props => [email, password];
 }
 
-class SignInAsGuestEvent extends AuthEvent {
-  const SignInAsGuestEvent();
+class SignInWithGoogleEvent extends AuthEvent {
+  const SignInWithGoogleEvent();
 }
 
 class SaveProfileEvent extends AuthEvent {
@@ -78,4 +78,13 @@ class SaveProfileEvent extends AuthEvent {
 
 class SignOutEvent extends AuthEvent {
   const SignOutEvent();
+}
+
+class AuthSessionChangedEvent extends AuthEvent {
+  final dynamic session;
+  final dynamic user;
+  const AuthSessionChangedEvent({this.session, this.user});
+
+  @override
+  List<Object?> get props => [session, user];
 }

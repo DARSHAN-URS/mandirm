@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../domain/models/user_profile.dart';
 import '../../../services/supabase_service.dart';
 import '../bloc/auth_bloc.dart';
@@ -24,6 +25,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   String? _selectedGotra;
   String? _selectedRashi;
   DateTime? _selectedBirthDate;
+
+  static const Color _primaryMaroon = Color(0xFF7A0C16);
+  static const Color _darkCharcoal = Color(0xFF1E1E1E);
+  static const Color _cardBorder = Color(0xFFEFE6D8);
+  static const Color _warmCreamBg = Color(0xFFFBF8F3);
+  static const Color _accentYellow = Color(0xFFFDCB06);
 
   final List<String> _gotras = [
     'Kashyap',
@@ -126,230 +133,396 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         final isLoading = state is AuthLoading;
 
         return Scaffold(
-          backgroundColor: AppColors.backgroundLight,
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: Text(
-              'Sacred Profile Setup',
-              style: GoogleFonts.cinzel(
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Spiritual Header
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.warmCream,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.marigoldGold.withAlpha(80),
-                          width: 2,
-                        ),
-                      ),
-                      child: const Text('🕉️', style: TextStyle(fontSize: 32)),
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  Center(
-                    child: Text(
-                      'Sankalp & Devotee Details',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimaryLight,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Center(
-                    child: Text(
-                      'These sacred details are used when performing Puja Sankalp and personalized Astrology consultations.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: AppColors.textSecondaryLight,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Full Name
-                  Text(
-                    'Full Name (as per Puja Sankalp) *',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      hintText: 'e.g. Rajesh Sharma',
-                      prefixIcon: Icon(Icons.person_outline,
-                          color: AppColors.saffronPrimary),
-                    ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return 'Please provide your full name';
-                      }
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // Gotra
-                  Text(
-                    'Gotra (Ancestral Lineage)',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedGotra,
-                    hint: const Text('Select your Gotra'),
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.account_tree_outlined,
-                          color: AppColors.saffronPrimary),
-                    ),
-                    items: _gotras.map((gotra) {
-                      return DropdownMenuItem(
-                        value: gotra,
-                        child: Text(gotra, style: GoogleFonts.poppins(fontSize: 14)),
-                      );
-                    }).toList(),
-                    onChanged: (val) => setState(() => _selectedGotra = val),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // Rashi (Zodiac)
-                  Text(
-                    'Rashi (Moon Sign for Astrology)',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedRashi,
-                    hint: const Text('Select your Rashi'),
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.auto_awesome_outlined,
-                          color: AppColors.saffronPrimary),
-                    ),
-                    items: _rashis.map((rashi) {
-                      return DropdownMenuItem(
-                        value: rashi,
-                        child: Text(rashi, style: GoogleFonts.poppins(fontSize: 14)),
-                      );
-                    }).toList(),
-                    onChanged: (val) => setState(() => _selectedRashi = val),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // Date of Birth
-                  Text(
-                    'Date of Birth',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  InkWell(
-                    onTap: _pickBirthDate,
-                    borderRadius: BorderRadius.circular(14),
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.cake_outlined,
-                            color: AppColors.saffronPrimary),
-                        suffixIcon: Icon(Icons.calendar_today_rounded, size: 20),
-                      ),
-                      child: Text(
-                        _selectedBirthDate != null
-                            ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
-                            : 'Select Date of Birth',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: _selectedBirthDate != null
-                              ? AppColors.textPrimaryLight
-                              : AppColors.textMutedLight,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // City
-                  Text(
-                    'Current City / Place of Residence',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _cityController,
-                    decoration: const InputDecoration(
-                      hintText: 'e.g. Varanasi, Uttar Pradesh',
-                      prefixIcon: Icon(Icons.location_on_outlined,
-                          color: AppColors.saffronPrimary),
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Complete Profile Button
-                  ElevatedButton(
-                    onPressed: isLoading ? null : _onSave,
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            'Save & Enter Mandiram',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+          backgroundColor: _warmCreamBg,
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Top Custom App Bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  color: _warmCreamBg,
+                  child: Row(
+                    children: [
+                      // Back if can pop
+                      if (Navigator.canPop(context))
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: _primaryMaroon,
+                              size: 22,
                             ),
                           ),
-                  ),
+                        ),
 
-                  const SizedBox(height: 24),
-                ],
-              ),
+                      // Central Branding
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 28,
+                              height: 28,
+                              decoration: const BoxDecoration(shape: BoxShape.circle),
+                              child: Image.asset(
+                                AppConstants.logoAsset,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.local_fire_department_rounded,
+                                  color: Color(0xFFD32F2F),
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Mandirm',
+                                  style: GoogleFonts.marcellus(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                    color: _primaryMaroon,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                Text(
+                                  '— Sacred Devotee Setup —',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 8.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: _primaryMaroon,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      if (Navigator.canPop(context))
+                        const SizedBox(width: 34),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: _cardBorder),
+
+                // Form Body
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Devotional Glow Header
+                          Center(
+                            child: Container(
+                              width: 68,
+                              height: 68,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFFFFF9ED), Color(0xFFFFF3DB)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: _accentYellow, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _primaryMaroon.withAlpha(20),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: Text('🕉️', style: TextStyle(fontSize: 32)),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          Center(
+                            child: Text(
+                              'Devotee Sankalp Profile',
+                              style: GoogleFonts.marcellus(
+                                fontSize: 21,
+                                fontWeight: FontWeight.w700,
+                                color: _primaryMaroon,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          Center(
+                            child: Text(
+                              'These sacred details are chanted during your puja sankalp and personalized horoscope readings.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: const Color(0xFF6E6E6E),
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 22),
+
+                          // Full Name
+                          _buildFieldLabel('Full Name (as per Puja Sankalp) *'),
+                          const SizedBox(height: 6),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _cardBorder),
+                            ),
+                            child: TextFormField(
+                              controller: _nameController,
+                              style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal),
+                              decoration: const InputDecoration(
+                                hintText: 'e.g. Rajesh Sharma',
+                                prefixIcon: Icon(Icons.person_outline_rounded,
+                                    color: _primaryMaroon),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                              validator: (val) {
+                                if (val == null || val.trim().isEmpty) {
+                                  return 'Please provide your full name';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Gotra
+                          _buildFieldLabel('Gotra (Ancestral Lineage)'),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _cardBorder),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButtonFormField<String>(
+                                initialValue: _selectedGotra,
+                                hint: Text('Select your Gotra',
+                                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.account_tree_outlined,
+                                      color: _primaryMaroon),
+                                  border: InputBorder.none,
+                                ),
+                                items: _gotras.map((gotra) {
+                                  return DropdownMenuItem(
+                                    value: gotra,
+                                    child: Text(gotra,
+                                        style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal)),
+                                  );
+                                }).toList(),
+                                onChanged: (val) => setState(() => _selectedGotra = val),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Rashi
+                          _buildFieldLabel('Rashi (Moon Sign for Astrology)'),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _cardBorder),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButtonFormField<String>(
+                                initialValue: _selectedRashi,
+                                hint: Text('Select your Rashi',
+                                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.auto_awesome_outlined,
+                                      color: _primaryMaroon),
+                                  border: InputBorder.none,
+                                ),
+                                items: _rashis.map((rashi) {
+                                  return DropdownMenuItem(
+                                    value: rashi,
+                                    child: Text(rashi,
+                                        style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal)),
+                                  );
+                                }).toList(),
+                                onChanged: (val) => setState(() => _selectedRashi = val),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Date of Birth
+                          _buildFieldLabel('Date of Birth'),
+                          const SizedBox(height: 6),
+                          InkWell(
+                            onTap: _pickBirthDate,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: _cardBorder),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.cake_outlined, color: _primaryMaroon, size: 22),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    _selectedBirthDate != null
+                                        ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
+                                        : 'Select Date of Birth',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      color: _selectedBirthDate != null
+                                          ? _darkCharcoal
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  const Icon(Icons.calendar_today_rounded,
+                                      size: 18, color: Colors.grey),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // City
+                          _buildFieldLabel('Current City / Place of Residence'),
+                          const SizedBox(height: 6),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _cardBorder),
+                            ),
+                            child: TextFormField(
+                              controller: _cityController,
+                              style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal),
+                              decoration: const InputDecoration(
+                                hintText: 'e.g. Varanasi, Uttar Pradesh',
+                                prefixIcon: Icon(Icons.location_on_outlined,
+                                    color: _primaryMaroon),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          // Complete Profile Button
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF7A0C16), Color(0xFF9E1B26)],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _primaryMaroon.withAlpha(50),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: isLoading ? null : _onSave,
+                              child: isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Save & Enter Mandirm',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // Trust Security Note
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.lock_outline_rounded,
+                                  size: 13, color: Color(0xFF757575)),
+                              const SizedBox(width: 4),
+                              Text(
+                                '100% Confidential & Secure Sankalp Data',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10.5,
+                                  color: const Color(0xFF757575),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildFieldLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.poppins(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: _darkCharcoal,
+      ),
     );
   }
 }

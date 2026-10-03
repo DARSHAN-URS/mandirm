@@ -1,8 +1,8 @@
-# Mandiram - Flutter Mobile Applications
+# Mandirm - Flutter Mobile Applications
 
-Repository for the **Mandiram Devotional & Astrology Platform** mobile applications built with Flutter.
+Repository for the **Mandirm Devotional & Astrology Platform** mobile applications built with Flutter.
 
-![Mandiram Logo](logo.jpeg)
+![Mandirm Logo](logo.jpeg)
 
 ---
 

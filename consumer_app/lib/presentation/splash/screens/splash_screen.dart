@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
@@ -19,10 +19,10 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
-  late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _glowAnimation;
+  late Animation<double> _pulseAnimation;
   Timer? _authTimer;
+  bool _hasNavigated = false;
 
   @override
   void initState() {
@@ -30,38 +30,55 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
-      ),
+      duration: const Duration(milliseconds: 1600),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animController,
-        curve: const Interval(0.2, 0.9, curve: Curves.easeIn),
+        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
       ),
     );
 
-    _glowAnimation = Tween<double>(begin: 0.4, end: 1.0).animate(
+    _pulseAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
       CurvedAnimation(
         parent: _animController,
-        curve: Curves.easeInOut,
+        curve: Curves.easeInOutSine,
       ),
     );
 
     _animController.repeat(reverse: true);
 
     // Check authentication after splash delay
-    _authTimer = Timer(const Duration(milliseconds: 2200), () {
+    _authTimer = Timer(const Duration(milliseconds: 2400), () {
       if (mounted) {
         context.read<AuthBloc>().add(const CheckAuthStatusEvent());
       }
     });
+  }
+
+  void _handleNavigation(AuthState state) {
+    if (_hasNavigated || !mounted) return;
+    _hasNavigated = true;
+
+    if (state is AuthAuthenticated) {
+      context.go('/home');
+    } else if (state is AuthProfileRequired) {
+      context.go('/profile-setup');
+    } else if (state is AuthUnauthenticated || state is AuthError) {
+      context.go('/login');
+    }
+  }
+
+  void _onSkipTap() {
+    if (_hasNavigated || !mounted) return;
+    final currentState = context.read<AuthBloc>().state;
+    if (currentState is AuthAuthenticated) {
+      _handleNavigation(currentState);
+    } else {
+      _hasNavigated = true;
+      context.go('/login');
+    }
   }
 
   @override
@@ -73,232 +90,153 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthAuthenticated) {
-          context.go('/home');
-        } else if (state is AuthProfileRequired) {
-          context.go('/profile-setup');
-        } else if (state is AuthUnauthenticated || state is AuthError) {
-          context.go('/login');
-        }
-      },
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF330B04),
-                Color(0xFF6B1D0E),
-                Color(0xFF8B2510),
-                Color(0xFF1E0703),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Subtle background mandala / divine circles
-              Positioned(
-                top: -80,
-                child: Container(
-                  width: 320,
-                  height: 320,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.saffronPrimary.withAlpha(20),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -100,
-                child: Container(
-                  width: 400,
-                  height: 400,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.marigoldGold.withAlpha(15),
-                  ),
-                ),
-              ),
-
-              // Main Animated Content
-              AnimatedBuilder(
-                animation: _animController,
-                builder: (context, child) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Spacer(),
-
-                        // Divine Glowing Emblem with Logo
-                        Transform.scale(
-                          scale: _scaleAnimation.value,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Pulsing outer gold aura
-                              Container(
-                                width: 140 + (14 * _glowAnimation.value),
-                                height: 140 + (14 * _glowAnimation.value),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.templeGold.withAlpha(
-                                        (80 * _glowAnimation.value).toInt(),
-                                      ),
-                                      blurRadius: 40,
-                                      spreadRadius: 8,
-                                    ),
-                                    BoxShadow(
-                                      color: AppColors.saffronPrimary.withAlpha(
-                                        (100 * _glowAnimation.value).toInt(),
-                                      ),
-                                      blurRadius: 25,
-                                      spreadRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Golden decorative border ring
-                              Container(
-                                width: 130,
-                                height: 130,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFFFDF7D),
-                                      Color(0xFFF59E0B),
-                                      Color(0xFFD97706),
-                                      Color(0xFFFFE89E),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  border: Border.all(
-                                    color: Colors.amber.shade200,
-                                    width: 2.5,
-                                  ),
-                                ),
-                                padding: const EdgeInsets.all(5),
-                                child: ClipOval(
-                                  child: Image.asset(
-                                    AppConstants.logoAsset,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      // Fallback temple icon if asset is loading
-                                      return Container(
-                                        color: const Color(0xFF6B1D0E),
-                                        child: const Icon(
-                                          Icons.temple_hindu_rounded,
-                                          size: 64,
-                                          color: AppColors.templeGold,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          _handleNavigation(state);
+        },
+        child: Scaffold(
+          backgroundColor: const Color(0xFF1E0703),
+          body: GestureDetector(
+            onTap: _onSkipTap,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // 1. Divine Temple Sunset & Emblem Artwork Background
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Image.asset(
+                    AppConstants.splashBackgroundAsset,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback in case asset cannot be loaded
+                      return Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFFE5A638),
+                              Color(0xFF8B2510),
+                              Color(0xFF1E0703),
                             ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
                           ),
                         ),
-
-                        const SizedBox(height: 32),
-
-                        // Title with Cinzel font
-                        FadeTransition(
-                          opacity: _fadeAnimation,
+                        child: Center(
                           child: Text(
-                            AppConstants.appName.toUpperCase(),
+                            AppConstants.appName,
                             style: GoogleFonts.cinzel(
-                              fontSize: 34,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 4.0,
-                              color: const Color(0xFFFFF7ED),
-                              shadows: [
-                                Shadow(
-                                  color: AppColors.marigoldGold.withAlpha(160),
-                                  blurRadius: 18,
-                                ),
-                              ],
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amber.shade200,
                             ),
                           ),
                         ),
+                      );
+                    },
+                  ),
+                ),
 
-                        const SizedBox(height: 10),
-
-                        // Tagline
-                        FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(50),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: AppColors.marigoldGold.withAlpha(60),
-                                width: 1,
+                // 2. Subtle Divine Breathing Golden Aura near Diya & Temple
+                AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return Positioned(
+                      bottom: MediaQuery.of(context).size.height * 0.14,
+                      right: MediaQuery.of(context).size.width * 0.15,
+                      child: Container(
+                        width: 90 * _pulseAnimation.value,
+                        height: 90 * _pulseAnimation.value,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFB300).withValues(
+                                alpha: 0.18 * _pulseAnimation.value,
                               ),
-                            ),
-                            child: Text(
-                              AppConstants.appTagline,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFFFDE68A),
-                                letterSpacing: 0.4,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const Spacer(),
-
-                        // Loading Indicator with Divine Theme
-                        Column(
-                          children: [
-                            SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.8,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.templeGold.withAlpha(220),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Awakening Divine Presence...',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: const Color(0xFFE2DFD8).withAlpha(180),
-                                letterSpacing: 0.5,
-                              ),
+                              blurRadius: 36 * _pulseAnimation.value,
+                              spreadRadius: 16 * _pulseAnimation.value,
                             ),
                           ],
                         ),
+                      ),
+                    );
+                  },
+                ),
 
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
+                // 3. Active Golden Rotating Circular Loader & "Loading..."
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: MediaQuery.of(context).size.height * 0.082,
+                  child: AnimatedBuilder(
+                    animation: _pulseAnimation,
+                    builder: (context, child) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Radiant Golden Circular Spinner
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFEAA031).withValues(
+                                    alpha: 0.35 * _pulseAnimation.value,
+                                  ),
+                                  blurRadius: 14,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3.2,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFFF6B842),
+                              ),
+                              backgroundColor:
+                                  const Color(0xFF5D240E).withValues(alpha: 0.35),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Pulsing "Loading..." Typography
+                          Opacity(
+                            opacity: 0.75 + (0.25 * _pulseAnimation.value),
+                            child: Text(
+                              'Loading...',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFFFDE68A),
+                                letterSpacing: 0.8,
+                                shadows: const [
+                                  Shadow(
+                                    color: Color(0x99000000),
+                                    offset: Offset(0, 1),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

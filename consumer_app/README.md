@@ -1,4 +1,4 @@
-# Mandiram - Consumer Mobile Application
+# Mandirm - Consumer Mobile Application
 
 A cross-platform Flutter application for the **Puja, Temple & Astrology Platform**, featuring Supabase Authentication, Live Darshan, Vedic Pujas, Chadhawa Prasad offerings, and Astrologer consultations.
 
@@ -6,7 +6,7 @@ A cross-platform Flutter application for the **Puja, Temple & Astrology Platform
 
 ## 🌟 Key Features Built
 1. **Divine Animated Splash Screen**
-   - Breathing golden aura and sacred glowing emblem with Mandiram branding.
+   - Breathing golden aura and sacred glowing emblem with Mandirm branding.
    - Smooth scale, glow, and fade animations.
    - Automatic authentication verification and dynamic route dispatching.
 2. **Supabase Authentication & State Management**

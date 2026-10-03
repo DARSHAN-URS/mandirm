@@ -6,8 +6,14 @@ import 'presentation/home/screens/main_hub_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  const supabaseKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  const supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://ndjvkzrxgmxsdrbyeyim.supabase.co',
+  );
+  const supabaseKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kanZrenJ4Z214c2RyYnlleWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MDE2NTcsImV4cCI6MjEwNjA3NzY1N30.sokDKK8Lnh36oKHt6Yq8_6ImmUXhwJ72FyU0NHsR3w0',
+  );
 
   if (supabaseUrl.isNotEmpty && supabaseKey.isNotEmpty) {
     try {
@@ -29,7 +35,7 @@ class AstrologerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mandiram Astrologer Portal',
+      title: 'Mandirm Astrologer Portal',
       debugShowCheckedModeBanner: false,
       theme: AstrologerTheme.darkTheme,
       home: const AstrologerMainHubScreen(),

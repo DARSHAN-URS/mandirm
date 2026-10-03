@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../common/widgets/mandirm_header.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -30,6 +32,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   int _countdown = 30;
   Timer? _timer;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -70,17 +73,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   String get _otpCode => _controllers.map((c) => c.text).join();
 
   void _onVerify() {
+    if (_isSubmitting) return;
     final code = _otpCode;
     if (code.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter all 6 digits of the sacred OTP'),
+        SnackBar(
+          content: Text(AppStrings.t('enter_all_digits')),
           backgroundColor: AppColors.sacredCrimson,
         ),
       );
       return;
     }
 
+    setState(() => _isSubmitting = true);
     if (widget.isPhone) {
       context.read<AuthBloc>().add(VerifyPhoneOtpEvent(
             phoneNumber: widget.target,
@@ -96,6 +101,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _onResend() {
     if (_countdown == 0) {
+      setState(() => _isSubmitting = false);
       if (widget.isPhone) {
         context.read<AuthBloc>().add(SendPhoneOtpEvent(widget.target));
       } else {
@@ -103,8 +109,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       }
       _startTimer();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sacred OTP resent successfully!'),
+        SnackBar(
+          content: Text(AppStrings.t('otp_resent_success')),
           backgroundColor: AppColors.saffronPrimary,
         ),
       );
@@ -120,6 +126,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         } else if (state is AuthProfileRequired) {
           context.go('/profile-setup');
         } else if (state is AuthError) {
+          setState(() => _isSubmitting = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -135,22 +142,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         }
       },
       builder: (context, state) {
-        final isLoading = state is AuthLoading;
+        final isLoading = state is AuthLoading || _isSubmitting;
 
         return Scaffold(
           backgroundColor: AppColors.backgroundLight,
           appBar: AppBar(
+            backgroundColor: const Color(0xFFFFFDF9),
+            elevation: 0.5,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF7A0C16)),
               onPressed: () => context.pop(),
             ),
             title: Text(
-              'Verify Sacred OTP',
+              AppStrings.t('verify_otp'),
               style: GoogleFonts.cinzel(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
+                color: const Color(0xFF7A0C16),
               ),
             ),
+            actions: const [
+              Padding(
+                padding: EdgeInsets.only(right: 14.0),
+                child: LanguageToggleButton(),
+              ),
+            ],
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
@@ -186,7 +202,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Enter Verification Code',
+                  AppStrings.t('enter_verification_code'),
                   style: GoogleFonts.cinzel(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -197,7 +213,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'We have sent a 6-digit code to',
+                  AppStrings.t('code_sent_to'),
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     color: AppColors.textSecondaryLight,
@@ -221,7 +237,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     GestureDetector(
                       onTap: () => context.pop(),
                       child: Text(
-                        'Change',
+                        AppStrings.t('change'),
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -294,48 +310,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                 const SizedBox(height: 28),
 
-                // Dev Tip Notice
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.warmCream,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppColors.marigoldGold.withAlpha(60),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.lightbulb_outline,
-                        color: AppColors.deepAmber,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Test mode hint: Enter 123456 for instant verification',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimaryLight,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
                 // Resend Countdown
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       _countdown > 0
-                          ? 'Resend OTP in '
-                          : 'Didn\'t receive code? ',
+                          ? AppStrings.t('resend_in')
+                          : AppStrings.t('didnt_receive_code'),
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: AppColors.textSecondaryLight,
@@ -354,7 +336,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       GestureDetector(
                         onTap: _onResend,
                         child: Text(
-                          'Resend OTP',
+                          AppStrings.t('resend_otp'),
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -381,12 +363,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           ),
                         )
                       : Text(
-                          'Verify & Proceed',
+                          AppStrings.t('verify_otp'),
                           style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
                         ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Supabase security assurance badge
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.lock_outline_rounded, size: 14, color: Color(0xFF8C7B70)),
+                    const SizedBox(width: 6),
+                    Text(
+                      AppStrings.t('supabase_auth_note'),
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: const Color(0xFF8C7B70),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -68,94 +68,101 @@ class DevotionalDrawerSheet extends StatelessWidget {
 
           // Header Branding & Profile Row
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+            padding: const EdgeInsets.fromLTRB(20, 10, 16, 16),
             decoration: const BoxDecoration(
               border: Border(bottom: BorderSide(color: _cardBorder, width: 1)),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Devotee Avatar or Flame Logo
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: (isLoggedIn && userAvatar != null && userAvatar.isNotEmpty)
-                      ? Image.network(
-                          userAvatar,
-                          width: 44,
-                          height: 44,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Image.asset(
-                            AppConstants.flameLogoAsset,
-                            width: 44,
-                            height: 44,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(
-                              Icons.local_fire_department_rounded,
-                              color: Color(0xFFD64D18),
-                              size: 38,
+                // Top Row: Official Mandirm Logo & Close Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      AppConstants.flameLogoAsset,
+                      height: 44,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.local_fire_department_rounded,
+                        color: Color(0xFFD64D18),
+                        size: 38,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: _darkCharcoal, size: 24),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Devotee Profile Row
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: (isLoggedIn && userAvatar != null && userAvatar.isNotEmpty)
+                          ? Image.network(
+                              userAvatar,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFBEBC7),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Center(
+                                  child: Text('🙏', style: TextStyle(fontSize: 22)),
+                                ),
+                              ),
+                            )
+                          : Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFBEBC7),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Center(
+                                child: Text('🙏', style: TextStyle(fontSize: 22)),
+                              ),
                             ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${AppStrings.t('namaste')}, $userName 🙏',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: _darkCharcoal,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        )
-                      : Image.asset(
-                          AppConstants.flameLogoAsset,
-                          width: 44,
-                          height: 44,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.local_fire_department_rounded,
-                            color: Color(0xFFD64D18),
-                            size: 38,
+                          const SizedBox(height: 2),
+                          Text(
+                            userEmail,
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '॥ मंदिरम् ॥',
-                        style: GoogleFonts.rozhaOne(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: _primaryMaroon,
-                          height: 1.1,
-                        ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        LocaleService().isHindi
-                            ? '• आस्था • आनंद • अध्यात्म •'
-                            : '• Faith • Peace • Spirituality •',
-                        style: GoogleFonts.poppins(
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF8B2510),
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${AppStrings.t('namaste')}, $userName 🙏',
-                        style: GoogleFonts.poppins(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: _darkCharcoal,
-                        ),
-                      ),
-                      Text(
-                        userEmail,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, color: _darkCharcoal),
-                  onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
                 ),
               ],
             ),

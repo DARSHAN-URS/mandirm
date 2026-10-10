@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../domain/models/astrologer_profile.dart';
 import '../../../domain/models/consultation_model.dart';
+import '../../../services/api/api_service.dart';
+import '../../../services/auth/auth_service.dart';
 import '../../calls/screens/live_consultation_screen.dart';
+import '../../common/widgets/app_image.dart';
+import '../../common/widgets/mandirm_header.dart';
 
 class AstrologerDashboardScreen extends StatefulWidget {
   const AstrologerDashboardScreen({super.key});
@@ -12,10 +18,106 @@ class AstrologerDashboardScreen extends StatefulWidget {
 }
 
 class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
+  AstrologerProfile? _profile;
   String _astrologerStatus = 'online'; // online, busy, offline
   final List<DevoteeConsultationRequest> _queue = List.from(DevoteeConsultationRequest.mockQueue);
-  final EarningsSummary _earnings = EarningsSummary.mockData;
+  EarningsSummary _earnings = EarningsSummary.mockData;
   final List<PastConsultation> _recentHistory = List.from(PastConsultation.mockHistory);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  void _loadDashboardData() async {
+    final current = AuthService().currentProfile;
+    if (current != null) {
+      setState(() {
+        _profile = current;
+        _astrologerStatus = current.isOnline ? 'online' : 'offline';
+      });
+    }
+
+    final astroId = current?.id ?? 'astro_1';
+
+    try {
+      final p = await ApiService().getAstrologerProfile(astroId);
+      if (p != null && mounted) {
+        setState(() {
+          _profile = p;
+          _astrologerStatus = p.isOnline ? 'online' : 'offline';
+        });
+      }
+
+      final earningsData = await ApiService().getAstrologerEarnings(astroId);
+      if (earningsData != null && mounted) {
+        setState(() {
+          _earnings = EarningsSummary(
+            todayEarnings: (earningsData['total_earned'] as num?)?.toDouble() ?? 2450.0,
+            todayMinutes: 82,
+            todayConsultations: (earningsData['completed_consultations'] as num?)?.toInt() ?? 6,
+            walletBalance: (earningsData['wallet_balance'] as num?)?.toDouble() ?? 18750.0,
+            rating: _profile?.rating ?? 4.95,
+          );
+        });
+      }
+
+      final cons = await ApiService().getAstrologerConsultations(astroId);
+      if (cons.isNotEmpty && mounted) {
+        final List<DevoteeConsultationRequest> fetchedQueue = [];
+        final List<PastConsultation> fetchedHistory = [];
+
+        for (var c in cons) {
+          final status = (c['status'] ?? 'requested').toString().toLowerCase();
+          if (status == 'requested' || status == 'active') {
+            fetchedQueue.add(DevoteeConsultationRequest.fromJson(c));
+          } else if (status == 'completed') {
+            fetchedHistory.add(PastConsultation.fromJson(c));
+          }
+        }
+
+        setState(() {
+          if (fetchedQueue.isNotEmpty) {
+            _queue.clear();
+            _queue.addAll(fetchedQueue);
+          }
+          if (fetchedHistory.isNotEmpty) {
+            _recentHistory.clear();
+            _recentHistory.addAll(fetchedHistory);
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('[Dashboard] Error fetching backend data: $e');
+    }
+  }
+
+  void _onStatusChanged(String newStatus) async {
+    setState(() => _astrologerStatus = newStatus);
+    final astroId = _profile?.id ?? 'astro_1';
+    final ok = await ApiService().updateAstrologerAvailability(
+      astroId,
+      isOnline: newStatus != 'offline',
+      isChatActive: newStatus == 'online',
+      isCallActive: newStatus == 'online',
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? 'Status updated to ${newStatus.toUpperCase()} on Mandirm network'
+              : 'Status set to ${newStatus.toUpperCase()}',
+          style: GoogleFonts.poppins(),
+        ),
+        backgroundColor: newStatus == 'online'
+            ? AppColors.statusOnline
+            : (newStatus == 'busy' ? AppColors.statusBusy : AppColors.statusOffline),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
   void _acceptConsultation(DevoteeConsultationRequest request) async {
     final result = await Navigator.push(
@@ -26,6 +128,22 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
     );
 
     if (result != null && result['completed'] == true) {
+      final durationMins = ((result['duration'] as int? ?? 60) ~/ 60) + 1;
+      final earned = (result['earnings'] as num?)?.toDouble() ?? (request.perMinuteRate * durationMins);
+      final remediesList = result['prescribed_remedies'] as List?;
+      final remediesNotes = (remediesList != null && remediesList.isNotEmpty)
+          ? 'Prescribed remedies: ${remediesList.join(', ')}'
+          : null;
+
+      // Persist status update to Backend & Supabase
+      ApiService().updateConsultationStatus(
+        request.id,
+        status: 'completed',
+        durationMinutes: durationMins,
+        totalAmount: earned,
+        notes: remediesNotes,
+      );
+
       setState(() {
         _queue.removeWhere((r) => r.id == request.id);
         _recentHistory.insert(
@@ -33,12 +151,13 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
           PastConsultation(
             id: 'hist_${DateTime.now().millisecondsSinceEpoch}',
             devoteeName: request.devoteeName,
+            devoteePhoto: request.devoteePhoto,
             type: request.type,
-            durationMinutes: ((result['duration'] as int) ~/ 60) + 1,
-            amount: (result['earnings'] as double),
+            durationMinutes: durationMins,
+            amount: earned,
             timeAgo: 'Just now',
             rating: 5.0,
-            feedback: 'Thank you Guruji for the auspicious remedies.',
+            feedback: remediesNotes ?? 'Thank you Guruji for the auspicious remedies.',
           ),
         );
       });
@@ -47,9 +166,10 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Consultation completed with ${request.devoteeName}! ₹${(result['earnings'] as double).toStringAsFixed(2)} added to wallet.',
+            'Consultation completed with ${request.devoteeName}! ₹${earned.toStringAsFixed(2)} added to wallet.',
+            style: GoogleFonts.poppins(),
           ),
-          backgroundColor: AstrologerColors.statusOnline,
+          backgroundColor: AppColors.statusOnline,
         ),
       );
     }
@@ -59,10 +179,14 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
     setState(() {
       _queue.removeWhere((r) => r.id == request.id);
     });
+
+    // Notify backend & Supabase that request was passed
+    ApiService().updateConsultationStatus(request.id, status: 'rejected');
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Request from ${request.devoteeName} passed.'),
-        backgroundColor: AstrologerColors.cosmicSurface,
+        content: Text('Request from ${request.devoteeName} passed.', style: GoogleFonts.poppins()),
+        backgroundColor: AppColors.warmCream,
       ),
     );
   }
@@ -70,31 +194,38 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AstrologerColors.cosmicDark,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Profile & Status Bar
-              _buildHeader(),
-              const SizedBox(height: 20),
+      backgroundColor: AppColors.backgroundLight,
+      body: Column(
+        children: [
+          // Unified Mandirm Header (identical to consumer app)
+          const MandirmHeader(),
 
-              // Today's Earnings & Performance Hub
-              _buildEarningsCard(),
-              const SizedBox(height: 24),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Acharya Profile & Duty Status (Availability Settings)
+                  _buildHeader(),
+                  const SizedBox(height: 16),
 
-              // Incoming Queue Section
-              _buildQueueSection(),
-              const SizedBox(height: 24),
+                  // 2. Today's Dakshina & Performance Hub (Earnings View)
+                  _buildEarningsCard(),
+                  const SizedBox(height: 20),
 
-              // Recent Consultations & Reviews
-              _buildHistorySection(),
-              const SizedBox(height: 40),
-            ],
+                  // 3. Incoming Devotee Consultations Queue (Consultation Requests: Voice, Video, Chat)
+                  _buildQueueSection(),
+                  const SizedBox(height: 20),
+
+                  // 4. Recent Devotee Consultations & Reviews (Consultation History)
+                  _buildHistorySection(),
+                  const SizedBox(height: 28),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -103,9 +234,16 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AstrologerColors.cosmicCard,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AstrologerColors.borderSubtle),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.lightBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -113,10 +251,21 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
             children: [
               Stack(
                 children: [
-                  const CircleAvatar(
-                    radius: 28,
-                    backgroundImage: NetworkImage(
-                      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.marigoldGold, width: 2),
+                    ),
+                    child: ClipOval(
+                      child: AppImage.network(
+                        AppConstants.cdnUrl(AppConstants.astroRajeshAsset),
+                        fallbackAsset: AppConstants.logoAsset,
+                        width: 58,
+                        height: 58,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   Positioned(
@@ -128,7 +277,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                       decoration: BoxDecoration(
                         color: _statusColor,
                         shape: BoxShape.circle,
-                        border: Border.all(color: AstrologerColors.cosmicCard, width: 2),
+                        border: Border.all(color: Colors.white, width: 2),
                       ),
                     ),
                   ),
@@ -140,20 +289,25 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Acharya Devavrat Shastri',
+                      _profile?.name ?? 'Acharya Ramanuj Shastri',
                       style: GoogleFonts.cinzel(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Jyotish Praveen • Vedic & Vastu Expert',
+                      _profile?.specialities ?? 'Jyotish Praveen • Vedic & Vastu Expert',
                       style: GoogleFonts.poppins(
                         fontSize: 11,
-                        color: AstrologerColors.vedicGold,
+                        color: AppColors.deepAmber,
+                        fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -161,21 +315,21 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AstrologerColors.vedicGold.withOpacity(0.15),
+                  color: AppColors.deepAmber.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AstrologerColors.vedicGold.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.deepAmber.withOpacity(0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.star, color: AstrologerColors.vedicGold, size: 14),
+                    const Icon(Icons.star_rounded, color: AppColors.marigoldGold, size: 16),
                     const SizedBox(width: 4),
                     Text(
                       '4.92',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: AstrologerColors.vedicGold,
+                        color: AppColors.deepAmber,
                       ),
                     ),
                   ],
@@ -183,19 +337,23 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const Divider(color: AstrologerColors.borderSubtle, height: 1),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          const Divider(color: AppColors.lightBorder, height: 1),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Duty Status:',
-                style: GoogleFonts.poppins(fontSize: 13, color: Colors.white70),
+                style: GoogleFonts.poppins(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
               ),
-              _buildStatusPill('online', 'Online (Accepting Calls)', AstrologerColors.statusOnline),
-              _buildStatusPill('busy', 'Busy', AstrologerColors.statusBusy),
-              _buildStatusPill('offline', 'Offline', AstrologerColors.statusOffline),
+              _buildStatusPill('online', 'Online', AppColors.statusOnline),
+              _buildStatusPill('busy', 'Busy', AppColors.statusBusy),
+              _buildStatusPill('offline', 'Offline', AppColors.statusOffline),
             ],
           ),
         ],
@@ -206,24 +364,27 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   Color get _statusColor {
     switch (_astrologerStatus) {
       case 'online':
-        return AstrologerColors.statusOnline;
+        return AppColors.statusOnline;
       case 'busy':
-        return AstrologerColors.statusBusy;
+        return AppColors.statusBusy;
       default:
-        return AstrologerColors.statusOffline;
+        return AppColors.statusOffline;
     }
   }
 
   Widget _buildStatusPill(String statusKey, String label, Color color) {
     final isSelected = _astrologerStatus == statusKey;
     return GestureDetector(
-      onTap: () => setState(() => _astrologerStatus = statusKey),
+      onTap: () => _onStatusChanged(statusKey),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
+          color: isSelected ? color.withOpacity(0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? color : Colors.transparent),
+          border: Border.all(
+            color: isSelected ? color : AppColors.lightBorder,
+            width: 1,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -238,11 +399,11 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
             ),
             const SizedBox(width: 6),
             Text(
-              statusKey.capitalize(),
+              label,
               style: GoogleFonts.poppins(
                 fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? Colors.white : Colors.white60,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? color : AppColors.textSecondary,
               ),
             ),
           ],
@@ -259,85 +420,102 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF4C1D95),
-            Color(0xFF2E1065),
-            Color(0xFF1E1B4B),
+            AppColors.primaryMaroon,
+            AppColors.kumkumMaroon,
+            Color(0xFF991B1B),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AstrologerColors.royalPurple.withOpacity(0.4)),
+        border: Border.all(color: AppColors.marigoldGold.withOpacity(0.4)),
         boxShadow: [
           BoxShadow(
-            color: AstrologerColors.royalPurple.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColors.primaryMaroon.withOpacity(0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Positioned(
+            right: -10,
+            bottom: -10,
+            child: Opacity(
+              opacity: 0.12,
+              child: Image.asset(
+                AppConstants.flameLogoAsset,
+                width: 110,
+                height: 110,
+                errorBuilder: (_, __, ___) => const Icon(Icons.wb_sunny, size: 80, color: Colors.white),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Today's Consultation Earnings",
-                    style: GoogleFonts.poppins(fontSize: 12, color: AstrologerColors.amberGlow),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.currency_rupee, color: AstrologerColors.vedicGold, size: 26),
                       Text(
-                        _earnings.todayEarnings.toStringAsFixed(0),
-                        style: GoogleFonts.cinzel(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
+                        "Today's Consultation Earnings",
+                        style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFFFFF6E5)),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.currency_rupee, color: Color(0xFFFFD54F), size: 26),
+                          Text(
+                            _earnings.todayEarnings.toStringAsFixed(0),
+                            style: GoogleFonts.cinzel(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Wallet',
+                          style: GoogleFonts.poppins(fontSize: 10, color: const Color(0xFFFFF6E5)),
+                        ),
+                        Text(
+                          '₹${_earnings.walletBalance.toStringAsFixed(0)}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFFFD54F),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Wallet',
-                      style: GoogleFonts.poppins(fontSize: 10, color: Colors.white70),
-                    ),
-                    Text(
-                      '₹${_earnings.walletBalance.toStringAsFixed(0)}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AstrologerColors.vedicGold,
-                      ),
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 16),
+              const Divider(color: Colors.white24),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildMetric('Consultations', '${_earnings.todayConsultations} devotees', Icons.people_outline),
+                  _buildMetric('Spoken Time', '${_earnings.todayMinutes} mins', Icons.timer_outlined),
+                  _buildMetric('Call Rate', '₹35 / min', Icons.call_outlined),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Divider(color: Colors.white12),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildMetric('Consultations', '${_earnings.todayConsultations} devotees', Icons.people_outline),
-              _buildMetric('Spoken Time', '${_earnings.todayMinutes} mins', Icons.timer_outlined),
-              _buildMetric('Call Rate', '₹35 / min', Icons.call_outlined),
             ],
           ),
         ],
@@ -348,10 +526,10 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   Widget _buildMetric(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: AstrologerColors.vedicGold, size: 18),
+        Icon(icon, color: const Color(0xFFFFD54F), size: 18),
         const SizedBox(height: 4),
         Text(value, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
-        Text(label, style: GoogleFonts.poppins(fontSize: 10, color: Colors.white60)),
+        Text(label, style: GoogleFonts.poppins(fontSize: 10, color: const Color(0xFFFFF6E5).withOpacity(0.8))),
       ],
     );
   }
@@ -370,14 +548,14 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   style: GoogleFonts.cinzel(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AstrologerColors.vedicGold,
+                    color: AppColors.primaryMaroon,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -385,7 +563,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1E1B4B),
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -394,7 +572,11 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
             if (_queue.isNotEmpty)
               Text(
                 'Instant Call Connect',
-                style: GoogleFonts.poppins(fontSize: 11, color: AstrologerColors.statusOnline),
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.statusOnline,
+                ),
               ),
           ],
         ),
@@ -403,23 +585,36 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: AstrologerColors.cosmicCard,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AstrologerColors.borderSubtle),
+              border: Border.all(color: AppColors.lightBorder),
             ),
             child: Center(
               child: Column(
                 children: [
-                  const Icon(Icons.self_improvement, color: AstrologerColors.vedicGold, size: 40),
-                  const SizedBox(height: 10),
+                  Image.asset(
+                    AppConstants.flameLogoAsset,
+                    width: 56,
+                    height: 56,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.self_improvement,
+                      color: AppColors.deepAmber,
+                      size: 40,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Text(
                     'Queue is clear 🙏',
-                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   Text(
                     'Keep your status Online. Devotees seeking guidance will appear here automatically.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(fontSize: 12, color: AstrologerColors.textMuted),
+                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -439,18 +634,38 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AstrologerColors.cosmicCard,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AstrologerColors.borderSubtle),
+        border: Border.all(color: AppColors.lightBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundImage: NetworkImage(req.devoteePhoto),
+              // Devotee Photo Image Avatar
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.lightBorder, width: 1.5),
+                ),
+                child: ClipOval(
+                  child: AppImage.network(
+                    req.devoteePhoto,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -462,12 +677,12 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
                       'Gotra: ${req.devoteeGotra} • Rashi: ${req.devoteeRashi}',
-                      style: GoogleFonts.poppins(fontSize: 11, color: AstrologerColors.textSecondary),
+                      style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -476,10 +691,10 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isVideo
-                      ? AstrologerColors.royalPurple.withOpacity(0.2)
+                      ? AppColors.primaryMaroon.withOpacity(0.1)
                       : isVoice
-                          ? Colors.blue.withOpacity(0.2)
-                          : Colors.green.withOpacity(0.2),
+                          ? Colors.blue.withOpacity(0.1)
+                          : Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -488,7 +703,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     Icon(
                       isVideo ? Icons.videocam : isVoice ? Icons.phone : Icons.chat,
                       size: 13,
-                      color: isVideo ? AstrologerColors.mysticalViolet : isVoice ? Colors.lightBlue : Colors.greenAccent,
+                      color: isVideo ? AppColors.primaryMaroon : isVoice ? Colors.blue : Colors.green,
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -496,7 +711,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: isVideo ? AppColors.primaryMaroon : isVoice ? Colors.blue.shade800 : Colors.green.shade800,
                       ),
                     ),
                   ],
@@ -508,22 +723,27 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AstrologerColors.cosmicDark,
+              color: AppColors.warmCream,
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.lightBorder),
             ),
             child: Row(
               children: [
-                const Icon(Icons.help_center_outlined, color: AstrologerColors.vedicGold, size: 16),
+                const Icon(Icons.help_center_outlined, color: AppColors.deepAmber, size: 16),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     req.problemTopic,
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.white70),
+                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textPrimary),
                   ),
                 ),
                 Text(
                   '₹${req.perMinuteRate.toInt()}/m',
-                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: AstrologerColors.vedicGold),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryMaroon,
+                  ),
                 ),
               ],
             ),
@@ -535,8 +755,8 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                 flex: 1,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white70,
-                    side: const BorderSide(color: Colors.white24),
+                    foregroundColor: AppColors.textSecondary,
+                    side: const BorderSide(color: AppColors.lightBorder),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -549,8 +769,8 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                 flex: 2,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AstrologerColors.vedicGold,
-                    foregroundColor: const Color(0xFF1E1B4B),
+                    backgroundColor: AppColors.primaryMaroon,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -578,7 +798,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
           style: GoogleFonts.cinzel(
             fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -592,61 +812,103 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AstrologerColors.cosmicCard,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AstrologerColors.borderSubtle),
+        border: Border.all(color: AppColors.lightBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 4,
+            offset: Offset(0, 1.5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                item.devoteeName,
-                style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+              // Devotee Photo Avatar
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.lightBorder, width: 1),
+                ),
+                child: ClipOval(
+                  child: AppImage.network(
+                    item.devoteePhoto,
+                    width: 38,
+                    height: 38,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.devoteeName,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      '${item.type.capitalize()} • ${item.durationMinutes} mins • ${item.timeAgo}',
+                      style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
               ),
               Row(
                 children: [
-                  const Icon(Icons.currency_rupee, color: AstrologerColors.vedicGold, size: 14),
+                  const Icon(Icons.currency_rupee, color: AppColors.primaryMaroon, size: 14),
                   Text(
                     item.amount.toStringAsFixed(0),
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AstrologerColors.vedicGold,
+                      color: AppColors.primaryMaroon,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Row(
             children: [
-              Text(
-                '${item.type.capitalize()} • ${item.durationMinutes} mins • ${item.timeAgo}',
-                style: GoogleFonts.poppins(fontSize: 11, color: AstrologerColors.textMuted),
-              ),
               const Spacer(),
               ...List.generate(
                 5,
                 (i) => Icon(
-                  Icons.star,
-                  size: 11,
-                  color: i < item.rating.floor() ? AstrologerColors.vedicGold : Colors.white24,
+                  Icons.star_rounded,
+                  size: 14,
+                  color: i < item.rating.floor() ? AppColors.marigoldGold : AppColors.lightBorder,
                 ),
               ),
             ],
           ),
           if (item.feedback.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(
-              '“${item.feedback}”',
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                fontStyle: FontStyle.italic,
-                color: Colors.white70,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.warmCream,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '“${item.feedback}”',
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
           ],

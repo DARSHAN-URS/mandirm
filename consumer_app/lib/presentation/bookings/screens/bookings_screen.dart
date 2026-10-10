@@ -3,7 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../services/api_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/certificate_download_card.dart';
+import '../../chadhawa/screens/chadhawa_booking_view_screen.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/l10n/locale_service.dart';
 
 class BookingsScreen extends StatefulWidget {
   final VoidCallback? onBrowsePujas;
@@ -44,105 +47,6 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
     super.dispose();
   }
 
-  void _showCertificateDialog(Map<String, dynamic> booking) {
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFFFD54F), width: 2),
-                  borderRadius: BorderRadius.circular(16),
-                  color: const Color(0xFFFFF9ED),
-                ),
-                child: Column(
-                  children: [
-                    const Text('🕉️', style: TextStyle(fontSize: 34)),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Sankalp Blessing Certificate',
-                      style: GoogleFonts.marcellus(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: _primaryMaroon,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'This certifies that sacred Vedic rituals for',
-                      style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade700),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      booking['title'] as String,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: _primaryMaroon,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'were conducted in the name of ${booking['devoteeName']} (Gotra: ${booking['gotra']}) at ${booking['mandir']}.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(fontSize: 11, color: _darkCharcoal),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Purohit: ${booking['pandit']} • Ref: ${booking['id']}',
-                      style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: _primaryMaroon,
-                        side: const BorderSide(color: _primaryMaroon),
-                      ),
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Close'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primaryMaroon,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Downloading Sankalp Certificate PDF...'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.download_rounded, size: 16),
-                      label: const Text('Download'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,6 +90,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
   }
 
   Widget _buildBookingsList(List<Map<String, dynamic>> list, {required bool isActive}) {
+    final isHi = LocaleService().isHindi;
     if (list.isEmpty) {
       return Center(
         child: Padding(
@@ -206,7 +111,9 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
               ),
               const SizedBox(height: 16),
               Text(
-                isActive ? 'No Active Puja Bookings' : 'No Completed Pujas Yet',
+                isHi
+                    ? (isActive ? 'कोई सक्रिय पूजा बुकिंग नहीं है' : 'अभी तक कोई पूर्ण पूजा नहीं है')
+                    : (isActive ? 'No Active Puja Bookings' : 'No Completed Pujas Yet'),
                 style: GoogleFonts.marcellus(
                   fontSize: 19,
                   fontWeight: FontWeight.w700,
@@ -215,7 +122,9 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
               ),
               const SizedBox(height: 8),
               Text(
-                'Book sacred Vedic pujas conducted with your Gotra & Name at holy sanctums.',
+                isHi
+                    ? 'पवित्र धामों में अपने गोत्र और नाम के साथ वैदिक पूजाएं करवाएं।'
+                    : 'Book sacred Vedic pujas conducted with your Gotra & Name at holy sanctums.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(fontSize: 12.5, color: Colors.grey.shade700),
               ),
@@ -230,7 +139,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
                   ),
                   onPressed: widget.onBrowsePujas,
                   child: Text(
-                    'Browse Sacred Pujas',
+                    isHi ? 'पवित्र पूजाएं देखें' : 'Browse Sacred Pujas',
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
                   ),
                 ),
@@ -247,7 +156,19 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
       itemBuilder: (context, index) {
         final b = list[index];
 
-        return Container(
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ChadhawaBookingViewScreen(
+                  booking: b,
+                  onBrowsePujas: widget.onBrowsePujas,
+                ),
+              ),
+            );
+          },
+          child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -277,7 +198,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
                       border: Border.all(color: const Color(0xFFFFE0B2)),
                     ),
                     child: Text(
-                      'Booking ID: ${b['id']}',
+                      isHi ? 'बुकिंग सं.: ${b['id']}' : 'Booking ID: ${b['id']}',
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -299,7 +220,11 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
                       ),
                     ),
                     child: Text(
-                      b['status'] as String,
+                      isHi
+                          ? (b['status'] == 'Confirmed'
+                              ? 'पुष्टि हो गई'
+                              : (b['status'] == 'Completed' ? 'संपन्न' : 'लंबित'))
+                          : (b['status'] as String),
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -315,7 +240,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
 
               // Puja Title & Mandir
               Text(
-                b['title'] as String,
+                (isHi && b['title_hi'] != null) ? b['title_hi'] : (b['title'] as String),
                 style: GoogleFonts.poppins(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
@@ -324,7 +249,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
               ),
               const SizedBox(height: 2),
               Text(
-                'Sanctum: ${b['mandir']}',
+                isHi ? 'पवित्र धाम: ${b['mandir']}' : 'Sanctum: ${b['mandir']}',
                 style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 10),
@@ -343,7 +268,9 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Sankalp for ${b['devoteeName']} • Gotra: ${b['gotra']}',
+                        isHi
+                            ? 'संकल्प: ${b['devoteeName']} • गोत्र: ${b['gotra']}'
+                            : 'Sankalp for ${b['devoteeName']} • Gotra: ${b['gotra']}',
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -362,11 +289,11 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Scheduled: ${b['date']}',
+                    isHi ? 'निर्धारित तिथि: ${b['date']}' : 'Scheduled: ${b['date']}',
                     style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade700),
                   ),
                   Text(
-                    'Seva: ${b['amount']}',
+                    isHi ? 'सेवा: ${b['amount']}' : 'Seva: ${b['amount']}',
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -378,28 +305,50 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
 
               const SizedBox(height: 12),
 
-              // Certificate Action
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: _primaryMaroon,
-                      side: const BorderSide(color: _primaryMaroon),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              // Certificate Download Card for completed bookings
+              if (!isActive) ...[  
+                CertificateDownloadCard(
+                  referenceId: b['id']?.toString() ?? '',
+                  certType: 'puja',
+                  devoteeName: b['devoteeName']?.toString() ?? b['sankalp_name']?.toString() ?? 'Devotee',
+                  serviceTitle: b['title']?.toString() ?? b['puja_title']?.toString() ?? 'Sacred Puja',
+                  templeName: b['mandir']?.toString() ?? b['temple_name']?.toString() ?? 'Sacred Temple',
+                  date: b['date']?.toString(),
+                ),
+              ] else ...[  
+                // For active bookings keep the old certificate outline button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: _primaryMaroon,
+                        side: const BorderSide(color: _primaryMaroon),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isHi
+                                ? 'पूजा संपन्न होने के पश्चात प्रमाण पत्र उपलब्ध होगा।'
+                                : 'Certificate will be available after puja completion.',
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      ),
+                      icon: const Icon(Icons.workspace_premium_outlined, size: 15),
+                      label: Text(
+                        isHi ? 'पूजा पूर्ण होने पर प्रमाण पत्र' : 'Certificate after completion',
+                        style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
                     ),
-                    onPressed: () => _showCertificateDialog(b),
-                    icon: const Icon(Icons.workspace_premium_outlined, size: 15),
-                    label: Text(
-                      'Sankalp Certificate',
-                      style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ],
           ),
+        ),
         );
       },
     );

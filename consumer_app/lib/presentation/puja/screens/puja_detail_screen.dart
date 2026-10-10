@@ -2,8 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../bookings/screens/bookings_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/faq_section.dart';
+import '../../common/widgets/app_image.dart';
 import '../widgets/sankalp_booking_modal.dart';
 
 class PujaDetailScreen extends StatefulWidget {
@@ -23,11 +26,17 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
   late Timer _timer;
   int _totalSeconds = (1 * 86400) + (16 * 3600) + (34 * 60) + 35;
 
-  final List<String> _navTabs = ['About', 'Benefits', 'Process', 'Packages', 'FAQs'];
+  List<String> get _navTabs {
+    final isHi = LocaleService().isHindi;
+    return isHi
+        ? ['विवरण', 'लाभ', 'प्रक्रिया', 'पैकेज', 'प्रश्न-उत्तर']
+        : ['About', 'Benefits', 'Process', 'Packages', 'FAQs'];
+  }
 
   final List<Map<String, dynamic>> _packages = [
     {
       'title': 'Basic Puja Package\n(Online)',
+      'title_hi': 'मूल पूजा पैकेज\n(ऑनलाइन)',
       'price': '₹ 1,100',
       'numericPrice': 1100,
       'imageAsset': AppConstants.pkgBasicAsset,
@@ -36,9 +45,15 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
         'Private Video Link to watch live Sankalp',
         'Online Aarti & Digital Darshan',
       ],
+      'features_hi': [
+        'आपके नाम और गोत्र से पंडित जी का संकल्प',
+        'लाइव संकल्प देखने हेतु निजी वीडियो लिंक',
+        'ऑनलाइन आरती और डिजिटल दर्शन',
+      ],
     },
     {
       'title': 'Special Puja Package\n(Live)',
+      'title_hi': 'विशेष पूजा पैकेज\n(लाइव)',
       'price': '₹ 2,100',
       'numericPrice': 2100,
       'imageAsset': AppConstants.pkgSpecialAsset,
@@ -47,9 +62,15 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
         'Holy Prasad Box dispatched to your home',
         'Direct 1-on-1 Video Connection with Sanctum',
       ],
+      'features_hi': [
+        'संपूर्ण 108 आहुति वैदिक हवन',
+        'पवित्र प्रसाद बॉक्स आपके घर भेजा जाएगा',
+        'गर्भगृह से सीधा 1-ऑन-1 वीडियो संपर्क',
+      ],
     },
     {
       'title': 'Complete Ritual Package\n(Live + Brahmin Bhojan)',
+      'title_hi': 'संपूर्ण अनुष्ठान पैकेज\n(लाइव + ब्राह्मण भोजन)',
       'price': '₹ 5,100',
       'numericPrice': 5100,
       'imageAsset': AppConstants.pkgCompleteAsset,
@@ -57,6 +78,11 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
         'Complete Homa + Brahmin Bhojan + Cow Grass Seva',
         'Doorstep consecrated Prasad hamper & Gangajal',
         'Energized Yantra & Raksha Sutra blessed at Mandir',
+      ],
+      'features_hi': [
+        'संपूर्ण हवन + ब्राह्मण भोजन + गो-ग्रास सेवा',
+        'घर पर अभिमंत्रित प्रसाद हैंपर व गंगाजल डिलीवरी',
+        'मंदिर में सिद्ध रक्षा सूत्र व अभिमंत्रित यंत्र',
       ],
     },
   ];
@@ -322,11 +348,11 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
         child: Stack(
           children: [
             // High resolution banner visual
-            Image.asset(
+            const AppImage.asset(
               AppConstants.pujaDetailBannerAsset,
               fit: BoxFit.cover,
               width: double.infinity,
-              errorBuilder: (_, __, ___) => Image.asset(
+              errorWidget: AppImage.asset(
                 AppConstants.pujaHeroBgAsset,
                 fit: BoxFit.cover,
                 width: double.infinity,
@@ -474,7 +500,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
               const Icon(Icons.timer_outlined, color: Colors.white, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Booking closes in',
+                LocaleService().isHindi ? 'बुकिंग समाप्त होगी' : 'Booking closes in',
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -487,13 +513,13 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
           // 4 Countdown Units (Days, Hrs, Min, Sec)
           Row(
             children: [
-              _buildCountdownUnit(days, 'Days'),
+              _buildCountdownUnit(days, LocaleService().isHindi ? 'दिन' : 'Days'),
               const SizedBox(width: 6),
-              _buildCountdownUnit(hours, 'Hrs'),
+              _buildCountdownUnit(hours, LocaleService().isHindi ? 'घंटे' : 'Hrs'),
               const SizedBox(width: 6),
-              _buildCountdownUnit(minutes, 'Min'),
+              _buildCountdownUnit(minutes, LocaleService().isHindi ? 'मिनट' : 'Min'),
               const SizedBox(width: 6),
-              _buildCountdownUnit(seconds, 'Sec'),
+              _buildCountdownUnit(seconds, LocaleService().isHindi ? 'सेकंड' : 'Sec'),
             ],
           ),
         ],
@@ -614,12 +640,12 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
             const SizedBox(width: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
+              child: AppImage.asset(
                 AppConstants.pujaAboutThumbAsset,
                 width: 90,
                 height: 70,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorWidget: Container(
                   width: 90,
                   height: 70,
                   color: const Color(0xFFFBEBC7),
@@ -739,53 +765,12 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
     );
   }
 
-  /// Section: FAQs (Shown on FAQs tab)
+  /// Section: FAQs (Shown on FAQs tab) — loads from backend API with built-in fallback
   Widget _buildFaqSection() {
-    final faqs = [
-      {
-        'q': 'Do I need to be physically present at the temple?',
-        'a': 'No, verified pandits will conduct the ritual with your personalized Sankalp. You can join via live video link.'
-      },
-      {
-        'q': 'How will I receive the sacred prasad?',
-        'a': 'Consecrated prasad (Ganga Jal, dry fruits, Bhasma) will be shipped directly to your address within 3-5 working days.'
-      },
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Frequently Asked Questions',
-          style: GoogleFonts.cinzel(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF4A1005),
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...faqs.map((f) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFEFE4D2)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(f['q']!,
-                      style: GoogleFonts.poppins(
-                          fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 4),
-                  Text(f['a']!,
-                      style: GoogleFonts.poppins(
-                          fontSize: 11, color: const Color(0xFF6B6560))),
-                ],
-              ),
-            )),
-      ],
+    final pujaId = widget.puja?['id'] as String?;
+    return FaqSection(
+      serviceType: 'puja',
+      serviceId: pujaId,
     );
   }
 
@@ -798,7 +783,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Puja Packages',
+              LocaleService().isHindi ? 'पूजा पैकेज' : 'Puja Packages',
               style: GoogleFonts.cinzel(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
@@ -812,7 +797,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
               child: Row(
                 children: [
                   Text(
-                    'View All Packages',
+                    LocaleService().isHindi ? 'सभी पैकेज देखें' : 'View All Packages',
                     style: GoogleFonts.poppins(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
@@ -855,12 +840,12 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
                     ClipRRect(
                       borderRadius:
                           const BorderRadius.vertical(top: Radius.circular(12)),
-                      child: Image.asset(
+                      child: AppImage.asset(
                         pkg['imageAsset'] as String,
                         height: 68,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                        errorWidget: Container(
                           height: 68,
                           color: const Color(0xFFFBEBC7),
                         ),
@@ -876,7 +861,8 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
                           SizedBox(
                             height: 34,
                             child: Text(
-                              pkg['title'] as String,
+                              (LocaleService().isHindi ? pkg['title_hi'] : null) as String? ??
+                                  pkg['title'] as String,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
@@ -917,7 +903,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Book Now',
+                                    LocaleService().isHindi ? 'अभी बुक करें' : 'Book Now',
                                     style: GoogleFonts.poppins(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,

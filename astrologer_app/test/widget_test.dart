@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:astrologer_app/main.dart';
-import 'package:astrologer_app/presentation/dashboard/screens/dashboard_screen.dart';
+import 'package:astrologer_app/presentation/home/screens/main_hub_screen.dart';
 
 class _FakeHttpOverrides extends HttpOverrides {
   @override
@@ -84,14 +85,22 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('AstrologerApp initializes and renders dashboard properly', (WidgetTester tester) async {
+  testWidgets('AstrologerApp initializes and renders splash screen properly', (WidgetTester tester) async {
     await tester.pumpWidget(const AstrologerApp());
     await tester.pump();
 
     expect(find.byType(AstrologerApp), findsOneWidget);
-    expect(find.byType(AstrologerDashboardScreen), findsOneWidget);
-    expect(find.text('Live Devotee Queue'), findsOneWidget);
-    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('VEDIC ACHARYA PORTAL'), findsOneWidget);
+  });
+
+  testWidgets('AstrologerMainHubScreen renders custom astrologer navigation bar properly', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AstrologerMainHubScreen()));
+    await tester.pump();
+
+    expect(find.text('Live Hub'), findsOneWidget);
+    expect(find.text('Queue'), findsOneWidget);
+    expect(find.text('Records'), findsOneWidget);
     expect(find.text('Earnings'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 }

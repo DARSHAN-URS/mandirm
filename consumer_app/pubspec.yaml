@@ -36,6 +36,8 @@ dependencies:
   flutter_local_notifications: ^17.1.2
   firebase_messaging: ^15.0.4
   google_fonts: ^8.2.1
+  url_launcher: ^6.3.0
+  mobile_scanner: ^7.4.2
 
 dev_dependencies:
   flutter_test:
@@ -52,7 +54,10 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-  fonts: []
+  fonts:
+    - family: Headway
+      fonts:
+        - asset: assets/fonts/HEADWAY.ttf
 
 flutter_launcher_icons:
   android: true

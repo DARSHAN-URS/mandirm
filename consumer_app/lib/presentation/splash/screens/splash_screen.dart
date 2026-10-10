@@ -116,6 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
                     AppConstants.splashBackgroundAsset,
                     fit: BoxFit.cover,
                     alignment: Alignment.center,
+                    filterQuality: FilterQuality.high,
                     errorBuilder: (context, error, stackTrace) {
                       // Fallback in case asset cannot be loaded
                       return Container(

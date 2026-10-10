@@ -205,10 +205,10 @@ class MandirmHeader extends StatelessWidget implements PreferredSizeWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Mandirm Flame Diya Logo
+                      // Mandirm Flame Diya Logo Only
                       Container(
-                        width: 32,
-                        height: 32,
+                        width: 36,
+                        height: 36,
                         decoration: const BoxDecoration(shape: BoxShape.circle),
                         child: Image.asset(
                           AppConstants.flameLogoAsset,
@@ -216,46 +216,9 @@ class MandirmHeader extends StatelessWidget implements PreferredSizeWidget {
                           errorBuilder: (_, __, ___) => const Icon(
                             Icons.local_fire_department_rounded,
                             color: Color(0xFFD64D18),
-                            size: 26,
+                            size: 28,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Mandirm Typography with dynamically localized tagline
-                      ValueListenableBuilder<String>(
-                        valueListenable: LocaleService().locale,
-                        builder: (context, _, __) {
-                          final isHindi = LocaleService().isHindi;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '॥ मंदिरम् ॥',
-                                style: GoogleFonts.rozhaOne(
-                                  fontSize: 19.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: _primaryMaroon,
-                                  letterSpacing: 0.5,
-                                  height: 1.1,
-                                ),
-                              ),
-                              const SizedBox(height: 1),
-                              Text(
-                                isHindi
-                                    ? '• आस्था • आनंद • अध्यात्म •'
-                                    : '• Aastha • Anand • Adhyatm •',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 7.2,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF8B2510),
-                                  letterSpacing: 0.6,
-                                  height: 1.0,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
                       ),
                     ],
                   ),

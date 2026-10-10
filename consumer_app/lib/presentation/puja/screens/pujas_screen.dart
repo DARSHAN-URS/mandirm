@@ -5,6 +5,8 @@ import '../../../services/api_service.dart';
 import '../../../core/l10n/locale_service.dart';
 import 'puja_detail_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/app_image.dart';
+import '../../common/widgets/faq_section.dart';
 
 class PujasScreen extends StatefulWidget {
   final String? initialMandirFilter;
@@ -40,13 +42,18 @@ class _PujasScreenState extends State<PujasScreen> {
     {
       'id': 'pj_pitru_1',
       'title': 'Haridwar Pitru Dosh Shanti Mahapuja, Ganga Aarti and Brahmin Bhojan',
+      'title_hi': 'हरिद्वार पितृ दोष शांति महापूजा, गंगा आरती व ब्राह्मण भोजन',
       'subtitle': 'For Pitru Dosh relief and ancestral blessings',
+      'subtitle_hi': 'पितृ दोष से मुक्ति एवं पूर्वजों के आशीर्वाद हेतु',
       'badge': 'Maha Bharani Special',
+      'badge_hi': 'महा भरणी विशेष',
       'badgeColor': const Color(0xFFFDE68A),
       'badgeTextColor': const Color(0xFF78350F),
       'badgeIcon': Icons.people_alt_rounded,
       'mandir': 'Ganga Ghat, Haridwar, Uttarakhand',
+      'mandir_hi': 'गंगा घाट, हरिद्वार, उत्तराखंड',
       'date': '29 Sep, Tue • 7:00 AM\nAshwin Krishna Tritiya',
+      'date_hi': '29 सितंबर, मंगल • सुबह 7:00\nअश्विन कृष्ण तृतीया',
       'category': 'Pitr Dosha',
       'price': '₹851',
       'numericPrice': 851,
@@ -64,13 +71,18 @@ class _PujasScreenState extends State<PujasScreen> {
     {
       'id': 'pj_guru_2',
       'title': 'Guru Chandal Dosh Nivaran Puja',
+      'title_hi': 'गुरु चांडाल दोष निवारण पूजा',
       'subtitle': 'For financial stability, removing hurdles in career and mental clarity',
+      'subtitle_hi': 'आर्थिक स्थिरता, करियर की बाधाएं दूर करने व मानसिक शांति हेतु',
       'badge': 'Thursday Guru Chandal Special',
+      'badge_hi': 'गुरुवार गुरु चांडाल विशेष',
       'badgeColor': const Color(0xFFFED7AA),
       'badgeTextColor': const Color(0xFF9A3412),
       'badgeIcon': Icons.public_rounded,
       'mandir': 'Brihaspati Temple, Kashi, Uttar Pradesh',
+      'mandir_hi': 'बृहस्पति मंदिर, काशी, उत्तर प्रदेश',
       'date': '29 Oct, Thu • 7:00 PM\nAsvayujamu Krishna Chaviti',
+      'date_hi': '29 अक्टूबर, गुरु • शाम 7:00\nआश्वयुज कृष्ण चतुर्थी',
       'category': 'Career',
       'price': '₹1,101',
       'numericPrice': 1101,
@@ -88,13 +100,18 @@ class _PujasScreenState extends State<PujasScreen> {
     {
       'id': 'pj_navgraha_3',
       'title': 'Navgraha Shanti Puja',
+      'title_hi': 'नवग्रह शांति महापूजा',
       'subtitle': 'Bring balance and positivity in life by pacifying the nine planets',
+      'subtitle_hi': 'नौ ग्रहों को शांत कर जीवन में संतुलन व सकारात्मकता लाएं',
       'badge': 'Navgraha Special',
+      'badge_hi': 'नवग्रह विशेष',
       'badgeColor': const Color(0xFFFEE2E2),
       'badgeTextColor': const Color(0xFF991B1B),
       'badgeIcon': Icons.local_fire_department_rounded,
       'mandir': 'Online / At Your Location',
+      'mandir_hi': 'ऑनलाइन / आपके स्थान पर',
       'date': 'Select Date & Time',
+      'date_hi': 'तिथि व समय चुनें',
       'category': 'Wealth',
       'price': '₹1,501',
       'numericPrice': 1501,
@@ -112,13 +129,18 @@ class _PujasScreenState extends State<PujasScreen> {
     {
       'id': 'pj_shiva_4',
       'title': 'Maha Rudrabhishek with 108 Bilva Patra',
+      'title_hi': '108 बिल्व पत्र महा रुद्राभिषेक',
       'subtitle': 'Supreme remedy for health recovery, peace, and spiritual elevation',
+      'subtitle_hi': 'स्वास्थ्य लाभ, शांति व आध्यात्मिक उन्नति हेतु सर्वश्रेष्ठ उपाय',
       'badge': 'Shiva Pradosh Special',
+      'badge_hi': 'शिव प्रदोष विशेष',
       'badgeColor': const Color(0xFFE0E7FF),
       'badgeTextColor': const Color(0xFF3730A3),
       'badgeIcon': Icons.temple_hindu_rounded,
       'mandir': 'Kashi Vishwanath Mandir, Varanasi',
+      'mandir_hi': 'काशी विश्वनाथ मंदिर, वाराणसी',
       'date': 'Coming Monday • 08:00 AM\nShukla Trayodashi',
+      'date_hi': 'आगामी सोमवार • सुबह 8:00\nशुक्ल त्रयोदशी',
       'category': 'Health',
       'price': '₹1,100',
       'numericPrice': 1100,
@@ -135,13 +157,18 @@ class _PujasScreenState extends State<PujasScreen> {
     {
       'id': 'pj_wealth_5',
       'title': 'Sri Lakshmi Kuber Dhan Prapti Puja',
+      'title_hi': 'श्री लक्ष्मी कुबेर धन प्राप्ति पूजा',
       'subtitle': 'Attracts auspicious prosperity, business abundance, and debt freedom',
+      'subtitle_hi': 'व्यापार में लाभ, धन-समृद्धि व ऋण मुक्ति हेतु',
       'badge': 'Friday Mahalakshmi Special',
+      'badge_hi': 'शुक्रवार महालक्ष्मी विशेष',
       'badgeColor': const Color(0xFFFEF3C7),
       'badgeTextColor': const Color(0xFF92400E),
       'badgeIcon': Icons.account_balance_wallet_rounded,
       'mandir': 'Tirupati Balaji Mandir, AP',
+      'mandir_hi': 'तिरुपति बालाजी मंदिर, आंध्र प्रदेश',
       'date': 'Coming Friday • 09:00 AM\nShukla Ashtami',
+      'date_hi': 'आगामी शुक्रवार • सुबह 9:00\nशुक्ल अष्टमी',
       'category': 'Wealth',
       'price': '₹2,100',
       'numericPrice': 2100,
@@ -441,6 +468,14 @@ class _PujasScreenState extends State<PujasScreen> {
                 ),
               ),
             ),
+
+          // 5. Frequently Asked Questions Section (Bilingual Puja FAQs)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 32),
+              child: FaqSection(serviceType: 'puja'),
+            ),
+          ),
         ],
       ),
     );
@@ -487,10 +522,10 @@ class _PujasScreenState extends State<PujasScreen> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.asset(
+                      AppImage.asset(
                         puja['imageAsset'] as String,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                        errorWidget: Container(
                           color: const Color(0xFFFBEBC7),
                         ),
                       ),
@@ -539,7 +574,8 @@ class _PujasScreenState extends State<PujasScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            puja['badge'] as String? ?? 'Special Puja',
+                            (LocaleService().isHindi ? puja['badge_hi'] : null) as String? ??
+                                puja['badge'] as String? ?? (LocaleService().isHindi ? 'विशेष पूजा' : 'Special Puja'),
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -556,7 +592,8 @@ class _PujasScreenState extends State<PujasScreen> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.52,
                       child: Text(
-                        puja['title'] as String,
+                        (LocaleService().isHindi ? puja['title_hi'] : null) as String? ??
+                            puja['title'] as String,
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -571,7 +608,8 @@ class _PujasScreenState extends State<PujasScreen> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.50,
                       child: Text(
-                        puja['subtitle'] as String,
+                        (LocaleService().isHindi ? puja['subtitle_hi'] : null) as String? ??
+                            puja['subtitle'] as String,
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           fontWeight: FontWeight.w400,
@@ -595,7 +633,8 @@ class _PujasScreenState extends State<PujasScreen> {
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.46,
                           child: Text(
-                            puja['mandir'] as String,
+                            (LocaleService().isHindi ? puja['mandir_hi'] : null) as String? ??
+                                puja['mandir'] as String,
                             style: GoogleFonts.poppins(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w500,
@@ -620,7 +659,8 @@ class _PujasScreenState extends State<PujasScreen> {
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.46,
                           child: Text(
-                            puja['date'] as String,
+                            (LocaleService().isHindi ? puja['date_hi'] : null) as String? ??
+                                puja['date'] as String,
                             style: GoogleFonts.poppins(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w500,

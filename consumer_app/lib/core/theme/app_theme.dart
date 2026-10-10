@@ -21,7 +21,11 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimaryLight,
       ),
-      fontFamily: GoogleFonts.poppins().fontFamily,
+      fontFamily: 'Headway',
+      fontFamilyFallback: [
+        GoogleFonts.poppins().fontFamily ?? 'Poppins',
+        'Roboto',
+      ],
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -29,6 +33,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: AppColors.textPrimaryLight),
         titleTextStyle: TextStyle(
+          fontFamily: 'Headway',
           color: AppColors.textPrimaryLight,
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -167,7 +172,11 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimaryDark,
       ),
-      fontFamily: GoogleFonts.poppins().fontFamily,
+      fontFamily: 'Headway',
+      fontFamilyFallback: [
+        GoogleFonts.poppins().fontFamily ?? 'Poppins',
+        'Roboto',
+      ],
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -175,6 +184,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: AppColors.textPrimaryDark),
         titleTextStyle: TextStyle(
+          fontFamily: 'Headway',
           color: AppColors.textPrimaryDark,
           fontSize: 18,
           fontWeight: FontWeight.w600,

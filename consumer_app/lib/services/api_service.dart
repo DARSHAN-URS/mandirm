@@ -252,6 +252,113 @@ class ApiService {
     }
   }
 
+  /// WhatsApp-style chat messages in a consultation room
+  Future<List<Map<String, dynamic>>> getChatMessages(String consultationId) async {
+    try {
+      final response = await _dio.get('/consultations/$consultationId/messages');
+      final data = response.data;
+      if (data is Map && data['data'] is List) {
+        return List<Map<String, dynamic>>.from(data['data'] as List);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] getChatMessages error: $e');
+    }
+    return [];
+  }
+
+  /// Sends a WhatsApp-style message with anti-disintermediation moderation
+  Future<Map<String, dynamic>?> sendChatMessage(
+    String consultationId, {
+    required String message,
+    String messageType = 'text',
+    String? replyToId,
+    String? replyToText,
+    String? replyToSender,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/consultations/$consultationId/messages',
+        data: {
+          'message': message,
+          'message_type': messageType,
+          'reply_to_id': replyToId,
+          'reply_to_text': replyToText,
+          'reply_to_sender': replyToSender,
+        },
+      );
+      if (response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } on DioException catch (dioErr) {
+      if (dioErr.response?.statusCode == 400 && dioErr.response?.data is Map) {
+        final detail = dioErr.response?.data['detail']?.toString();
+        if (detail != null) {
+          throw Exception(detail);
+        }
+      }
+      debugPrint('[ApiService] sendChatMessage error: $dioErr');
+    } catch (e) {
+      debugPrint('[ApiService] sendChatMessage error: $e');
+      rethrow;
+    }
+    return null;
+  }
+
+  /// Updates message delivery/read status (double grey tick, double blue tick)
+  Future<bool> updateMessageStatus(
+    String consultationId,
+    String messageId,
+    String status,
+  ) async {
+    try {
+      await _dio.patch(
+        '/consultations/$consultationId/messages/$messageId/status',
+        data: {'status': status},
+      );
+      return true;
+    } catch (e) {
+      debugPrint('[ApiService] updateMessageStatus error: $e');
+    }
+    return false;
+  }
+
+  /// Reacts to a message with an emoji (🙏, 🕉️, ❤️, 👍)
+  Future<bool> reactToMessage(
+    String consultationId,
+    String messageId,
+    String reaction,
+  ) async {
+    try {
+      await _dio.patch(
+        '/consultations/$consultationId/messages/$messageId/reaction',
+        data: {'reaction': reaction},
+      );
+      return true;
+    } catch (e) {
+      debugPrint('[ApiService] reactToMessage error: $e');
+    }
+    return false;
+  }
+
+  /// Reports a message for moderation review
+  Future<bool> reportMessage(
+    String consultationId,
+    String messageId, {
+    required String reason,
+    String? comments,
+  }) async {
+    try {
+      await _dio.post(
+        '/consultations/$consultationId/messages/$messageId/report',
+        data: {'reason': reason, 'comments': comments},
+      );
+      return true;
+    } catch (e) {
+      debugPrint('[ApiService] reportMessage error: $e');
+    }
+    return false;
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // SHOP
   // ─────────────────────────────────────────────────────────────────────────────
@@ -427,4 +534,72 @@ class ApiService {
       return [];
     }
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // FAQs
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /// Fetch FAQs filtered by service type ('puja', 'chadhawa', 'general')
+  /// and optionally by a specific puja/chadhawa ID.
+  Future<List<Map<String, dynamic>>> getFAQs({
+    String? serviceType,
+    String? serviceId,
+    int limit = 50,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/faqs',
+        queryParameters: {
+          if (serviceType != null) 'service_type': serviceType,
+          if (serviceId != null) 'service_id': serviceId,
+          'limit': limit,
+        },
+      );
+      final data = response.data;
+      if (data is Map && data['data'] is List) {
+        return List<Map<String, dynamic>>.from(data['data'] as List);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('[ApiService] getFAQs error: $e');
+      return [];
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CERTIFICATES
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /// Returns the full URL to download a puja certificate SVG.
+  String getPujaCertificateUrl(String bookingId) {
+    return '${AppConstants.backendUrl}/certificates/puja/$bookingId';
+  }
+
+  /// Returns the full URL to download a chadhawa certificate SVG.
+  String getChaDhawaCertificateUrl(String orderId) {
+    return '${AppConstants.backendUrl}/certificates/chadhawa/$orderId';
+  }
+
+  /// Fetches certificate metadata for a puja booking (devotee name, title, etc.)
+  Future<Map<String, dynamic>?> getPujaCertificateData(String bookingId) async {
+    try {
+      final response = await _dio.get('/certificates/puja/$bookingId/data');
+      return Map<String, dynamic>.from(response.data as Map);
+    } catch (e) {
+      debugPrint('[ApiService] getPujaCertificateData error: $e');
+      return null;
+    }
+  }
+
+  /// Fetches certificate metadata for a chadhawa order.
+  Future<Map<String, dynamic>?> getChaDhawaCertificateData(String orderId) async {
+    try {
+      final response = await _dio.get('/certificates/chadhawa/$orderId/data');
+      return Map<String, dynamic>.from(response.data as Map);
+    } catch (e) {
+      debugPrint('[ApiService] getChaDhawaCertificateData error: $e');
+      return null;
+    }
+  }
 }
+

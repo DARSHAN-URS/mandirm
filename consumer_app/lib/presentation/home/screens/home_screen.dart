@@ -19,7 +19,9 @@ import '../../puja/screens/pujas_screen.dart';
 import '../../shop/screens/store_screen.dart';
 import '../../temples/screens/temples_screen.dart';
 import '../widgets/global_search_dialog.dart';
+import '../widgets/real_qr_scanner_sheet.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/app_image.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -87,243 +89,13 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _buildQrScannerSheet(ctx),
-    );
-  }
-
-  Widget _buildQrScannerSheet(BuildContext ctx) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF1B0B0E),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Container(
-            width: 44,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(60),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Text('📸', style: TextStyle(fontSize: 18)),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Sanctum QR Scanner',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFFFFF6E5),
-                    ),
-                  ),
-                ],
-              ),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
-                onPressed: () => Navigator.pop(ctx),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Point at official Mandirm QR code placed at temple garbhagriha or select a temple below to enter live darshan instantly.',
-            style: GoogleFonts.poppins(
-              fontSize: 11.5,
-              color: Colors.white.withAlpha(180),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Scanner viewfinder frame
-          Container(
-            width: 220,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.black.withAlpha(120),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Corner guides
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                        left: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                        right: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 12,
-                  left: 12,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                        left: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 12,
-                  right: 12,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                        right: BorderSide(color: Color(0xFFF59E0B), width: 3),
-                      ),
-                    ),
-                  ),
-                ),
-                // Center scanning animation visual
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.qr_code_scanner_rounded,
-                      color: Color(0xFFF59E0B),
-                      size: 48,
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7A0C16).withAlpha(200),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Align Temple QR in Box',
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFFFFF6E5),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Instant Sanctum Simulation Chips
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Or Tap to Connect to Sanctum:',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFFF59E0B),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildQrSanctumChip(
-                ctx,
-                '🔱 Kashi Vishwanath',
-                'Kashi Vishwanath Mandir',
-              ),
-              _buildQrSanctumChip(
-                ctx,
-                '🕉️ Mahakaleshwar Ujjain',
-                'Mahakaleshwar Jyotirlinga',
-              ),
-              _buildQrSanctumChip(
-                ctx,
-                '🪷 Tirupati Balaji',
-                'Tirupati Balaji Mandir',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQrSanctumChip(BuildContext ctx, String label, String mandirName) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(ctx);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TemplesScreen(
-              onBookPuja: (mandir) {
-                Navigator.pop(context);
-                setState(() {
-                  _selectedMandirFilter = mandir;
-                  _currentTabIndex = 1;
-                });
-              },
-            ),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(22),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFD4AF37).withAlpha(120)),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFFFFF6E5),
-          ),
-        ),
+      builder: (ctx) => RealQrScannerSheet(
+        onMandirSelected: (mandir) {
+          setState(() {
+            _selectedMandirFilter = mandir;
+            _currentTabIndex = 1;
+          });
+        },
       ),
     );
   }
@@ -425,80 +197,90 @@ class _HomeScreenState extends State<HomeScreen> {
             context.go('/login');
           }
         },
-        child: Scaffold(
-          backgroundColor: const Color(0xFFFBF9F5),
-          body: IndexedStack(
-            index: _currentTabIndex,
-            children: [
-              // Tab 0: Home Tab matching design
-              _buildHomeTab(),
+        child: ValueListenableBuilder<String>(
+          valueListenable: LocaleService().locale,
+          builder: (context, locale, _) {
+            return Scaffold(
+              backgroundColor: const Color(0xFFFBF9F5),
+              body: IndexedStack(
+                key: ValueKey('main_indexed_stack_$locale'),
+                index: _currentTabIndex,
+                children: [
+                  // Tab 0: Home Tab matching design
+                  _buildHomeTab(),
 
-              // Tab 1: Vedic Pujas
-              PujasScreen(
-                initialMandirFilter: _selectedMandirFilter,
-                onBookingSuccess: () {
-                  _openBookings();
-                },
-              ),
+                  // Tab 1: Vedic Pujas
+                  PujasScreen(
+                    key: ValueKey('pujas_tab_$locale'),
+                    initialMandirFilter: _selectedMandirFilter,
+                    onBookingSuccess: () {
+                      _openBookings();
+                    },
+                  ),
 
-              // Tab 2: Certified Astrologers
-              AstrologersScreen(
-                onConsultationFinished: () {
-                  _openConsultations();
-                },
-              ),
+                  // Tab 2: Certified Astrologers
+                  AstrologersScreen(
+                    key: ValueKey('astro_tab_$locale'),
+                    onConsultationFinished: () {
+                      _openConsultations();
+                    },
+                  ),
 
-              // Tab 3: Sacred Chadhawa & Offerings
-              ChadhawaScreen(
-                onBrowsePujas: () {
-                  setState(() => _currentTabIndex = 1);
-                },
-              ),
+                  // Tab 3: Sacred Chadhawa & Offerings
+                  ChadhawaScreen(
+                    key: ValueKey('chadhawa_tab_$locale'),
+                    onBrowsePujas: () {
+                      setState(() => _currentTabIndex = 1);
+                    },
+                  ),
 
-              // Tab 4: Mandirm Divine Store
-              StoreScreen(
-                onBrowsePujas: () {
-                  setState(() => _currentTabIndex = 1);
+                  // Tab 4: Mandirm Divine Store
+                  StoreScreen(
+                    key: ValueKey('store_tab_$locale'),
+                    onBrowsePujas: () {
+                      setState(() => _currentTabIndex = 1);
+                    },
+                  ),
+                ],
+              ),
+              bottomNavigationBar: NavigationBar(
+                selectedIndex: _currentTabIndex,
+                onDestinationSelected: (index) {
+                  setState(() {
+                    _currentTabIndex = index;
+                    if (index != 1) _selectedMandirFilter = null;
+                  });
                 },
+                destinations: [
+                  NavigationDestination(
+                    icon: const Icon(Icons.home_outlined),
+                    selectedIcon: const Icon(Icons.home_rounded, color: AppColors.saffronPrimary),
+                    label: AppStrings.t('home'),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.spa_outlined),
+                    selectedIcon: const Icon(Icons.spa_rounded, color: AppColors.saffronPrimary),
+                    label: AppStrings.t('pujas'),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.brightness_7_outlined),
+                    selectedIcon: const Icon(Icons.brightness_7_rounded, color: AppColors.sacredCrimson),
+                    label: AppStrings.t('astrology'),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.volunteer_activism_outlined),
+                    selectedIcon: const Icon(Icons.volunteer_activism_rounded, color: AppColors.sacredCrimson),
+                    label: AppStrings.t('chadhawa'),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.shopping_cart_outlined),
+                    selectedIcon: const Icon(Icons.shopping_cart_rounded, color: AppColors.saffronPrimary),
+                    label: AppStrings.t('puja_store'),
+                  ),
+                ],
               ),
-            ],
-          ),
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _currentTabIndex,
-            onDestinationSelected: (index) {
-              setState(() {
-                _currentTabIndex = index;
-                if (index != 1) _selectedMandirFilter = null;
-              });
-            },
-            destinations: [
-              NavigationDestination(
-                icon: const Icon(Icons.home_outlined),
-                selectedIcon: const Icon(Icons.home_rounded, color: AppColors.saffronPrimary),
-                label: AppStrings.t('home'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.spa_outlined),
-                selectedIcon: const Icon(Icons.spa_rounded, color: AppColors.saffronPrimary),
-                label: AppStrings.t('pujas'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.brightness_7_outlined),
-                selectedIcon: const Icon(Icons.brightness_7_rounded, color: AppColors.sacredCrimson),
-                label: AppStrings.t('astrology'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.volunteer_activism_outlined),
-                selectedIcon: const Icon(Icons.volunteer_activism_rounded, color: AppColors.sacredCrimson),
-                label: AppStrings.t('chadhawa'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.shopping_cart_outlined),
-                selectedIcon: const Icon(Icons.shopping_cart_rounded, color: AppColors.saffronPrimary),
-                label: AppStrings.t('puja_store'),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -648,11 +430,11 @@ class _HomeScreenState extends State<HomeScreen> {
           fit: StackFit.expand,
           children: [
             // Temple background artwork
-            Image.asset(
+            AppImage.asset(
               AppConstants.homeHeaderAsset,
               fit: BoxFit.cover,
               alignment: Alignment.centerRight,
-              errorBuilder: (_, __, ___) => Container(
+              errorWidget: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFFEAA031), Color(0xFF8B2510)],
@@ -876,7 +658,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Featured Card 1: Pooja Booking (वैदिक पूजा बुकिंग)
+  /// Featured Card 1: Pooja Booking (पूजा बुकिंग)
   Widget _buildPoojaBookingCard() {
     final isHindi = LocaleService().isHindi;
 
@@ -898,10 +680,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // Background Artwork
             Positioned.fill(
-              child: Image.asset(
+              child: AppImage.asset(
                 AppConstants.pujaHeroBgAsset,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorWidget: Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF6B1118), Color(0xFFC75B12)],
@@ -1098,10 +880,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // Celestial Background Artwork
             Positioned.fill(
-              child: Image.asset(
+              child: AppImage.asset(
                 AppConstants.astroHeroBannerAsset,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorWidget: Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF3B0764), Color(0xFF1E1B4B)],

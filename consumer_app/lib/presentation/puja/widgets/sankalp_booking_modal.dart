@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/l10n/locale_service.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/devotee_data_service.dart';
 import '../../../../services/supabase_service.dart';
@@ -235,7 +236,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Vedic Sankalp Booking',
+                        LocaleService().isHindi ? 'वैदिक संकल्प बुकिंग' : 'Vedic Sankalp Booking',
                         style: GoogleFonts.marcellus(
                             fontSize: 18, fontWeight: FontWeight.w700, color: _primaryMaroon),
                       ),
@@ -309,7 +310,8 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                     const SizedBox(height: 16),
 
                     // Section 1: Devotee & Gotra
-                    Text('1. Sacred Sankalp Details',
+                    Text(
+                        LocaleService().isHindi ? '1. पवित्र संकल्प विवरण' : '1. Sacred Sankalp Details',
                         style: GoogleFonts.marcellus(
                             fontSize: 15, fontWeight: FontWeight.w700, color: _primaryMaroon)),
                     const SizedBox(height: 10),
@@ -317,7 +319,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                       controller: _nameController,
                       style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal),
                       decoration: InputDecoration(
-                        labelText: 'Devotee / Yajman Full Name *',
+                        labelText: LocaleService().isHindi ? 'यजमान / भक्त का पूरा नाम *' : 'Devotee / Yajman Full Name *',
                         labelStyle: GoogleFonts.poppins(fontSize: 12),
                         prefixIcon: const Icon(Icons.person_outline, size: 20, color: _primaryMaroon),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -325,14 +327,14 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                             horizontal: 12, vertical: 12),
                       ),
                       validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Enter devotee name'
+                          ? (LocaleService().isHindi ? 'भक्त का नाम दर्ज करें' : 'Enter devotee name')
                           : null,
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedGotra,
                       decoration: InputDecoration(
-                        labelText: 'Vedic Gotra *',
+                        labelText: LocaleService().isHindi ? 'वैदिक गोत्र *' : 'Vedic Gotra *',
                         labelStyle: GoogleFonts.poppins(fontSize: 12),
                         prefixIcon:
                             const Icon(Icons.temple_hindu_outlined, size: 20, color: _primaryMaroon),
@@ -352,23 +354,24 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                       controller: _wishController,
                       style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal),
                       decoration: InputDecoration(
-                        labelText: 'Sankalp Objective / Mano-kamna *',
+                        labelText: LocaleService().isHindi ? 'संकल्प उद्देश्य / मनोकामना *' : 'Sankalp Objective / Mano-kamna *',
                         labelStyle: GoogleFonts.poppins(fontSize: 12),
-                        hintText: 'e.g. Health, Career, Family peace',
+                        hintText: LocaleService().isHindi ? 'उदा. स्वास्थ्य, करियर, पारिवारिक सुख-शांति' : 'e.g. Health, Career, Family peace',
                         prefixIcon: const Icon(Icons.auto_awesome, size: 20, color: _primaryMaroon),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 12),
                       ),
                       validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Enter prayer wish'
+                          ? (LocaleService().isHindi ? 'मनोकामना दर्ज करें' : 'Enter prayer wish')
                           : null,
                     ),
 
                     const SizedBox(height: 20),
 
                     // Section 2: Prasad & Video
-                    Text('2. Prasad Delivery & Stream Options',
+                    Text(
+                        LocaleService().isHindi ? '2. प्रसाद डिलीवरी व लाइव प्रसारण' : '2. Prasad Delivery & Stream Options',
                         style: GoogleFonts.marcellus(
                             fontSize: 15, fontWeight: FontWeight.w700, color: _primaryMaroon)),
                     const SizedBox(height: 8),
@@ -376,11 +379,14 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                       contentPadding: EdgeInsets.zero,
                       value: _wantPrasadDelivered,
                       activeThumbColor: _primaryMaroon,
-                      title: Text('Doorstep Holy Prasad Delivery',
+                      title: Text(
+                          LocaleService().isHindi ? 'घर पर पवित्र प्रसाद डिलीवरी' : 'Doorstep Holy Prasad Delivery',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600, color: _darkCharcoal)),
                       subtitle: Text(
-                          'Receive energized Bhasma, Raksha Sutra, and dry fruits box',
+                          LocaleService().isHindi
+                              ? 'अभिमंत्रित भस्म, रक्षा सूत्र व सूखे मेवे का प्रसाद प्राप्त करें'
+                              : 'Receive energized Bhasma, Raksha Sutra, and dry fruits box',
                           style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF6E6E6E))),
                       onChanged: (val) =>
                           setState(() => _wantPrasadDelivered = val),
@@ -391,7 +397,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                         maxLines: 2,
                         style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal),
                         decoration: InputDecoration(
-                          labelText: 'Prasad Courier Address *',
+                          labelText: LocaleService().isHindi ? 'प्रसाद डिलीवरी का पता *' : 'Prasad Courier Address *',
                           labelStyle: GoogleFonts.poppins(fontSize: 12),
                           prefixIcon: const Icon(Icons.home_outlined, size: 20, color: _primaryMaroon),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -400,7 +406,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                         ),
                         validator: (val) => _wantPrasadDelivered &&
                                 (val == null || val.trim().isEmpty)
-                            ? 'Enter delivery address'
+                            ? (LocaleService().isHindi ? 'पता दर्ज करें' : 'Enter delivery address')
                             : null,
                       ),
                     const SizedBox(height: 8),
@@ -408,11 +414,14 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                       contentPadding: EdgeInsets.zero,
                       value: _joinLiveVideo,
                       activeThumbColor: _primaryMaroon,
-                      title: Text('Join Live Priest Video Sankalp',
+                      title: Text(
+                          LocaleService().isHindi ? 'लाइव पुजारी वीडियो संकल्प में जुड़ें' : 'Join Live Priest Video Sankalp',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600, color: _darkCharcoal)),
                       subtitle: Text(
-                          'Direct video connection with the Mandir sanctum during ritual',
+                          LocaleService().isHindi
+                              ? 'अनुष्ठान के समय मंदिर गर्भगृह से सीधा वीडियो संपर्क'
+                              : 'Direct video connection with the Mandir sanctum during ritual',
                           style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF6E6E6E))),
                       onChanged: (val) =>
                           setState(() => _joinLiveVideo = val),
@@ -421,7 +430,8 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                     const SizedBox(height: 20),
 
                     // Section 3: Payment
-                    Text('3. Payment Method',
+                    Text(
+                        LocaleService().isHindi ? '3. भुगतान विधि' : '3. Payment Method',
                         style: GoogleFonts.marcellus(
                             fontSize: 15, fontWeight: FontWeight.w700, color: _primaryMaroon)),
                     const SizedBox(height: 10),
@@ -492,7 +502,9 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                             ? const CircularProgressIndicator(
                                 color: Colors.white, strokeWidth: 2)
                             : Text(
-                                'Confirm & Book Dakshina (${widget.puja['price'] ?? '₹ 1,100'})',
+                                LocaleService().isHindi
+                                    ? 'पुष्टि करें व दक्षिणा दें (${widget.puja['price'] ?? '₹ 1,100'})'
+                                    : 'Confirm & Book Dakshina (${widget.puja['price'] ?? '₹ 1,100'})',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,

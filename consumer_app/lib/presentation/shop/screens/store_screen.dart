@@ -8,6 +8,7 @@ import '../../../services/devotee_data_service.dart';
 import 'prasad_orders_screen.dart';
 import 'product_detail_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/app_image.dart';
 
 class StoreScreen extends StatefulWidget {
   final VoidCallback? onBrowsePujas;
@@ -400,10 +401,10 @@ class _StoreScreenState extends State<StoreScreen> {
                                       width: 60,
                                       height: 60,
                                       color: _cardBgLight,
-                                      child: Image.asset(
+                                      child: AppImage.asset(
                                         item['asset'] as String,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const Icon(
+                                        errorWidget: const Icon(
                                             Icons.shopping_bag_outlined,
                                             color: _primaryMaroon),
                                       ),
@@ -951,11 +952,11 @@ class _StoreScreenState extends State<StoreScreen> {
       child: Stack(
         children: [
           // Banner Image
-          Image.asset(
+          AppImage.asset(
             AppConstants.storeHeroCropAsset,
             width: double.infinity,
             fit: BoxFit.fitWidth,
-            errorBuilder: (_, __, ___) => Container(
+            errorWidget: Container(
               height: 160,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -999,14 +1000,15 @@ class _StoreScreenState extends State<StoreScreen> {
 
   /// 3. Trust Badges Row (Pure & Sacred, Mantra Energized, Authentic & Genuine)
   Widget _buildTrustBadgesRow() {
+    final isHi = LocaleService().isHindi;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildTrustItem(Icons.local_florist_outlined, 'Pure & Sacred'),
-          _buildTrustItem(Icons.verified_user_outlined, 'Mantra Energized'),
-          _buildTrustItem(Icons.star_border_rounded, 'Authentic & Genuine'),
+          _buildTrustItem(Icons.local_florist_outlined, isHi ? 'शुद्ध व पवित्र' : 'Pure & Sacred'),
+          _buildTrustItem(Icons.verified_user_outlined, isHi ? 'मंत्र सिद्ध' : 'Mantra Energized'),
+          _buildTrustItem(Icons.star_border_rounded, isHi ? 'प्रामाणिक व दिव्य' : 'Authentic & Genuine'),
         ],
       ),
     );
@@ -1168,10 +1170,10 @@ class _StoreScreenState extends State<StoreScreen> {
                             ),
                           )
                         : ClipOval(
-                            child: Image.asset(
+                            child: AppImage.asset(
                               cat['asset'] as String,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorWidget: Container(
                                 color: const Color(0xFFFFF3E0),
                                 child: const Icon(Icons.circle,
                                     color: _primaryMaroon, size: 20),
@@ -1294,10 +1296,10 @@ class _StoreScreenState extends State<StoreScreen> {
                           width: double.infinity,
                           height: 70,
                           color: const Color(0xFFFFFDF8),
-                          child: Image.asset(
+                          child: AppImage.asset(
                             deity['asset'] as String,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Center(
+                            errorWidget: const Center(
                               child: Icon(Icons.image, color: Colors.grey, size: 28),
                             ),
                           ),
@@ -1344,11 +1346,11 @@ class _StoreScreenState extends State<StoreScreen> {
           onTap: () {
             _openProductDetailModal(_featuredProducts[0]);
           },
-          child: Image.asset(
+          child: AppImage.asset(
             AppConstants.storePromoBannerAsset,
             width: double.infinity,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
+            errorWidget: Container(
               height: 90,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
@@ -1481,10 +1483,10 @@ class _StoreScreenState extends State<StoreScreen> {
                               width: double.infinity,
                               height: 105,
                               color: const Color(0xFFFAFAFA),
-                              child: Image.asset(
+                              child: AppImage.asset(
                                 prod['asset'] as String,
                                 fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => const Center(
+                                errorWidget: const Center(
                                   child: Icon(Icons.image,
                                       color: Colors.grey, size: 36),
                                 ),
@@ -1711,10 +1713,10 @@ class _StoreScreenState extends State<StoreScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
+                    child: AppImage.asset(
                       fest['asset'] as String,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorWidget: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: fest['bgGradient'] as List<Color>,

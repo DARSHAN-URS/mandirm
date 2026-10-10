@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../services/api_service.dart';
 import '../../../services/devotee_data_service.dart';
 import 'prasad_orders_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/app_image.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic>? initialProduct;
@@ -532,13 +534,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           // Main Image (AnimatedSwitcher for smooth thumbnail transition)
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
-            child: Image.asset(
+            child: AppImage.asset(
               _galleryThumbnails[_selectedThumbIndex],
               key: ValueKey<int>(_selectedThumbIndex),
               width: double.infinity,
               height: 360,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Image.asset(
+              errorWidget: const AppImage.asset(
                 AppConstants.mahakalHeroAsset,
                 width: double.infinity,
                 height: 360,
@@ -654,10 +656,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: Image.asset(
+                child: AppImage.asset(
                   _galleryThumbnails[index],
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorWidget: Container(
                     color: _softCream,
                     child: const Icon(Icons.image, size: 20, color: Colors.grey),
                   ),
@@ -972,12 +974,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           // Om Shield Icon Asset
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: Image.asset(
+            child: AppImage.asset(
               AppConstants.consecratedOmShieldAsset,
               width: 44,
               height: 48,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Container(
+              errorWidget: Container(
                 width: 44,
                 height: 48,
                 decoration: const BoxDecoration(
@@ -1161,7 +1163,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   onPressed: _addToCart,
                   icon: const Icon(Icons.shopping_cart_outlined, size: 16),
                   label: Text(
-                    'Add to Cart',
+                    LocaleService().isHindi ? 'कार्ट में जोड़ें' : 'Add to Cart',
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 12.5,
@@ -1190,7 +1192,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   onPressed: _proceedToCheckout,
                   child: Text(
-                    'Buy Now',
+                    LocaleService().isHindi ? 'अभी खरीदें' : 'Buy Now',
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,

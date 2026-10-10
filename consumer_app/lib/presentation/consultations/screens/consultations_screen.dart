@@ -4,6 +4,7 @@ import '../../../services/api_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../astrologers/screens/astrologers_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../../core/l10n/locale_service.dart';
 
 class ConsultationsScreen extends StatefulWidget {
   final VoidCallback? onBrowseAstrologers;
@@ -40,6 +41,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
   @override
   Widget build(BuildContext context) {
     final consultations = DevoteeDataService().consultations;
+    final isHi = LocaleService().isHindi;
 
     return Scaffold(
       backgroundColor: _warmCreamBg,
@@ -70,7 +72,9 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Past Sessions (${consultations.length})',
+                                isHi
+                                    ? 'पिछले सत्र (${consultations.length})'
+                                    : 'Past Sessions (${consultations.length})',
                                 style: GoogleFonts.marcellus(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w700,
@@ -78,7 +82,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                                 ),
                               ),
                               Text(
-                                'Prescribed Remedies & Notes',
+                                isHi ? 'सुझाए गए उपाय एवं विवरण' : 'Prescribed Remedies & Notes',
                                 style: GoogleFonts.poppins(
                                   fontSize: 11,
                                   color: const Color(0xFF757575),
@@ -103,6 +107,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
 
   /// Summary Banner
   Widget _buildSummaryBanner(int count) {
+    final isHi = LocaleService().isHindi;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -134,7 +139,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'VEDIC SANCTIFIED REMEDIES',
+                  isHi ? 'वैदिक प्रमाणित समाधान' : 'VEDIC SANCTIFIED REMEDIES',
                   style: GoogleFonts.poppins(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
@@ -147,7 +152,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
               const Text('✨', style: TextStyle(fontSize: 16)),
               const SizedBox(width: 4),
               Text(
-                '100% Verified Acharyas',
+                isHi ? '100% सत्यापित आचार्य' : '100% Verified Acharyas',
                 style: GoogleFonts.poppins(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
@@ -158,7 +163,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Your Vedic Guidance History',
+            isHi ? 'आपका वैदिक मार्गदर्शन इतिहास' : 'Your Vedic Guidance History',
             style: GoogleFonts.marcellus(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -167,7 +172,9 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Track all prescribed remedies, daily mantra counts, and sacred gemstone recommendations.',
+            isHi
+                ? 'प्रदत्त वैदिक उपाय, दैनिक मंत्र जप संख्या एवं पवित्र रत्न परामर्श ट्रैक करें।'
+                : 'Track all prescribed remedies, daily mantra counts, and sacred gemstone recommendations.',
             style: GoogleFonts.poppins(
               fontSize: 11.5,
               color: const Color(0xFF5A4A42),
@@ -181,6 +188,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
 
   /// Consultation Card
   Widget _buildConsultationCard(BuildContext context, Map<String, dynamic> c) {
+    final isHi = LocaleService().isHindi;
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -298,7 +306,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                     const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFF757575)),
                     const SizedBox(width: 4),
                     Text(
-                      'Duration: ${c['duration']}',
+                      isHi ? 'अवधि: ${c['duration']}' : 'Duration: ${c['duration']}',
                       style: GoogleFonts.poppins(fontSize: 10.5, color: const Color(0xFF555555)),
                     ),
                   ],
@@ -326,7 +334,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                     const Text('🪷', style: TextStyle(fontSize: 14)),
                     const SizedBox(width: 6),
                     Text(
-                      'Remedies Prescribed by Acharya:',
+                      isHi ? 'आचार्य द्वारा सुझाए गए उपाय:' : 'Remedies Prescribed by Acharya:',
                       style: GoogleFonts.poppins(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w700,
@@ -361,7 +369,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                   const Icon(Icons.star_rounded, color: Color(0xFFFFB300), size: 18),
                   const SizedBox(width: 4),
                   Text(
-                    'Your Rating: 5.0 ★',
+                    isHi ? 'आपकी रेटिंग: 5.0 ★' : 'Your Rating: 5.0 ★',
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -398,7 +406,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                     }
                   },
                   child: Text(
-                    'Consult Again',
+                    isHi ? 'पुनः परामर्श लें' : 'Consult Again',
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -416,6 +424,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
 
   /// Empty State
   Widget _buildEmptyState(BuildContext context) {
+    final isHi = LocaleService().isHindi;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -443,7 +452,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No Consultations Yet',
+              isHi ? 'अभी तक कोई परामर्श सत्र नहीं' : 'No Consultations Yet',
               style: GoogleFonts.marcellus(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -452,7 +461,9 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Talk with certified Vedic Acharyas for call & chat remedies, Kundli dosha analysis, and personalized remedies.',
+              isHi
+                  ? 'कॉल एवं चैट पर समाधान, कुंडली दोष विश्लेषण और व्यक्तिगत वैदिक उपायों के लिए सत्यापित आचार्यों से बात करें।'
+                  : 'Talk with certified Vedic Acharyas for call & chat remedies, Kundli dosha analysis, and personalized remedies.',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 12,
@@ -495,7 +506,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                   }
                 },
                 child: Text(
-                  'Consult an Astrologer',
+                  isHi ? 'ज्योतिषी से परामर्श लें' : 'Consult an Astrologer',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,

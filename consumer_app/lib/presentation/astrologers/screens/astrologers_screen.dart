@@ -4,8 +4,10 @@ import '../../../core/constants/app_constants.dart';
 import '../../../services/api_service.dart';
 import '../../../core/l10n/locale_service.dart';
 import '../widgets/astrologer_consultation_modals.dart';
+import '../widgets/ai_jyotish_modal.dart';
 import 'astrologer_detail_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/app_image.dart';
 
 class AstrologersScreen extends StatefulWidget {
   final VoidCallback? onConsultationFinished;
@@ -27,6 +29,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
     final isHi = LocaleService().isHindi;
     return [
       {'key': 'All Astrologers', 'label': isHi ? 'सभी ज्योतिषी' : 'All Astrologers', 'icon': Icons.people_alt_rounded},
+      {'key': 'AI Jyotish', 'label': isHi ? 'एआई ज्योतिषी ✨' : 'AI Jyotish ✨', 'icon': Icons.auto_awesome_rounded},
       {'key': 'Vedic Astrology', 'label': isHi ? 'वैदिक ज्योतिष' : 'Vedic Astrology', 'icon': Icons.spa_rounded},
       {'key': 'Kundli Analysis', 'label': isHi ? 'कुंडली विश्लेषण' : 'Kundli Analysis', 'icon': Icons.auto_stories_rounded},
       {'key': 'Tarot Cards', 'label': isHi ? 'टैरो कार्ड्स' : 'Tarot Cards', 'icon': Icons.style_rounded},
@@ -47,8 +50,30 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
     ];
   }
 
-  // Exact Astrologers from Screenshot
+  // Astrologers list including 24/7 AI Jyotish
   final List<Map<String, dynamic>> _allAstrologers = [
+    {
+      'id': 'ast_ai_jyotish',
+      'name': 'Acharya AI Jyotish (एआई ज्योतिषी)',
+      'badge': 'Instant 24x7 AI',
+      'badgeIcon': Icons.auto_awesome_rounded,
+      'isVerified': true,
+      'isAi': true,
+      'specialties': 'AI Kundli Analysis • Real-time Vedic Predictions • Dosha Remedies • 24/7 Instant',
+      'categories': ['All Astrologers', 'AI Jyotish', 'Vedic Astrology', 'Kundli Analysis'],
+      'topics': ['Love & Relationships', 'Career & Jobs', 'Wealth & Prosperity', 'Health', 'Home & Vastu'],
+      'rating': '4.9',
+      'reviews': '(28,500+ reviews)',
+      'sessions': '52,800 sessions',
+      'experience': 'Vedic AI Intelligence',
+      'expNumeric': 99,
+      'languages': 'Hindi, English, Sanskrit',
+      'isOnline': true,
+      'price': 'FREE Instant',
+      'priceNumeric': 0,
+      'originalPrice': '₹ 22/min',
+      'imageAsset': AppConstants.logoAsset,
+    },
     {
       'id': 'ast_rajesh',
       'name': 'Pandit Acharya Rajesh Sharma',
@@ -272,10 +297,30 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
   }
 
   void _openAstrologerDetail(Map<String, dynamic> a) {
+    if (a['isAi'] == true) {
+      _openAiJyotishModal();
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => AstrologerDetailScreen(astrologer: a),
+      ),
+    );
+  }
+
+  void _openAiJyotishModal([String? initialQuestion]) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => AiJyotishModal(
+        initialQuestion: initialQuestion,
+        onConsultationFinished: () {
+          if (widget.onConsultationFinished != null) {
+            widget.onConsultationFinished!();
+          }
+        },
       ),
     );
   }
@@ -423,6 +468,11 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                 ),
               ),
             ),
+          ),
+
+          // 3.5. AI Jyotish Spotlight Banner
+          SliverToBoxAdapter(
+            child: _buildAiJyotishBanner(),
           ),
 
           // 4. Filter Pills Row 1: Categories (All Astrologers, Vedic, Kundli, Tarot, Numerology)
@@ -586,7 +636,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Featured Astrologers',
+                    LocaleService().isHindi ? 'विशेष ज्योतिषी' : 'Featured Astrologers',
                     style: GoogleFonts.cinzel(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -603,14 +653,14 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     itemBuilder: (ctx) => [
-                      const PopupMenuItem(
-                          value: 'Top Rated', child: Text('Top Rated')),
-                      const PopupMenuItem(
+                      PopupMenuItem(
+                          value: 'Top Rated', child: Text(LocaleService().isHindi ? 'सर्वश्रेष्ठ' : 'Top Rated')),
+                      PopupMenuItem(
                           value: 'Experience: High to Low',
-                          child: Text('Experience: High to Low')),
-                      const PopupMenuItem(
+                          child: Text(LocaleService().isHindi ? 'अनुभव: अधिक से कम' : 'Experience: High to Low')),
+                      PopupMenuItem(
                           value: 'Price: Low to High',
-                          child: Text('Price: Low to High')),
+                          child: Text(LocaleService().isHindi ? 'मूल्य: कम से अधिक' : 'Price: Low to High')),
                     ],
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -757,10 +807,10 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                   stops: const [0.0, 0.35],
                 ).createShader(rect),
                 blendMode: BlendMode.dstIn,
-                child: Image.asset(
+                child: AppImage.asset(
                   AppConstants.astroHeroBannerAsset,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorWidget: Container(
                     color: const Color(0xFFFBE4BA),
                   ),
                 ),
@@ -808,45 +858,246 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
     );
   }
 
-  Widget _buildAstrologerAvatar(Map<String, dynamic> a) {
-    final avatarUrl = a['avatarUrl']?.toString() ?? '';
-    final imageAsset = a['imageAsset']?.toString() ?? AppConstants.astroRajeshAsset;
+  /// Dedicated AI Jyotish Spotlight Banner
+  Widget _buildAiJyotishBanner() {
+    final isHi = LocaleService().isHindi;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF2C0B05),
+            Color(0xFF5A1408),
+            Color(0xFF8B2510),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+          width: 1.2,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x228B1E1E),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // Subtle glowing cosmic aura background
+            Positioned(
+              right: -25,
+              top: -25,
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFFFB300).withValues(alpha: 0.12),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top badge row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD97706),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.auto_awesome_rounded, size: 12, color: Colors.white),
+                            const SizedBox(width: 4),
+                            Text(
+                              isHi ? 'एआई ज्योतिषी 24/7' : 'AI JYOTISH 24/7',
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF16A34A).withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF22C55E).withValues(alpha: 0.4)),
+                        ),
+                        child: Text(
+                          isHi ? '● तुरंत निःशुल्क उत्तर' : '● Instant Free Answers',
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF86EFAC),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
 
-    if (avatarUrl.isNotEmpty && (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://'))) {
-      return Image.network(
-        avatarUrl,
-        width: 68,
-        height: 68,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildAvatarAssetFallback(imageAsset),
-      );
-    }
-    return _buildAvatarAssetFallback(imageAsset);
+                  // Headline
+                  Text(
+                    isHi
+                        ? 'आचार्य एआई ज्योतिषी से तुरंत पूछें ✨'
+                        : 'Ask Acharya AI Jyotish ✨',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFFFFF3CD),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isHi
+                        ? 'कुंडली दोष, करियर, विवाह योग व ग्रह शांति के सटीक वैदिक उपाय पाएं।'
+                        : 'Get instant Vedic answers on Kundli Dosha, Career, Marriage & daily remedies.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11.5,
+                      color: Colors.white.withValues(alpha: 0.85),
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Quick Ask Chips
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      _buildQuickAskChip(
+                        isHi ? '🔮 कुंडली दोष व उपाय' : '🔮 Kundli Doshas',
+                        isHi ? 'मेरी कुंडली के मुख्य ग्रह दोष और उपाय' : 'What are the main doshas in my Kundli?',
+                      ),
+                      _buildQuickAskChip(
+                        isHi ? '💼 करियर व नौकरी' : '💼 Career & Job',
+                        isHi ? 'नौकरी और करियर में तरक्की कब होगी?' : 'When will my career and job prospects improve?',
+                      ),
+                      _buildQuickAskChip(
+                        isHi ? '❤️ विवाह योग' : '❤️ Marriage Yoga',
+                        isHi ? 'विवाह योग और मांगलिक दोष निवारण' : 'Marriage prospects and Manglik dosha remedies',
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // CTA Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD97706),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () => _openAiJyotishModal(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.chat_bubble_outline_rounded, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            isHi ? 'एआई ज्योतिषी से निःशुल्क पूछें →' : 'Chat with AI Jyotish (FREE) →',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  Widget _buildAvatarAssetFallback(String imageAsset) {
-    if (imageAsset.isNotEmpty) {
-      return Image.asset(
-        imageAsset,
+  Widget _buildQuickAskChip(String label, String query) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => _openAiJyotishModal(query),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFFFFE082),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAstrologerAvatar(Map<String, dynamic> a) {
+    if (a['isAi'] == true) {
+      return Container(
         width: 68,
         height: 68,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
-          width: 68,
-          height: 68,
-          color: const Color(0xFFFBEBC7),
-          child: const Center(
-            child: Text('🧘‍♂️', style: TextStyle(fontSize: 30)),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFD54F), Color(0xFFD97706), Color(0xFF91240D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+        ),
+        child: const Center(
+          child: Text('🔮', style: TextStyle(fontSize: 34)),
         ),
       );
     }
-    return Container(
+    final avatarUrl = a['avatarUrl']?.toString() ?? '';
+    final imageAsset = a['imageAsset']?.toString() ?? AppConstants.astroRajeshAsset;
+
+    return AppImage(
+      imageUrl: (avatarUrl.isNotEmpty && (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')))
+          ? avatarUrl
+          : null,
+      assetPath: imageAsset,
       width: 68,
       height: 68,
-      color: const Color(0xFFFBEBC7),
-      child: const Center(
-        child: Text('🧘‍♂️', style: TextStyle(fontSize: 30)),
+      fit: BoxFit.cover,
+      errorWidget: Container(
+        width: 68,
+        height: 68,
+        color: const Color(0xFFFBEBC7),
+        child: const Center(
+          child: Text('🧘‍♂️', style: TextStyle(fontSize: 30)),
+        ),
       ),
     );
   }
@@ -1131,95 +1382,136 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                   ),
 
                   // Action Buttons
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Call Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () => _startConsultation(a, isVideo: false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFBF4EA),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: const Color(0xFFE2C9A5),
-                              width: 1.1,
+                  if (a['isAi'] == true)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () => _openAiJyotishModal(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFD97706), Color(0xFF91240D)],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x35D97706),
+                              blurRadius: 5,
+                              offset: Offset(0, 1.5),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.phone_in_talk_rounded,
-                                size: 15,
-                                color: Color(0xFF8B2510),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                LocaleService().isHindi ? 'कॉल' : 'Call',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF8B2510),
-                                ),
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
-                      ),
-
-                      const SizedBox(width: 8),
-
-                      // "FREE Chat →" Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () => _startChatConsultation(a),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF581C87), Color(0xFF3B0764)],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome_rounded,
+                              size: 13,
+                              color: Colors.white,
                             ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x28581C87),
-                                blurRadius: 4,
-                                offset: Offset(0, 1.5),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.chat_bubble_rounded,
-                                size: 13,
+                            const SizedBox(width: 5),
+                            Text(
+                              LocaleService().isHindi ? 'एआई चैट (निःशुल्क) →' : 'Chat with AI (FREE) →',
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.white,
                               ),
-                              const SizedBox(width: 5),
-                              Text(
-                                LocaleService().isHindi ? 'मुफ्त चैट' : 'FREE Chat',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Call Button
+                        InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _startConsultation(a, isVideo: false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFBF4EA),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFE2C9A5),
+                                width: 1.1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.phone_in_talk_rounded,
+                                  size: 15,
+                                  color: Color(0xFF8B2510),
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  LocaleService().isHindi ? 'कॉल' : 'Call',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF8B2510),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        // "FREE Chat →" Button
+                        InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _startChatConsultation(a),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF581C87), Color(0xFF3B0764)],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x28581C87),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 1.5),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.chat_bubble_rounded,
+                                  size: 13,
                                   color: Colors.white,
                                 ),
-                              ),
-                              const SizedBox(width: 3),
-                              const Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                            ],
+                                const SizedBox(width: 5),
+                                Text(
+                                  LocaleService().isHindi ? 'मुफ्त चैट' : 'FREE Chat',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 3),
+                                const Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ],
               ),
             ),

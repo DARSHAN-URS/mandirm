@@ -4,6 +4,8 @@ import '../../../services/api_service.dart';
 import '../../../services/devotee_data_service.dart';
 import 'store_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
+import '../../common/widgets/certificate_download_card.dart';
+import '../../../core/l10n/locale_service.dart';
 
 class PrasadOrdersScreen extends StatefulWidget {
   final VoidCallback? onBrowsePujas;
@@ -38,6 +40,7 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final orders = DevoteeDataService().prasadOrders;
+    final isHi = LocaleService().isHindi;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8F3),
@@ -62,7 +65,7 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'No Sacred Orders Yet',
+                      isHi ? 'अभी तक कोई पवित्र ऑर्डर नहीं' : 'No Sacred Orders Yet',
                       style: GoogleFonts.marcellus(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -71,7 +74,9 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Order consecrated idols, malas, or sacred temple chadava delivered with SpeedPost to your doorstep.',
+                      isHi
+                          ? 'अभिमंत्रित मूर्तियां, रुद्राक्ष माला अथवा पवित्र धाम का चढ़ावा प्रसाद स्पीडपोस्ट से घर मंगवाएं।'
+                          : 'Order consecrated idols, malas, or sacred temple chadava delivered with SpeedPost to your doorstep.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(fontSize: 12.5, color: Colors.grey.shade700),
                     ),
@@ -94,7 +99,7 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                         }
                       },
                       child: Text(
-                        'Explore Mandirm Store & Pujas',
+                        isHi ? 'मंदिरम स्टोर एवं पूजाएं देखें' : 'Explore Mandirm Store & Pujas',
                         style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                     ),
@@ -140,7 +145,7 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                               border: Border.all(color: const Color(0xFFFFE0B2)),
                             ),
                             child: Text(
-                              'Order ID: ${o['id']}',
+                              isHi ? 'ऑर्डर सं.: ${o['id']}' : 'Order ID: ${o['id']}',
                               style: GoogleFonts.poppins(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -162,7 +167,11 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                               ),
                             ),
                             child: Text(
-                              o['status'] as String,
+                              isHi
+                                  ? (o['status'] == 'Delivered'
+                                      ? 'डिलीवर हुआ'
+                                      : (o['status'] == 'Packed' ? 'पैक हुआ' : 'मार्ग में'))
+                                  : (o['status'] as String),
                               style: GoogleFonts.poppins(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -178,7 +187,7 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
 
                       // Title & Mandir
                       Text(
-                        o['title'] as String,
+                        (isHi && o['title_hi'] != null) ? o['title_hi'] : (o['title'] as String),
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -187,26 +196,38 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Blessed from: ${o['mandir']}',
+                        isHi ? 'पवित्र आशीर्वाद: ${o['mandir']}' : 'Blessed from: ${o['mandir']}',
                         style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade600),
                       ),
                       const SizedBox(height: 14),
 
                       // Stepper: Blessed -> Packed -> In Transit -> Delivered
                       Text(
-                        'Consecration & Dispatch Status:',
+                        isHi ? 'अभिमंत्रण एवं प्रेषण स्थिति:' : 'Consecration & Dispatch Status:',
                         style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          _buildStepDot(label: 'Blessed', isDone: currentStep >= 0),
+                          _buildStepDot(
+                            label: isHi ? 'अभिमंत्रित' : 'Blessed',
+                            isDone: currentStep >= 0,
+                          ),
                           _buildStepLine(isDone: currentStep >= 1),
-                          _buildStepDot(label: 'Packed', isDone: currentStep >= 1),
+                          _buildStepDot(
+                            label: isHi ? 'पैक हुआ' : 'Packed',
+                            isDone: currentStep >= 1,
+                          ),
                           _buildStepLine(isDone: currentStep >= 2),
-                          _buildStepDot(label: 'In Transit', isDone: currentStep >= 2),
+                          _buildStepDot(
+                            label: isHi ? 'मार्ग में' : 'In Transit',
+                            isDone: currentStep >= 2,
+                          ),
                           _buildStepLine(isDone: currentStep >= 3),
-                          _buildStepDot(label: 'Delivered', isDone: currentStep >= 3),
+                          _buildStepDot(
+                            label: isHi ? 'डिलीवर' : 'Delivered',
+                            isDone: currentStep >= 3,
+                          ),
                         ],
                       ),
 
@@ -230,7 +251,9 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    '${o['carrier']} • Tracking: ${o['trackingNumber']}',
+                                    isHi
+                                        ? '${o['carrier']} • ट्रैकिंग: ${o['trackingNumber']}'
+                                        : '${o['carrier']} • Tracking: ${o['trackingNumber']}',
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -242,7 +265,9 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Estimated Delivery: ${o['estDelivery'] ?? '3-5 Business Days'}',
+                              isHi
+                                  ? 'अनुमानित डिलीवरी: ${o['estDelivery'] ?? '3-5 कार्य दिवस'}'
+                                  : 'Estimated Delivery: ${o['estDelivery'] ?? '3-5 Business Days'}',
                               style: GoogleFonts.poppins(fontSize: 10.5, color: Colors.grey.shade700),
                             ),
                           ],
@@ -251,28 +276,70 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
 
                       const SizedBox(height: 12),
 
-                      // Action Button
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Tracking ${o['trackingNumber']} with BlueDart SpeedPost'),
-                                duration: const Duration(seconds: 2),
+                      // Action Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (o['status'] == 'Delivered') ...[
+                            TextButton.icon(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (ctx) => Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+                                      left: 16,
+                                      right: 16,
+                                      top: 20,
+                                    ),
+                                    child: CertificateDownloadCard(
+                                      referenceId: o['id'] as String,
+                                      certType: 'chadhawa',
+                                      devoteeName: 'Devotee',
+                                      serviceTitle: o['title'] as String,
+                                      templeName: o['mandir'] as String,
+                                    ),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.workspace_premium_outlined, size: 16, color: Color(0xFFB8860B)),
+                              label: Text(
+                                isHi ? 'प्रमाण पत्र' : 'Certificate',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFFB8860B),
+                                ),
                               ),
-                            );
-                          },
-                          icon: const Icon(Icons.open_in_new_rounded, size: 14, color: _primaryMaroon),
-                          label: Text(
-                            'Live Track on BlueDart',
-                            style: GoogleFonts.poppins(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: _primaryMaroon,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          TextButton.icon(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isHi
+                                        ? '${o['trackingNumber']} को BlueDart SpeedPost से ट्रैक किया जा रहा है'
+                                        : 'Tracking ${o['trackingNumber']} with BlueDart SpeedPost',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.open_in_new_rounded, size: 14, color: _primaryMaroon),
+                            label: Text(
+                              isHi ? 'लाइव ट्रैक (BlueDart)' : 'Live Track on BlueDart',
+                              style: GoogleFonts.poppins(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: _primaryMaroon,
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),

@@ -78,7 +78,7 @@ class AppStrings {
     'welcome_to_mandirm': 'Welcome to Mandirm',
 
     // Home Screen Sections
-    'pooja_booking_title': 'Vedic Puja Booking',
+    'pooja_booking_title': 'Pooja Booking',
     'pooja_booking_desc': 'Perform sacred rituals with your Gotra & Sankalp at 108 Holy Temples',
     'talk_astrologer_title': 'Talk to Astrologer',
     'talk_astrologer_desc': 'Instant 1-on-1 audio call & chat with certified Vedic Astrologers',
@@ -288,7 +288,7 @@ class AppStrings {
     'welcome_to_mandirm': 'मंदिरम् में आपका स्वागत है',
 
     // Home Screen Sections
-    'pooja_booking_title': 'वैदिक पूजा बुकिंग',
+    'pooja_booking_title': 'पूजा बुकिंग',
     'pooja_booking_desc': '108 पवित्र मंदिरों में अपने नाम और गोत्र से लाइव वैदिक पूजा कराएं',
     'talk_astrologer_title': 'ज्योतिषी से बात करें',
     'talk_astrologer_desc': 'सत्यापित वैदिक ज्योतिषियों से तुरंत ऑडियो कॉल व चैट पर समाधान पाएं',

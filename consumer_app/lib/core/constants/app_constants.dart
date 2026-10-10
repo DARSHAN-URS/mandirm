@@ -25,17 +25,34 @@ class AppConstants {
     defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kanZrenJ4Z214c2RyYnlleWltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MDE2NTcsImV4cCI6MjEwNjA3NzY1N30.sokDKK8Lnh36oKHt6Yq8_6ImmUXhwJ72FyU0NHsR3w0',
   );
 
+  // CDN Configuration (Supabase Storage public bucket)
+  // Override via --dart-define=CDN_BASE_URL=https://...
+  static const String cdnBaseUrl = String.fromEnvironment(
+    'CDN_BASE_URL',
+    defaultValue: 'https://ndjvkzrxgmxsdrbyeyim.supabase.co/storage/v1/object/public/assets',
+  );
+
+  // Toggle to switch between CDN loading and bundled assets
+  static const bool enableCdnImages = bool.fromEnvironment(
+    'ENABLE_CDN_IMAGES',
+    defaultValue: true,
+  );
+
+  /// Resolves any relative asset path or image filename to its CDN URL
+  static String cdnUrl(String assetPath) {
+    if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) {
+      return assetPath;
+    }
+    final normalized = assetPath.startsWith('/') ? assetPath.substring(1) : assetPath;
+    return '$cdnBaseUrl/$normalized';
+  }
+
   // Asset paths
   static const String logoAsset = 'assets/images/inner_logo.jpg';
   static const String flameLogoAsset = 'assets/images/mandirm_flame_logo.png';
   static const String splashBackgroundAsset = 'assets/images/splash_bg_clean.jpg';
-  static const String splashOriginalAsset = 'assets/images/splash_screen_original.jpg';
   static const String loginTopHeaderAsset = 'assets/images/login_top_header.jpg';
-  static const String loginScreenBgAsset = 'assets/images/login_screen_bg.jpg';
   static const String homeHeaderAsset = 'assets/images/home_header.jpg';
-  static const String homeCardPujaAsset = 'assets/images/home_card_puja.jpg';
-  static const String homeCardAstroAsset = 'assets/images/home_card_astro.jpg';
-  static const String homeMockupFullAsset = 'assets/images/home_mockup_full.jpg';
   static const String pujaGangaDiyaAsset = 'assets/images/puja_ganga_diya.jpg';
   static const String pujaGuruBrihaspatiAsset = 'assets/images/puja_guru_brihaspati.jpg';
   static const String pujaNavgrahaAsset = 'assets/images/puja_navgraha.jpg';
@@ -53,7 +70,6 @@ class AppConstants {
 
   // Store Assets
   static const String storeHeroCropAsset = 'assets/images/store_hero_crop.jpg';
-  static const String storeHeroAiAsset = 'assets/images/store_hero_ai.jpg';
   static const String storePromoBannerAsset = 'assets/images/store_promo_banner.jpg';
   static const String deityGaneshaAsset = 'assets/images/deity_ganesha.jpg';
   static const String deityKrishnaAsset = 'assets/images/deity_krishna.jpg';

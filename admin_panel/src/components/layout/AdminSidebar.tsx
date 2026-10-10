@@ -1,0 +1,130 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: string;
+  badge?: string;
+  badgeColor?: string;
+}
+
+const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
+  {
+    group: 'CORE OVERVIEW',
+    items: [
+      { name: 'Dashboard', href: '/', icon: '📊' },
+      { name: 'Financials & Dakshina', href: '/transactions', icon: '💳' },
+    ],
+  },
+  {
+    group: 'TEMPLE & RITUALS',
+    items: [
+      { name: 'Temples & Live Darshan', href: '/temples', icon: '🛕', badge: 'Live', badgeColor: 'bg-emerald-500 text-white' },
+      { name: 'Puja Ceremonies', href: '/puja-services', icon: '🪔' },
+      { name: 'Bookings & Sankalps', href: '/bookings', icon: '📜', badge: 'Queue', badgeColor: 'bg-amber-500 text-white' },
+      { name: 'Chadhawa Offerings', href: '/chadhawa', icon: '🌸' },
+    ],
+  },
+  {
+    group: 'ASTROLOGY & LIVE CHAT',
+    items: [
+      { name: 'Astrologers & KYC', href: '/astrologers', icon: '🧘‍♂️', badge: 'Verify', badgeColor: 'bg-indigo-500 text-white' },
+      { name: 'Consultations & Chat', href: '/consultations', icon: '💬', badge: 'Shield', badgeColor: 'bg-red-500 text-white' },
+    ],
+  },
+  {
+    group: 'COMMERCE & LOGISTICS',
+    items: [
+      { name: 'Spiritual Shop Items', href: '/products', icon: '🛍️' },
+      { name: 'Prasad & Order Dispatch', href: '/orders', icon: '📦' },
+    ],
+  },
+  {
+    group: 'CONTENT & GOVERNANCE',
+    items: [
+      { name: 'Devotee Registry', href: '/users', icon: '👥' },
+      { name: 'Sacred Certificates', href: '/certificates', icon: '📜' },
+      { name: 'FAQs Management', href: '/faqs', icon: '❓' },
+      { name: 'Platform Settings', href: '/settings', icon: '⚙️' },
+    ],
+  },
+];
+
+export default function AdminSidebar() {
+  const pathname = usePathname();
+
+  return (
+    <aside className="w-64 bg-mandir-maroon-deep text-white border-r border-amber-900/30 flex flex-col h-screen sticky top-0 select-none shadow-2xl z-40">
+      {/* Brand Logo Header */}
+      <div className="h-16 px-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-mandir-maroon to-mandir-maroon-dark">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-amber-400 text-mandir-maroon font-bold text-xl flex items-center justify-center shadow-md">
+            🕉️
+          </div>
+          <div>
+            <span className="font-cinzel font-bold text-base tracking-wider text-amber-200 block leading-tight">
+              MANDIRM
+            </span>
+            <span className="text-[10px] uppercase font-semibold text-amber-300/80 tracking-widest">
+              Admin Console
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Nav List */}
+      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.group}>
+            <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-amber-300/50 uppercase">
+              {group.group}
+            </div>
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                      isActive
+                        ? 'bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40 shadow-sm'
+                        : 'text-amber-100/70 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">{item.icon}</span>
+                      <span>{item.name}</span>
+                    </div>
+                    {item.badge && (
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.badgeColor || 'bg-amber-400 text-black'}`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Safety Compliance Footer */}
+      <div className="p-3 border-t border-white/10 bg-black/20 text-xs">
+        <div className="flex items-center justify-between text-amber-200/80 mb-1">
+          <span className="flex items-center gap-1.5 text-[11px] font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Mandirm Engine Live
+          </span>
+          <span className="text-[10px] text-amber-300/60 font-mono">v1.2.0</span>
+        </div>
+        <p className="text-[10px] text-amber-200/50 leading-tight">
+          Protected with Trust & Safety Shield and Real-Time Chat Moderation.
+        </p>
+      </div>
+    </aside>
+  );
+}

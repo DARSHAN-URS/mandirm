@@ -32,6 +32,7 @@ dist/
 # Non-Flutter apps in this repo (maintained in separate repositories)
 /backend/
 /consumer_website/
+/admin_panel/
 /supabase/
 /docs/
 Puja-Platform-Features-and-Tasks.pdf

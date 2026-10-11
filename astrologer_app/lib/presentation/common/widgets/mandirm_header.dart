@@ -190,7 +190,7 @@ class MandirmHeader extends StatelessWidget implements PreferredSizeWidget {
 
           const SizedBox(width: 8),
 
-          // 2. Central Mandirm Emblem Branding (Flame Diya Logo + Acharya Pill)
+          // 2. Central Mandirm Emblem Branding (Flame Diya Logo Only)
           Expanded(
             child: titleOverride ??
                 GestureDetector(
@@ -206,7 +206,7 @@ class MandirmHeader extends StatelessWidget implements PreferredSizeWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Mandirm Flame Diya Logo
+                      // Mandirm Flame Diya Logo Only
                       Container(
                         width: 36,
                         height: 36,
@@ -220,43 +220,6 @@ class MandirmHeader extends StatelessWidget implements PreferredSizeWidget {
                             size: 28,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Mandirm Sanskrit Brand & Acharya Tag
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '॥ मंदिरम् ॥',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: _primaryMaroon,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: AppColors.deepAmber.withOpacity(0.14),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  'JYOTISH ACHARYA',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 8.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.deepAmber,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
                       ),
                     ],
                   ),

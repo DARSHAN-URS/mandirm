@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../domain/models/astrologer_profile.dart';
 import '../../../services/api/api_service.dart';
 import '../../../services/auth/auth_service.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../common/widgets/app_image.dart';
 import '../../common/widgets/mandirm_header.dart';
-import '../../onboarding/screens/onboarding_screen.dart';
+
 import 'edit_profile_screen.dart';
 
 class AstrologerProfileScreen extends StatefulWidget {
@@ -191,7 +192,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          _profile?.name ?? 'Acharya Ramanuj Shastri',
+                                          _profile?.name ?? (LocaleService().isHindi ? 'पं. रामचन्द्र शास्त्री' : 'Pt. Ramachandra Shastri'),
                                           style: GoogleFonts.cinzel(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
@@ -208,8 +209,8 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                   const SizedBox(height: 2),
                                   Text(
                                     _profile?.phone != null && _profile!.phone!.isNotEmpty
-                                        ? '${_profile!.phone} • ${_profile?.specialities ?? 'Vedic Jyotish'}'
-                                        : (_profile?.title ?? 'Senior Vedic Astrologer & Kundli Expert'),
+                                        ? '${_profile!.phone} • ${_profile?.specialities ?? (LocaleService().isHindi ? 'वैदिक ज्योतिष' : 'Vedic Jyotish')}'
+                                        : (_profile?.title ?? (LocaleService().isHindi ? 'वरिष्ठ वैदिक ज्योतिषी व कुंडली विशेषज्ञ' : 'Senior Vedic Astrologer & Kundli Expert')),
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: AppColors.deepAmber,
@@ -228,7 +229,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Text(
-                                          'KYC VERIFIED',
+                                          LocaleService().isHindi ? 'KYC सत्यापित' : 'KYC VERIFIED',
                                           style: GoogleFonts.poppins(
                                             fontSize: 9,
                                             fontWeight: FontWeight.w700,
@@ -253,7 +254,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                               const Icon(Icons.edit_rounded, size: 12, color: AppColors.primaryMaroon),
                                               const SizedBox(width: 4),
                                               Text(
-                                                'Edit Profile',
+                                                LocaleService().isHindi ? 'बदलें' : 'Edit Profile',
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w600,
@@ -460,38 +461,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                   _buildTrustBadge(),
                   const SizedBox(height: 24),
 
-                  // Platform Tour & Onboarding Guide Action
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AstrologerOnboardingScreen(isTourMode: true),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.menu_book_rounded, color: AppColors.primaryMaroon),
-                      label: Text(
-                        'Acharya Onboarding & Platform Tour',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.primaryMaroon,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.warmCream,
-                        elevation: 0,
-                        side: BorderSide(color: AppColors.marigoldGold.withOpacity(0.6)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+
 
                   // Sign Out Button
                   SizedBox(
@@ -499,20 +469,23 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                     height: 48,
                     child: OutlinedButton.icon(
                       onPressed: () {
+                        final isHi = LocaleService().isHindi;
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
                             backgroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             title: Text(
-                              'Sign Out of Acharya Portal?',
+                              isHi ? 'आचार्य पोर्टल से लॉग आउट करें?' : 'Sign Out of Acharya Portal?',
                               style: GoogleFonts.cinzel(
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             content: Text(
-                              'Your status will be set to Offline and you will not receive incoming consultation calls.',
+                              isHi
+                                  ? 'आपकी स्थिति ऑफलाइन कर दी जाएगी और भक्त आपको परामर्श हेतु कॉल नहीं कर सकेंगे।'
+                                  : 'Your status will be set to Offline and you will not receive incoming consultation calls.',
                               style: GoogleFonts.poppins(
                                 color: AppColors.textSecondary,
                                 fontSize: 13,
@@ -521,7 +494,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx),
-                                child: Text('Cancel', style: GoogleFonts.poppins(color: AppColors.textSecondary)),
+                                child: Text(isHi ? 'रद्द करें' : 'Cancel', style: GoogleFonts.poppins(color: AppColors.textSecondary)),
                               ),
                               ElevatedButton(
                                 onPressed: () async {
@@ -538,7 +511,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                   backgroundColor: AppColors.statusOffline,
                                   foregroundColor: Colors.white,
                                 ),
-                                child: const Text('Sign Out'),
+                                child: Text(isHi ? 'लॉग आउट' : 'Sign Out'),
                               ),
                             ],
                           ),
@@ -546,7 +519,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                       },
                       icon: const Icon(Icons.logout_rounded, color: AppColors.statusOffline),
                       label: Text(
-                        'Sign Out from Console',
+                        LocaleService().isHindi ? 'पोर्टल से लॉग आउट करें' : 'Sign Out from Console',
                         style: GoogleFonts.poppins(
                           color: AppColors.statusOffline,
                           fontWeight: FontWeight.w600,

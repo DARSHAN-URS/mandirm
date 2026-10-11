@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../consultations/screens/consultations_screen.dart';
 import '../../history/screens/history_screen.dart';
@@ -65,32 +66,32 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
                   index: 0,
                   icon: Icons.dashboard_outlined,
                   activeIcon: Icons.dashboard_rounded,
-                  label: 'Duty Status',
+                  label: AstroStrings.t('nav_duty'),
                 ),
                 _buildNavItem(
                   index: 1,
                   icon: Icons.headset_mic_outlined,
                   activeIcon: Icons.headset_mic_rounded,
-                  label: 'Requests',
+                  label: AstroStrings.t('nav_requests'),
                   badgeCount: 3, // Live devotees waiting in queue
                 ),
                 _buildNavItem(
                   index: 2,
                   icon: Icons.history_edu_outlined,
                   activeIcon: Icons.history_edu_rounded,
-                  label: 'History',
+                  label: AstroStrings.t('nav_history'),
                 ),
                 _buildNavItem(
                   index: 3,
                   icon: Icons.account_balance_wallet_outlined,
                   activeIcon: Icons.account_balance_wallet_rounded,
-                  label: 'Earnings',
+                  label: AstroStrings.t('nav_earnings'),
                 ),
                 _buildNavItem(
                   index: 4,
                   icon: Icons.person_outline_rounded,
                   activeIcon: Icons.person_rounded,
-                  label: 'Profile',
+                  label: AstroStrings.t('nav_profile'),
                 ),
               ],
             ),

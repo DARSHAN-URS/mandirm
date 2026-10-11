@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../services/auth/auth_service.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../home/screens/main_hub_screen.dart';
 import '../../notifications/screens/notifications_screen.dart';
-import '../../onboarding/screens/onboarding_screen.dart';
+
 import 'app_image.dart';
 
 class AstrologerDrawerSheet extends StatelessWidget {
@@ -191,8 +193,8 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 _buildNavItem(
                   context,
                   icon: Icons.dashboard_rounded,
-                  label: 'Live Consultation Hub',
-                  subtitle: 'Real-time devotees, earnings & quick actions',
+                  label: AstroStrings.t('drawer_duty_title'),
+                  subtitle: AstroStrings.t('drawer_duty_sub'),
                   onTap: () {
                     Navigator.pop(context);
                     if (onSelectTab != null) {
@@ -209,8 +211,8 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 _buildNavItem(
                   context,
                   icon: Icons.headset_mic_rounded,
-                  label: 'Devotee Queue & Live Calls',
-                  subtitle: 'Manage active waiting devotees and scheduled slots',
+                  label: AstroStrings.t('drawer_requests_title'),
+                  subtitle: AstroStrings.t('drawer_requests_sub'),
                   onTap: () {
                     Navigator.pop(context);
                     if (onSelectTab != null) {
@@ -227,8 +229,8 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 _buildNavItem(
                   context,
                   icon: Icons.history_edu_rounded,
-                  label: 'Consultation Records & Kundlis',
-                  subtitle: 'Past sessions, prescribed remedies & devotee reviews',
+                  label: AstroStrings.t('drawer_history_title'),
+                  subtitle: AstroStrings.t('drawer_history_sub'),
                   onTap: () {
                     Navigator.pop(context);
                     if (onSelectTab != null) {
@@ -245,8 +247,8 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 _buildNavItem(
                   context,
                   icon: Icons.account_balance_wallet_rounded,
-                  label: 'Earnings & Bank Settlements',
-                  subtitle: 'Daily earnings, payouts & withdrawal history',
+                  label: AstroStrings.t('drawer_earnings_title'),
+                  subtitle: AstroStrings.t('drawer_earnings_sub'),
                   onTap: () {
                     Navigator.pop(context);
                     if (onSelectTab != null) {
@@ -263,8 +265,8 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 _buildNavItem(
                   context,
                   icon: Icons.person_rounded,
-                  label: 'Acharya Profile & Pricing',
-                  subtitle: 'Audio/Video rates, bio & languages',
+                  label: AstroStrings.t('drawer_profile_title'),
+                  subtitle: AstroStrings.t('drawer_profile_sub'),
                   onTap: () {
                     Navigator.pop(context);
                     if (onSelectTab != null) {
@@ -281,8 +283,8 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 _buildNavItem(
                   context,
                   icon: Icons.notifications_active_rounded,
-                  label: 'Consultation Alerts',
-                  subtitle: 'Live devotee bookings and review notices',
+                  label: AstroStrings.t('drawer_notifications_title'),
+                  subtitle: AstroStrings.t('drawer_notifications_sub'),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -299,31 +301,20 @@ class AstrologerDrawerSheet extends StatelessWidget {
 
                 _buildNavItem(
                   context,
-                  icon: Icons.menu_book_rounded,
-                  label: 'Platform Tour & Guidelines',
-                  subtitle: 'Acharya ethics, dakshina policy & how it works',
-                  iconColor: AppColors.marigoldGold,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AstrologerOnboardingScreen(isTourMode: true),
-                      ),
-                    );
-                  },
-                ),
-                _buildNavItem(
-                  context,
                   icon: Icons.support_agent_rounded,
-                  label: 'Acharya Support Helpline',
-                  subtitle: '24x7 Mandirm Astrologer Desk',
+                  label: AstroStrings.t('drawer_support_title'),
+                  subtitle: AstroStrings.t('drawer_support_sub'),
                   iconColor: AppColors.saffronPrimary,
                   onTap: () {
+                    final isHi = LocaleService().isHindi;
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Connecting to Mandirm Acharya Desk: +91 8000 108 108'),
+                      SnackBar(
+                        content: Text(
+                          isHi
+                              ? 'मंदिरम् आचार्य डेस्क से संपर्क हो रहा है: +91 8000 108 108'
+                              : 'Connecting to Mandirm Acharya Desk: +91 8000 108 108',
+                        ),
                         backgroundColor: _primaryMaroon,
                       ),
                     );
@@ -332,10 +323,11 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 _buildNavItem(
                   context,
                   icon: Icons.logout_rounded,
-                  label: 'Sign Out Console',
-                  subtitle: 'Securely exit your session',
+                  label: AstroStrings.t('drawer_sign_out_title'),
+                  subtitle: AstroStrings.t('drawer_sign_out_sub'),
                   iconColor: AppColors.statusOffline,
                   onTap: () async {
+                    final isHi = LocaleService().isHindi;
                     Navigator.pop(context);
                     final confirm = await showDialog<bool>(
                       context: context,
@@ -343,14 +335,16 @@ class AstrologerDrawerSheet extends StatelessWidget {
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         title: Text(
-                          'Sign Out of Acharya Portal?',
+                          isHi ? 'आचार्य पोर्टल से लॉग आउट करें?' : 'Sign Out of Acharya Portal?',
                           style: GoogleFonts.cinzel(
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
                         ),
                         content: Text(
-                          'Your status will be set to Offline and you will not receive consultation calls.',
+                          isHi
+                              ? 'आपकी स्थिति ऑफलाइन कर दी जाएगी और भक्त आपको परामर्श हेतु कॉल नहीं कर सकेंगे।'
+                              : 'Your status will be set to Offline and you will not receive consultation calls.',
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: AppColors.textSecondary,
@@ -359,7 +353,10 @@ class AstrologerDrawerSheet extends StatelessWidget {
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: Text('Cancel', style: GoogleFonts.poppins(color: AppColors.textSecondary)),
+                            child: Text(
+                              isHi ? 'रद्द करें' : 'Cancel',
+                              style: GoogleFonts.poppins(color: AppColors.textSecondary),
+                            ),
                           ),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -367,7 +364,7 @@ class AstrologerDrawerSheet extends StatelessWidget {
                               foregroundColor: Colors.white,
                             ),
                             onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text('Sign Out'),
+                            child: Text(isHi ? 'लॉग आउट' : 'Sign Out'),
                           ),
                         ],
                       ),

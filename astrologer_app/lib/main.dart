@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'core/l10n/locale_service.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/splash/screens/splash_screen.dart';
 import 'services/auth/auth_service.dart';
@@ -12,6 +13,9 @@ Future<void> main() async {
     debugPrint('AuthService initialization error: $e');
   }
 
+  // Initialize saved language preference (English/Hindi)
+  await LocaleService().initialize();
+
   runApp(const AstrologerApp());
 }
 
@@ -20,11 +24,16 @@ class AstrologerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mandirm Astrologer Portal',
-      debugShowCheckedModeBanner: false,
-      theme: AstrologerTheme.darkTheme,
-      home: const AstrologerSplashScreen(),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        return MaterialApp(
+          title: 'Mandirm Astrologer Portal',
+          debugShowCheckedModeBanner: false,
+          theme: AstrologerTheme.darkTheme,
+          home: const AstrologerSplashScreen(),
+        );
+      },
     );
   }
 }

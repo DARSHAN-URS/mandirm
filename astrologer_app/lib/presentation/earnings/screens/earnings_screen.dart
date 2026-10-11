@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../services/api/api_service.dart';
 import '../../../services/auth/auth_service.dart';
 import '../../common/widgets/app_image.dart';
@@ -194,6 +195,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isHi = LocaleService().isHindi;
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: Column(
@@ -248,11 +250,17 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Withdrawable Balance', style: GoogleFonts.poppins(color: const Color(0xFFFFF6E5), fontSize: 13)),
+                            Text(
+                              isHi ? 'निकासी योग्य दक्षिणा शेष' : 'Withdrawable Balance',
+                              style: GoogleFonts.poppins(color: const Color(0xFFFFF6E5), fontSize: 13),
+                            ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(20)),
-                              child: Text('Auto-Settlement ON', style: GoogleFonts.poppins(color: Colors.white, fontSize: 10)),
+                              child: Text(
+                                isHi ? 'ऑटो-सेटलमेंट सक्रिय' : 'Auto-Settlement ON',
+                                style: GoogleFonts.poppins(color: Colors.white, fontSize: 10),
+                              ),
                             ),
                           ],
                         ),
@@ -270,7 +278,9 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                         Row(
                           children: [
                             Text(
-                              'Pending T+1 Clearing: ₹${_pendingSettlement.toStringAsFixed(0)}',
+                              isHi
+                                  ? 'प्रक्रियाधीन T+1 राशि: ₹${_pendingSettlement.toStringAsFixed(0)}'
+                                  : 'Pending T+1 Clearing: ₹${_pendingSettlement.toStringAsFixed(0)}',
                               style: GoogleFonts.poppins(color: const Color(0xFFFFF6E5).withOpacity(0.8), fontSize: 12),
                             ),
                           ],
@@ -286,7 +296,10 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             icon: const Icon(Icons.account_balance_wallet, size: 18),
-                            label: Text('Withdraw Payout', style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
+                            label: Text(
+                              isHi ? 'बैंक खाते में ट्रांसफर करें' : 'Withdraw Payout',
+                              style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+                            ),
                             onPressed: _walletBalance > 0 ? _requestWithdrawal : null,
                           ),
                         ),

@@ -2,13 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../services/auth/auth_service.dart';
 import '../../home/screens/main_hub_screen.dart';
 import '../../auth/screens/login_screen.dart';
-import '../../onboarding/screens/onboarding_screen.dart';
 
 class AstrologerSplashScreen extends StatefulWidget {
   const AstrologerSplashScreen({super.key});
@@ -68,19 +65,8 @@ class _AstrologerSplashScreenState extends State<AstrologerSplashScreen>
 
     if (!mounted) return;
 
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final hasSeenOnboarding = prefs.getBool(AppConstants.keyHasSeenOnboarding) ?? false;
-      if (!mounted) return;
-
-      if (!hasSeenOnboarding) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AstrologerOnboardingScreen()),
-        );
-        return;
-      }
-    } catch (_) {}
+    // Direct routing to Main Hub or Login without onboarding
+    if (!mounted) return;
 
     if (!mounted) return;
 

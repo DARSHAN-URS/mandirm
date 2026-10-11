@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../domain/models/astrologer_profile.dart';
 import '../../../domain/models/consultation_model.dart';
 import '../../../services/api/api_service.dart';
@@ -231,6 +233,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   }
 
   Widget _buildHeader() {
+    final isHi = LocaleService().isHindi;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -289,7 +292,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _profile?.name ?? 'Acharya Ramanuj Shastri',
+                      _profile?.name ?? (isHi ? 'पं. रामचन्द्र शास्त्री' : 'Pt. Ramachandra Shastri'),
                       style: GoogleFonts.cinzel(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -300,7 +303,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _profile?.specialities ?? 'Jyotish Praveen • Vedic & Vastu Expert',
+                      _profile?.specialities ?? (isHi ? 'ज्योतिष प्रवीण • वैदिक व वास्तु विशेषज्ञ' : 'Jyotish Praveen • Vedic & Vastu Expert'),
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: AppColors.deepAmber,
@@ -344,16 +347,16 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Duty Status:',
+                isHi ? 'ड्यूटी स्थिति:' : 'Duty Status:',
                 style: GoogleFonts.poppins(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),
               ),
-              _buildStatusPill('online', 'Online', AppColors.statusOnline),
-              _buildStatusPill('busy', 'Busy', AppColors.statusBusy),
-              _buildStatusPill('offline', 'Offline', AppColors.statusOffline),
+              _buildStatusPill('online', AstroStrings.t('online'), AppColors.statusOnline),
+              _buildStatusPill('busy', AstroStrings.t('busy'), AppColors.statusBusy),
+              _buildStatusPill('offline', AstroStrings.t('offline'), AppColors.statusOffline),
             ],
           ),
         ],
@@ -413,6 +416,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   }
 
   Widget _buildEarningsCard() {
+    final isHi = LocaleService().isHindi;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -460,7 +464,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Today's Consultation Earnings",
+                        isHi ? 'आज की कुल दक्षिणा' : "Today's Consultation Earnings",
                         style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFFFFF6E5)),
                       ),
                       const SizedBox(height: 4),
@@ -489,7 +493,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     child: Column(
                       children: [
                         Text(
-                          'Wallet',
+                          isHi ? 'वॉलेट' : 'Wallet',
                           style: GoogleFonts.poppins(fontSize: 10, color: const Color(0xFFFFF6E5)),
                         ),
                         Text(
@@ -511,9 +515,21 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildMetric('Consultations', '${_earnings.todayConsultations} devotees', Icons.people_outline),
-                  _buildMetric('Spoken Time', '${_earnings.todayMinutes} mins', Icons.timer_outlined),
-                  _buildMetric('Call Rate', '₹35 / min', Icons.call_outlined),
+                  _buildMetric(
+                    isHi ? 'परामर्श' : 'Consultations',
+                    '${_earnings.todayConsultations} ${isHi ? 'भक्त' : 'devotees'}',
+                    Icons.people_outline,
+                  ),
+                  _buildMetric(
+                    isHi ? 'परामर्श समय' : 'Spoken Time',
+                    '${_earnings.todayMinutes} ${isHi ? 'मिनट' : 'mins'}',
+                    Icons.timer_outlined,
+                  ),
+                  _buildMetric(
+                    isHi ? 'कॉल दर' : 'Call Rate',
+                    '₹35 / ${isHi ? 'मिनट' : 'min'}',
+                    Icons.call_outlined,
+                  ),
                 ],
               ),
             ],
@@ -535,6 +551,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   }
 
   Widget _buildQueueSection() {
+    final isHi = LocaleService().isHindi;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -544,7 +561,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
             Row(
               children: [
                 Text(
-                  'Live Devotee Queue',
+                  isHi ? 'प्रतीक्षारत भक्त कतार' : 'Live Devotee Queue',
                   style: GoogleFonts.cinzel(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -571,7 +588,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
             ),
             if (_queue.isNotEmpty)
               Text(
-                'Instant Call Connect',
+                isHi ? 'त्वरित कॉल कनेक्ट' : 'Instant Call Connect',
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -604,7 +621,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Queue is clear 🙏',
+                    isHi ? 'कतार वर्तमान में रिक्त है 🙏' : 'Queue is clear 🙏',
                     style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -612,7 +629,9 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     ),
                   ),
                   Text(
-                    'Keep your status Online. Devotees seeking guidance will appear here automatically.',
+                    isHi
+                        ? 'अपनी स्थिति ऑनलाइन रखें। मार्गदर्शन चाहने वाले भक्त यहाँ स्वतः प्रदर्शित होंगे।'
+                        : 'Keep your status Online. Devotees seeking guidance will appear here automatically.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary),
                   ),
@@ -761,7 +780,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => _dismissRequest(req),
-                  child: const Text('Pass'),
+                  child: Text(LocaleService().isHindi ? 'छोड़ें' : 'Pass'),
                 ),
               ),
               const SizedBox(width: 10),
@@ -776,7 +795,9 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   ),
                   icon: Icon(isVideo ? Icons.videocam : Icons.call, size: 18),
                   label: Text(
-                    isVideo ? 'Accept Video Call' : 'Accept Audio Call',
+                    isVideo
+                        ? (LocaleService().isHindi ? 'वीडियो कॉल स्वीकारें' : 'Accept Video Call')
+                        : (LocaleService().isHindi ? 'ऑडियो कॉल स्वीकारें' : 'Accept Audio Call'),
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 13),
                   ),
                   onPressed: () => _acceptConsultation(req),
@@ -790,11 +811,12 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   }
 
   Widget _buildHistorySection() {
+    final isHi = LocaleService().isHindi;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Recent Consultations & Reviews',
+          isHi ? 'हाल के परामर्श व समीक्षाएं' : 'Recent Consultations & Reviews',
           style: GoogleFonts.cinzel(
             fontSize: 17,
             fontWeight: FontWeight.w700,

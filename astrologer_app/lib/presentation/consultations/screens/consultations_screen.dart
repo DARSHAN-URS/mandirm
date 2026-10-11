@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../domain/models/consultation_model.dart';
 import '../../../services/api/api_service.dart';
 import '../../../services/auth/auth_service.dart';
@@ -148,7 +149,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Requests Console',
+                        AstroStrings.t('requests_console'),
                         style: GoogleFonts.cinzel(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -156,7 +157,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                         ),
                       ),
                       Text(
-                        'Live consultations (Voice, Video, Chat) & Special service requests',
+                        AstroStrings.t('requests_subtitle'),
                         style: GoogleFonts.poppins(
                           fontSize: 11.5,
                           color: AppColors.textSecondary,
@@ -177,7 +178,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Consultations'),
+                          Text(AstroStrings.t('tab_consultations')),
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -197,7 +198,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                         ],
                       ),
                     ),
-                    const Tab(text: 'Service Requests'),
+                    Tab(text: AstroStrings.t('tab_services')),
                   ],
                 ),
               ],

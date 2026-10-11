@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -20,6 +21,7 @@ class AstrologerConsultationsScreen extends StatefulWidget {
 class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  Timer? _pollingTimer;
   final List<DevoteeConsultationRequest> _liveQueue =
       List.from(DevoteeConsultationRequest.mockQueue);
   final List<AstrologerServiceBooking> _serviceBookings =
@@ -30,7 +32,12 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadQueue();
+    // Auto-poll live queue every 8 seconds for real-time customer bookings
+    _pollingTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+      if (mounted) _loadQueue();
+    });
   }
+
 
   Future<void> _loadQueue() async {
     final astroId = AuthService().currentProfile?.id ?? 'astro_1';
@@ -72,9 +79,11 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }
+
 
   void _startConsultation(DevoteeConsultationRequest request) async {
     final result = await Navigator.push(

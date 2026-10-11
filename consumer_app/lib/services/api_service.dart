@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants/app_constants.dart';
+import 'supabase_service.dart';
+
 
 /// Central API service that connects the consumer app to the Mandirm FastAPI backend.
 ///
@@ -251,6 +253,63 @@ class ApiService {
       return [];
     }
   }
+
+  /// Dispatches a live consultation booking to the backend & Supabase
+  /// so that it appears in real-time on the Astrologer App's Live Queue.
+  Future<Map<String, dynamic>?> requestConsultation({
+    required String astrologerId,
+    required String astrologerName,
+    required String type, // 'chat', 'voice', or 'video'
+    String? problemTopic,
+    String? birthDob,
+    String? birthTime,
+    String? birthPlace,
+    double perMinuteRate = 25.0,
+    String? userName,
+    String? userPhone,
+    String? userId,
+  }) async {
+    final newId = 'cons_${DateTime.now().millisecondsSinceEpoch}';
+    final payload = {
+      'id': newId,
+      'astrologer_id': astrologerId,
+      'astrologer_name': astrologerName,
+      'user_id': userId ?? 'usr_${DateTime.now().millisecondsSinceEpoch % 10000}',
+      'user_name': userName ?? 'Devotee',
+      'user_phone': userPhone ?? '+91 98765 43210',
+      'type': type,
+      'status': 'requested',
+      'problem_topic': problemTopic ?? 'General Vedic Guidance',
+      'birth_dob': birthDob,
+      'birth_time': birthTime,
+      'birth_place': birthPlace,
+      'per_minute_rate': perMinuteRate,
+      'call_room_id': 'mandir_room_$newId',
+      'created_at': DateTime.now().toUtc().toIso8601String(),
+    };
+
+    // 1. Send to FastAPI backend
+    try {
+      final response = await _dio.post('/consultations/request', data: payload);
+      if (response.data is Map && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data'] as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] requestConsultation backend notice: $e');
+    }
+
+    // 2. Direct Supabase insert for instant reflection in Astrologer App
+    try {
+      final sb = SupabaseService().client;
+      await sb.from('consultations').insert(payload);
+      debugPrint('[ApiService] Consultation request synced to Supabase: $newId');
+    } catch (e) {
+      debugPrint('[ApiService] Supabase consultation insert notice: $e');
+    }
+
+    return payload;
+  }
+
 
   /// WhatsApp-style chat messages in a consultation room
   Future<List<Map<String, dynamic>>> getChatMessages(String consultationId) async {

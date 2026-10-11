@@ -33,6 +33,16 @@ class _LiveConsultationCallDialogState
   @override
   void initState() {
     super.initState();
+    final astroId = widget.astrologer['id']?.toString() ?? 'astro_1';
+    final astroName = widget.astrologer['name']?.toString() ?? 'Vedic Acharya';
+    ApiService().requestConsultation(
+      astrologerId: astroId,
+      astrologerName: astroName,
+      type: widget.isVideo ? 'video' : 'voice',
+      problemTopic: widget.astrologer['specialty']?.toString() ?? 'Vedic Kundli Guidance',
+      perMinuteRate: (widget.astrologer['priceNumeric'] as num?)?.toDouble() ?? 25.0,
+    );
+
     Future.delayed(const Duration(milliseconds: 1200), () {
       if (mounted) {
         setState(() => _isConnected = true);
@@ -40,6 +50,7 @@ class _LiveConsultationCallDialogState
       }
     });
   }
+
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
@@ -330,6 +341,16 @@ class _LiveChatModalState extends State<LiveChatModal> {
   @override
   void initState() {
     super.initState();
+    final astroId = widget.astrologer['id']?.toString() ?? 'astro_1';
+    final astroName = widget.astrologer['name']?.toString() ?? 'Vedic Acharya';
+    ApiService().requestConsultation(
+      astrologerId: astroId,
+      astrologerName: astroName,
+      type: 'chat',
+      problemTopic: 'Vedic Horoscope & Kundli Chat',
+      perMinuteRate: (widget.astrologer['priceNumeric'] as num?)?.toDouble() ?? 20.0,
+    );
+
     _messages = [
       {
         'id': 'msg_001',
@@ -343,6 +364,7 @@ class _LiveChatModalState extends State<LiveChatModal> {
       },
     ];
   }
+
 
   @override
   void dispose() {

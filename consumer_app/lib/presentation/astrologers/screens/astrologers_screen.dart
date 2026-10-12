@@ -637,7 +637,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                 children: [
                   Text(
                     LocaleService().isHindi ? 'विशेष ज्योतिषी' : 'Featured Astrologers',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF4A1005),
@@ -707,7 +707,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                     const SizedBox(height: 12),
                     Text(
                       'No Astrologers Found',
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                           fontSize: 16, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 6),
@@ -826,7 +826,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                 children: [
                   Text(
                     LocaleService().isHindi ? 'ज्योतिषी से\nबात करें' : 'Talk to\nAstrologer',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 25,
                       fontWeight: FontWeight.w900,
                       color: const Color(0xFF5A1208),
@@ -960,7 +960,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                     isHi
                         ? 'आचार्य एआई ज्योतिषी से तुरंत पूछें ✨'
                         : 'Ask Acharya AI Jyotish ✨',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFFFFF3CD),

@@ -134,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen>
                         child: Center(
                           child: Text(
                             AppConstants.appName,
-                            style: GoogleFonts.cinzel(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
                               color: Colors.amber.shade200,

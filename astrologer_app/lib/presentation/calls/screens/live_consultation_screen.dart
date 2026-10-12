@@ -302,7 +302,7 @@ class _LiveConsultationScreenState extends State<LiveConsultationScreen> {
                           const SizedBox(height: 16),
                           Text(
                             dev.devoteeName,
-                            style: GoogleFonts.cinzel(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -662,7 +662,7 @@ class _LiveConsultationScreenState extends State<LiveConsultationScreen> {
                         children: [
                           Text(
                             'Vedic Birth Chart (Kundli)',
-                            style: GoogleFonts.cinzel(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                               color: AstrologerColors.vedicGold,

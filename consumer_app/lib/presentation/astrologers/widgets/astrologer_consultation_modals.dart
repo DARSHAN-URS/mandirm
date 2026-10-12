@@ -103,7 +103,7 @@ class _LiveConsultationCallDialogState
             const Text('✨', style: TextStyle(fontSize: 22)),
             const SizedBox(width: 8),
             Text('Consultation Complete',
-                style: GoogleFonts.cinzel(
+                style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 16, fontWeight: FontWeight.w700)),
           ],
         ),
@@ -199,7 +199,7 @@ class _LiveConsultationCallDialogState
             Text(
               widget.astrologer['name'] as String,
               textAlign: TextAlign.center,
-              style: GoogleFonts.cinzel(
+              style: TextStyle(fontFamily: 'Headway', 
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: Colors.white),
@@ -404,7 +404,7 @@ class _LiveChatModalState extends State<LiveChatModal> {
             const SizedBox(width: 8),
             Text(
               'Mandirm Safety Policy',
-              style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF8B1E1E)),
+              style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF8B1E1E)),
             ),
           ],
         ),
@@ -567,7 +567,7 @@ class _LiveChatModalState extends State<LiveChatModal> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             'Report Message',
-            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700),
+            style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1098,7 +1098,7 @@ class GiftOfferingDialog extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Gift to Acharya',
-            style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700),
+            style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700),
           ),
         ],
       ),

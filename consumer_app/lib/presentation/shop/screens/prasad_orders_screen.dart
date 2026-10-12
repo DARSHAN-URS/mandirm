@@ -66,7 +66,7 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                     const SizedBox(height: 16),
                     Text(
                       isHi ? 'अभी तक कोई पवित्र ऑर्डर नहीं' : 'No Sacred Orders Yet',
-                      style: GoogleFonts.marcellus(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: _primaryMaroon,

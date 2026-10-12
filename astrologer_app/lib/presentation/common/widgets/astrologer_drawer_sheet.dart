@@ -125,7 +125,7 @@ class AstrologerDrawerSheet extends StatelessWidget {
                               Flexible(
                                 child: Text(
                                   name,
-                                  style: GoogleFonts.cinzel(
+                                  style: TextStyle(fontFamily: 'Headway', 
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -336,7 +336,7 @@ class AstrologerDrawerSheet extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         title: Text(
                           isHi ? 'आचार्य पोर्टल से लॉग आउट करें?' : 'Sign Out of Acharya Portal?',
-                          style: GoogleFonts.cinzel(
+                          style: TextStyle(fontFamily: 'Headway', 
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
@@ -405,7 +405,7 @@ class AstrologerDrawerSheet extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   '॥ मंदिरम् ज्योतिषाचार्य पोर्टल • v1.0.0 ॥',
-                  style: GoogleFonts.cinzel(
+                  style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,

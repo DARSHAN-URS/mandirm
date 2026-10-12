@@ -89,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           isHi ? 'भक्त प्रोफ़ाइल संपादित करें' : 'Edit Devotee Profile',
-          style: GoogleFonts.marcellus(
+          style: TextStyle(fontFamily: 'Headway', 
             fontWeight: FontWeight.w700,
             color: _primaryMaroon,
           ),
@@ -185,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           isHi ? '${AppConstants.appName} से लॉग आउट करें?' : 'Sign Out from ${AppConstants.appName}?',
-          style: GoogleFonts.marcellus(
+          style: TextStyle(fontFamily: 'Headway', 
             fontWeight: FontWeight.w700,
             color: _primaryMaroon,
           ),
@@ -317,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 12),
                   Text(
                     _devoteeName,
-                    style: GoogleFonts.marcellus(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: _darkCharcoal,

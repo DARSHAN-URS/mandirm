@@ -150,7 +150,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                     children: [
                       Text(
                         AstroStrings.t('requests_console'),
-                        style: GoogleFonts.cinzel(
+                        style: TextStyle(fontFamily: 'Headway', 
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -258,7 +258,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                   const SizedBox(height: 16),
                   Text(
                     'No Devotees in Queue',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -330,7 +330,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                             children: [
                               Text(
                                 '॥ परामर्श मर्यादा व आचार संहिता ॥',
-                                style: GoogleFonts.cinzel(
+                                style: TextStyle(fontFamily: 'Headway', 
                                   color: const Color(0xFFFFD54F),
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -635,7 +635,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                             children: [
                               Text(
                                 '॥ विशेष सेवा अनुरोध (Special Service Requests) ॥',
-                                style: GoogleFonts.cinzel(
+                                style: TextStyle(fontFamily: 'Headway', 
                                   color: const Color(0xFFFFD54F),
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,

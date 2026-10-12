@@ -1,11 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+@font-face {
+  font-family: 'Headway';
+  src: url('/fonts/HEADWAY.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-cinzel: 'Cinzel', serif;
+  --font-headway: 'Headway', sans-serif;
+  --font-cinzel: 'Headway', sans-serif;
   --font-poppins: 'Poppins', sans-serif;
 }
 
@@ -14,6 +23,12 @@ body {
   background-color: #F8F9FA;
   font-family: var(--font-poppins);
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-headway,
+.font-cinzel {
+  font-family: 'Headway', sans-serif;
 }
 
 /* Custom Scrollbar */

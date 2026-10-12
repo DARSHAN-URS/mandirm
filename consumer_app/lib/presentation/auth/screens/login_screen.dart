@@ -273,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Center(
                     child: Text(
                       LocaleService().isHindi ? 'लॉग इन / पंजीकरण' : 'Sign In / Register',
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF6B1118),

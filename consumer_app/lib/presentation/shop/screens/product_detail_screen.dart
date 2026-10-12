@@ -211,7 +211,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   Text(
                     'Sacred Order Checkout 📦',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: _primaryMaroon,

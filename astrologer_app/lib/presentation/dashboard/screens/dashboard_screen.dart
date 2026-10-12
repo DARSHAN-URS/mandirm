@@ -293,7 +293,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   children: [
                     Text(
                       _profile?.name ?? (isHi ? 'पं. रामचन्द्र शास्त्री' : 'Pt. Ramachandra Shastri'),
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -473,7 +473,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                           const Icon(Icons.currency_rupee, color: Color(0xFFFFD54F), size: 26),
                           Text(
                             _earnings.todayEarnings.toStringAsFixed(0),
-                            style: GoogleFonts.cinzel(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
@@ -562,7 +562,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
               children: [
                 Text(
                   isHi ? 'प्रतीक्षारत भक्त कतार' : 'Live Devotee Queue',
-                  style: GoogleFonts.cinzel(
+                  style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -817,7 +817,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       children: [
         Text(
           isHi ? 'हाल के परामर्श व समीक्षाएं' : 'Recent Consultations & Reviews',
-          style: GoogleFonts.cinzel(
+          style: TextStyle(fontFamily: 'Headway', 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,

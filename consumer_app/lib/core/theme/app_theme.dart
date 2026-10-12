@@ -39,6 +39,62 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
+      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme).copyWith(
+        displayLarge: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 32,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryLight,
+        ),
+        displayMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryLight,
+        ),
+        displaySmall: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryLight,
+        ),
+        headlineLarge: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryLight,
+        ),
+        headlineMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryLight,
+        ),
+        headlineSmall: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryLight,
+        ),
+        titleLarge: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryLight,
+        ),
+        titleMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryLight,
+        ),
+        titleSmall: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryLight,
+        ),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.saffronPrimary,
@@ -188,6 +244,62 @@ class AppTheme {
           color: AppColors.textPrimaryDark,
           fontSize: 18,
           fontWeight: FontWeight.w600,
+        ),
+      ),
+      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).copyWith(
+        displayLarge: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 32,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryDark,
+        ),
+        displayMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryDark,
+        ),
+        displaySmall: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryDark,
+        ),
+        headlineLarge: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryDark,
+        ),
+        headlineMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryDark,
+        ),
+        headlineSmall: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryDark,
+        ),
+        titleLarge: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryDark,
+        ),
+        titleMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryDark,
+        ),
+        titleSmall: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryDark,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(

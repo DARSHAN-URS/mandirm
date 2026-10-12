@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 12),
             Text(
               'Today\'s Vedic Panchang ✨',
-              style: GoogleFonts.cinzel(
+              style: TextStyle(fontFamily: 'Headway', 
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -740,7 +740,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Title
                   Text(
                     AppStrings.t('pooja_booking_title'),
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -940,7 +940,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Title
                   Text(
                     AppStrings.t('talk_astrologer_title'),
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -1093,7 +1093,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           Text(
             AppStrings.t('panchang_tithi_default'),
-            style: GoogleFonts.cinzel(
+            style: TextStyle(fontFamily: 'Headway', 
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: Colors.white,
@@ -1121,7 +1121,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             title,
-            style: GoogleFonts.cinzel(
+            style: TextStyle(fontFamily: 'Headway', 
               fontSize: 17,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimaryLight,

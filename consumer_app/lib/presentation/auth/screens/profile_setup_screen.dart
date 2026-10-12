@@ -182,7 +182,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               children: [
                                 Text(
                                   'Mandirm',
-                                  style: GoogleFonts.marcellus(
+                                  style: TextStyle(fontFamily: 'Headway', 
                                     fontSize: 22,
                                     fontWeight: FontWeight.w700,
                                     color: _primaryMaroon,
@@ -253,7 +253,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           Center(
                             child: Text(
                               'Devotee Sankalp Profile',
-                              style: GoogleFonts.marcellus(
+                              style: TextStyle(fontFamily: 'Headway', 
                                 fontSize: 21,
                                 fontWeight: FontWeight.w700,
                                 color: _primaryMaroon,

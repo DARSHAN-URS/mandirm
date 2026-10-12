@@ -796,7 +796,7 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
         children: [
           Text(
             'About Me',
-            style: GoogleFonts.cinzel(
+            style: TextStyle(fontFamily: 'Headway', 
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF4A1005),
@@ -886,7 +886,7 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
         children: [
           Text(
             'Expertise',
-            style: GoogleFonts.cinzel(
+            style: TextStyle(fontFamily: 'Headway', 
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF4A1005),
@@ -963,7 +963,7 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
                 children: [
                   Text(
                     'Rating & Reviews',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF4A1005),

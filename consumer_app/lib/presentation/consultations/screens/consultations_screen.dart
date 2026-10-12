@@ -75,7 +75,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                                 isHi
                                     ? 'पिछले सत्र (${consultations.length})'
                                     : 'Past Sessions (${consultations.length})',
-                                style: GoogleFonts.marcellus(
+                                style: TextStyle(fontFamily: 'Headway', 
                                   fontSize: 17,
                                   fontWeight: FontWeight.w700,
                                   color: _primaryMaroon,
@@ -164,7 +164,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
           const SizedBox(height: 8),
           Text(
             isHi ? 'आपका वैदिक मार्गदर्शन इतिहास' : 'Your Vedic Guidance History',
-            style: GoogleFonts.marcellus(
+            style: TextStyle(fontFamily: 'Headway', 
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: _primaryMaroon,
@@ -236,7 +236,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                         Flexible(
                           child: Text(
                             c['astrologerName'] as String,
-                            style: GoogleFonts.marcellus(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: _darkCharcoal,
@@ -453,7 +453,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
             const SizedBox(height: 16),
             Text(
               isHi ? 'अभी तक कोई परामर्श सत्र नहीं' : 'No Consultations Yet',
-              style: GoogleFonts.marcellus(
+              style: TextStyle(fontFamily: 'Headway', 
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: _primaryMaroon,

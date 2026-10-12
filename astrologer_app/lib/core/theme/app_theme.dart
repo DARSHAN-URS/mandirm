@@ -43,6 +43,11 @@ class AstrologerTheme {
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
       ),
+      fontFamily: 'Headway',
+      fontFamilyFallback: [
+        GoogleFonts.poppins().fontFamily ?? 'Poppins',
+        'Roboto',
+      ],
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -50,18 +55,39 @@ class AstrologerTheme {
         surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: AppColors.primaryMaroon),
         titleTextStyle: TextStyle(
+          fontFamily: 'Headway',
           color: AppColors.textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
       ),
       textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme).copyWith(
-        displayLarge: GoogleFonts.cinzel(
+        displayLarge: const TextStyle(
+          fontFamily: 'Headway',
           fontSize: 28,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        titleLarge: GoogleFonts.poppins(
+        displayMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+        headlineLarge: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        headlineMedium: const TextStyle(
+          fontFamily: 'Headway',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        titleLarge: const TextStyle(
+          fontFamily: 'Headway',
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,

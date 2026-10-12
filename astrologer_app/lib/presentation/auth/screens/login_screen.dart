@@ -207,7 +207,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                   const SizedBox(width: 6),
                                   Text(
                                     'ACHARYA CONSOLE',
-                                    style: GoogleFonts.cinzel(
+                                    style: TextStyle(fontFamily: 'Headway', 
                                       color: const Color(0xFFFFD54F),
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
@@ -259,7 +259,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                 children: [
                                   Text(
                                     'Vedic Astrologer Portal',
-                                    style: GoogleFonts.cinzel(
+                                    style: TextStyle(fontFamily: 'Headway', 
                                       fontSize: 22,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.primaryMaroon,

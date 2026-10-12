@@ -174,7 +174,7 @@ class _CertificateDownloadCardState extends State<CertificateDownloadCard>
                         children: [
                           Text(
                             'Your Sacred Certificate',
-                            style: GoogleFonts.cinzel(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF4A1005),

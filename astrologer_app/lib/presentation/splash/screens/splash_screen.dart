@@ -198,7 +198,7 @@ class _AstrologerSplashScreenState extends State<AstrologerSplashScreen>
                               const SizedBox(width: 6),
                               Text(
                                 'VEDIC ACHARYA PORTAL',
-                                style: GoogleFonts.cinzel(
+                                style: TextStyle(fontFamily: 'Headway', 
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 1.5,

@@ -316,7 +316,7 @@ class _PujasScreenState extends State<PujasScreen> {
                 children: [
                   Text(
                     LocaleService().isHindi ? 'ऑनलाइन पूजा' : 'Online Puja',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF4A1005),
@@ -428,7 +428,7 @@ class _PujasScreenState extends State<PujasScreen> {
                     const SizedBox(height: 10),
                     Text(
                       'No Pujas in this Category',
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF4A1005),

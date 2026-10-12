@@ -25,7 +25,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        cinzel: ["Cinzel", "serif"],
+        headway: ["Headway", "sans-serif"],
+        cinzel: ["Headway", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
       },
       boxShadow: {

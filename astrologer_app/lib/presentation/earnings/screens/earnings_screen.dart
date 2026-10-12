@@ -104,7 +104,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
             const SizedBox(height: 16),
             Text(
               'Withdraw to Bank Account',
-              style: GoogleFonts.cinzel(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              style: TextStyle(fontFamily: 'Headway', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 6),
             Text(
@@ -270,7 +270,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                             const Icon(Icons.currency_rupee, color: Color(0xFFFFD54F), size: 30),
                             Text(
                               _walletBalance.toStringAsFixed(0),
-                              style: GoogleFonts.cinzel(fontSize: 34, fontWeight: FontWeight.w800, color: Colors.white),
+                              style: TextStyle(fontFamily: 'Headway', fontSize: 34, fontWeight: FontWeight.w800, color: Colors.white),
                             ),
                           ],
                         ),
@@ -354,7 +354,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                                     children: [
                                       Text(
                                         '॥ विशेष आचार्य प्रोत्साहन (15% Bonus) ॥',
-                                        style: GoogleFonts.cinzel(
+                                        style: TextStyle(fontFamily: 'Headway', 
                                           color: const Color(0xFFFFD54F),
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.bold,
@@ -385,7 +385,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                   // Service Breakdown
                   Text(
                     'Earnings by Consultation Type',
-                    style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -402,7 +402,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                   // Payout History
                   Text(
                     'Recent Payout Transactions',
-                    style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 12),
                   ..._payoutTransactions.map(

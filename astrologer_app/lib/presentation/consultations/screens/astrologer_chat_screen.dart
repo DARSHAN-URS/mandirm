@@ -112,7 +112,7 @@ class _AstrologerWhatsAppChatScreenState
             const SizedBox(width: 8),
             Text(
               'Safety & Policy Compliance',
-              style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primaryMaroon),
+              style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primaryMaroon),
             ),
           ],
         ),
@@ -198,7 +198,7 @@ class _AstrologerWhatsAppChatScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('End Chat Session?', style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.w700)),
+        title: Text('End Chat Session?', style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700)),
         content: Text(
           'Total Duration: ${_formatSessionTimer(_sessionDurationSeconds)}\nEstimated Dakshina: ₹${((_sessionDurationSeconds / 60) * widget.consultation.perMinuteRate).clamp(widget.consultation.perMinuteRate, 5000).toStringAsFixed(1)}',
           style: GoogleFonts.poppins(fontSize: 13),

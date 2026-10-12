@@ -98,7 +98,7 @@ class _AstrologerNotificationsScreenState extends State<AstrologerNotificationsS
                   children: [
                     Text(
                       'Acharya Notifications',
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,

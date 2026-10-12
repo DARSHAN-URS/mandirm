@@ -155,7 +155,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             ),
             title: Text(
               AppStrings.t('verify_otp'),
-              style: GoogleFonts.cinzel(
+              style: TextStyle(fontFamily: 'Headway', 
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: const Color(0xFF7A0C16),
@@ -203,7 +203,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                 Text(
                   AppStrings.t('enter_verification_code'),
-                  style: GoogleFonts.cinzel(
+                  style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimaryLight,

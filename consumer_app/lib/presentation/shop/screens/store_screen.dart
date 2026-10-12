@@ -345,7 +345,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'Puja Store Cart ($_cartCount items)',
-                              style: GoogleFonts.cinzel(
+                              style: TextStyle(fontFamily: 'Headway', 
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
                                 color: _primaryMaroon,
@@ -609,7 +609,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 children: [
                   Text(
                     'Sacred Order Checkout 📦',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: _primaryMaroon,
@@ -968,7 +968,7 @@ class _StoreScreenState extends State<StoreScreen> {
               child: Center(
                 child: Text(
                   'Mantra Energized Divine Idols',
-                  style: GoogleFonts.marcellus(
+                  style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: _primaryMaroon,
@@ -1371,7 +1371,7 @@ class _StoreScreenState extends State<StoreScreen> {
                       children: [
                         Text(
                           'Mantra Energized Divine Idols',
-                          style: GoogleFonts.marcellus(
+                          style: TextStyle(fontFamily: 'Headway', 
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,

@@ -236,7 +236,7 @@ class _FaqSectionState extends State<FaqSection> {
             // Section title
             Text(
               displayTitle,
-              style: GoogleFonts.cinzel(
+              style: TextStyle(fontFamily: 'Headway', 
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF4A1005),

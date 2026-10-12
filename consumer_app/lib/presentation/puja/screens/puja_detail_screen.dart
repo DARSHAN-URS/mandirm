@@ -193,7 +193,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
                   // Main Puja Title
                   Text(
                     title,
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF4A1005),
@@ -616,7 +616,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
       children: [
         Text(
           'About This Puja',
-          style: GoogleFonts.cinzel(
+          style: TextStyle(fontFamily: 'Headway', 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF4A1005),
@@ -672,7 +672,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
       children: [
         Text(
           'Key Benefits',
-          style: GoogleFonts.cinzel(
+          style: TextStyle(fontFamily: 'Headway', 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF4A1005),
@@ -736,7 +736,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
       children: [
         Text(
           'Puja Process & Rituals',
-          style: GoogleFonts.cinzel(
+          style: TextStyle(fontFamily: 'Headway', 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF4A1005),
@@ -784,7 +784,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
           children: [
             Text(
               LocaleService().isHindi ? 'पूजा पैकेज' : 'Puja Packages',
-              style: GoogleFonts.cinzel(
+              style: TextStyle(fontFamily: 'Headway', 
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF4A1005),

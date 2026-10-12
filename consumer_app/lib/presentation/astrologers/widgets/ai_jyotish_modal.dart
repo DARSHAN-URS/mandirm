@@ -374,7 +374,7 @@ class _AiJyotishModalState extends State<AiJyotishModal> {
                               Flexible(
                                 child: Text(
                                   isHi ? 'आचार्य एआई ज्योतिषी' : 'Acharya AI Jyotish',
-                                  style: GoogleFonts.cinzel(
+                                  style: TextStyle(fontFamily: 'Headway', 
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
                                     color: const Color(0xFFFFF3CD),
@@ -685,7 +685,7 @@ class _AiJyotishModalState extends State<AiJyotishModal> {
                   Expanded(
                     child: Text(
                       title,
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF6B150A),

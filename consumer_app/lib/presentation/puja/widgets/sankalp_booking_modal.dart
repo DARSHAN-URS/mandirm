@@ -133,7 +133,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
               Expanded(
                 child: Text(
                   'Sankalp Confirmed!',
-                  style: GoogleFonts.marcellus(
+                  style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 19, fontWeight: FontWeight.w700, color: _primaryMaroon),
                 ),
               ),
@@ -237,7 +237,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                     children: [
                       Text(
                         LocaleService().isHindi ? 'वैदिक संकल्प बुकिंग' : 'Vedic Sankalp Booking',
-                        style: GoogleFonts.marcellus(
+                        style: TextStyle(fontFamily: 'Headway', 
                             fontSize: 18, fontWeight: FontWeight.w700, color: _primaryMaroon),
                       ),
                       Text(
@@ -312,7 +312,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                     // Section 1: Devotee & Gotra
                     Text(
                         LocaleService().isHindi ? '1. पवित्र संकल्प विवरण' : '1. Sacred Sankalp Details',
-                        style: GoogleFonts.marcellus(
+                        style: TextStyle(fontFamily: 'Headway', 
                             fontSize: 15, fontWeight: FontWeight.w700, color: _primaryMaroon)),
                     const SizedBox(height: 10),
                     TextFormField(
@@ -372,7 +372,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                     // Section 2: Prasad & Video
                     Text(
                         LocaleService().isHindi ? '2. प्रसाद डिलीवरी व लाइव प्रसारण' : '2. Prasad Delivery & Stream Options',
-                        style: GoogleFonts.marcellus(
+                        style: TextStyle(fontFamily: 'Headway', 
                             fontSize: 15, fontWeight: FontWeight.w700, color: _primaryMaroon)),
                     const SizedBox(height: 8),
                     SwitchListTile(
@@ -432,7 +432,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
                     // Section 3: Payment
                     Text(
                         LocaleService().isHindi ? '3. भुगतान विधि' : '3. Payment Method',
-                        style: GoogleFonts.marcellus(
+                        style: TextStyle(fontFamily: 'Headway', 
                             fontSize: 15, fontWeight: FontWeight.w700, color: _primaryMaroon)),
                     const SizedBox(height: 10),
                     ..._paymentMethods.map((method) {

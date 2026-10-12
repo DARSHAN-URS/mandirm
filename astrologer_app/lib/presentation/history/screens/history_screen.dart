@@ -79,7 +79,7 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
               children: [
                 Text(
                   'Devotee Records & Kundlis',
-                  style: GoogleFonts.cinzel(
+                  style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -340,7 +340,7 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.devoteeName, style: GoogleFonts.cinzel(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(item.devoteeName, style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       Text('${item.type.toUpperCase()} • ${item.durationMinutes} mins • ₹${item.amount.toInt()}', style: GoogleFonts.poppins(fontSize: 12, color: AppColors.deepAmber)),
                     ],
                   ),
@@ -360,7 +360,7 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
             const SizedBox(height: 16),
             const Divider(color: AppColors.lightBorder),
             const SizedBox(height: 10),
-            Text('Prescribed Vedic Remedies in Session:', style: GoogleFonts.cinzel(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            Text('Prescribed Vedic Remedies in Session:', style: TextStyle(fontFamily: 'Headway', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
             const SizedBox(height: 10),
             Row(
               children: [

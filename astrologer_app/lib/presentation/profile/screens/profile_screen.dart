@@ -193,7 +193,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                       Expanded(
                                         child: Text(
                                           _profile?.name ?? (LocaleService().isHindi ? 'पं. रामचन्द्र शास्त्री' : 'Pt. Ramachandra Shastri'),
-                                          style: GoogleFonts.cinzel(
+                                          style: TextStyle(fontFamily: 'Headway', 
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
                                             color: AppColors.textPrimary,
@@ -316,7 +316,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                   // Rate Settings Section
                   Text(
                     'Manage Consultation Rates (Per Minute)',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -366,7 +366,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                     children: [
                       Text(
                         'Vedic Specializations',
-                        style: GoogleFonts.cinzel(
+                        style: TextStyle(fontFamily: 'Headway', 
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -414,7 +414,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                     children: [
                       Text(
                         'Consultation Languages',
-                        style: GoogleFonts.cinzel(
+                        style: TextStyle(fontFamily: 'Headway', 
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -477,7 +477,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             title: Text(
                               isHi ? 'आचार्य पोर्टल से लॉग आउट करें?' : 'Sign Out of Acharya Portal?',
-                              style: GoogleFonts.cinzel(
+                              style: TextStyle(fontFamily: 'Headway', 
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -653,7 +653,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
           children: [
             Text(
               'Ashram & Vedic Certifications',
-              style: GoogleFonts.cinzel(
+              style: TextStyle(fontFamily: 'Headway', 
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -771,7 +771,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
               children: [
                 Text(
                   'Mandirm Verified Acharya Seal',
-                  style: GoogleFonts.cinzel(
+                  style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,

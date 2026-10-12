@@ -51,7 +51,7 @@ class ChadhawaBookingViewScreen extends StatelessWidget {
         ),
         title: Text(
           isHi ? 'चढ़ावा रसीद एवं विवरण' : 'Chadava Booking Details',
-          style: GoogleFonts.marcellus(
+          style: TextStyle(fontFamily: 'Headway', 
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -176,7 +176,7 @@ class ChadhawaBookingViewScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             isHi ? 'चढ़ावा संकल्प स्वीकृत ✨' : 'Chadava Sankalp Confirmed ✨',
-            style: GoogleFonts.marcellus(
+            style: TextStyle(fontFamily: 'Headway', 
               fontSize: 19,
               fontWeight: FontWeight.w700,
               color: Colors.white,

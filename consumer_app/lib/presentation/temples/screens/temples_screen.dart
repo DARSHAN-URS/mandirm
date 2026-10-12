@@ -294,7 +294,7 @@ class _TemplesScreenState extends State<TemplesScreen> {
                             children: [
                               Text(
                                 'Sacred Mandirs (${temples.length})',
-                                style: GoogleFonts.marcellus(
+                                style: TextStyle(fontFamily: 'Headway', 
                                   fontSize: 17,
                                   fontWeight: FontWeight.w700,
                                   color: _primaryMaroon,
@@ -340,7 +340,7 @@ class _TemplesScreenState extends State<TemplesScreen> {
                             const SizedBox(height: 12),
                             Text(
                               'No Mandirs Found',
-                              style: GoogleFonts.marcellus(
+                              style: TextStyle(fontFamily: 'Headway', 
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 color: _primaryMaroon,
@@ -494,7 +494,7 @@ class _TemplesScreenState extends State<TemplesScreen> {
           const SizedBox(height: 8),
           Text(
             'Sacred Mandirs & Live Darshan',
-            style: GoogleFonts.marcellus(
+            style: TextStyle(fontFamily: 'Headway', 
               fontSize: 19,
               fontWeight: FontWeight.w700,
               color: _primaryMaroon,
@@ -718,7 +718,7 @@ class _TemplesScreenState extends State<TemplesScreen> {
                           const SizedBox(height: 4),
                           Text(
                             temple['name'] as String,
-                            style: GoogleFonts.marcellus(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: _darkCharcoal,
@@ -984,7 +984,7 @@ class _LiveDarshanSheetState extends State<_LiveDarshanSheet> {
                     children: [
                       Text(
                         widget.temple['name'] as String,
-                        style: GoogleFonts.marcellus(
+                        style: TextStyle(fontFamily: 'Headway', 
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: _primaryMaroon,
@@ -1049,7 +1049,7 @@ class _LiveDarshanSheetState extends State<_LiveDarshanSheet> {
                             const SizedBox(height: 8),
                             Text(
                               'Garbhagriha Live Stream',
-                              style: GoogleFonts.marcellus(
+                              style: TextStyle(fontFamily: 'Headway', 
                                 color: Colors.amber.shade200,
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
@@ -1123,7 +1123,7 @@ class _LiveDarshanSheetState extends State<_LiveDarshanSheet> {
                   // Interactive Devotional Ritual Actions
                   Text(
                     'Sacred Devotional Actions',
-                    style: GoogleFonts.marcellus(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: _primaryMaroon,
@@ -1174,7 +1174,7 @@ class _LiveDarshanSheetState extends State<_LiveDarshanSheet> {
                   // Daily Aarti Timetable
                   Text(
                     'Daily Aarti & Darshan Schedule',
-                    style: GoogleFonts.marcellus(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: _primaryMaroon,
@@ -1228,7 +1228,7 @@ class _LiveDarshanSheetState extends State<_LiveDarshanSheet> {
                   // Temple History
                   Text(
                     'Spiritual Significance',
-                    style: GoogleFonts.marcellus(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: _primaryMaroon,

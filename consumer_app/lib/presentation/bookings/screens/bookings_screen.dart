@@ -114,7 +114,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
                 isHi
                     ? (isActive ? 'कोई सक्रिय पूजा बुकिंग नहीं है' : 'अभी तक कोई पूर्ण पूजा नहीं है')
                     : (isActive ? 'No Active Puja Bookings' : 'No Completed Pujas Yet'),
-                style: GoogleFonts.marcellus(
+                style: TextStyle(fontFamily: 'Headway', 
                   fontSize: 19,
                   fontWeight: FontWeight.w700,
                   color: _primaryMaroon,

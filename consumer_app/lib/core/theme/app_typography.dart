@@ -5,8 +5,9 @@ import '../constants/app_colors.dart';
 class AppTypography {
   AppTypography._();
 
-  // Headings with Cinzel for spiritual touch
-  static TextStyle displayLarge(BuildContext context) => GoogleFonts.cinzel(
+  // Headings with Headway font
+  static TextStyle displayLarge(BuildContext context) => TextStyle(
+        fontFamily: 'Headway',
         fontSize: 32,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.5,
@@ -15,7 +16,8 @@ class AppTypography {
             : AppColors.textPrimaryLight,
       );
 
-  static TextStyle displayMedium(BuildContext context) => GoogleFonts.cinzel(
+  static TextStyle displayMedium(BuildContext context) => TextStyle(
+        fontFamily: 'Headway',
         fontSize: 26,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.3,
@@ -24,7 +26,8 @@ class AppTypography {
             : AppColors.textPrimaryLight,
       );
 
-  static TextStyle headlineLarge(BuildContext context) => GoogleFonts.poppins(
+  static TextStyle headlineLarge(BuildContext context) => TextStyle(
+        fontFamily: 'Headway',
         fontSize: 22,
         fontWeight: FontWeight.w600,
         color: Theme.of(context).brightness == Brightness.dark
@@ -32,7 +35,8 @@ class AppTypography {
             : AppColors.textPrimaryLight,
       );
 
-  static TextStyle headlineMedium(BuildContext context) => GoogleFonts.poppins(
+  static TextStyle headlineMedium(BuildContext context) => TextStyle(
+        fontFamily: 'Headway',
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: Theme.of(context).brightness == Brightness.dark
@@ -40,7 +44,8 @@ class AppTypography {
             : AppColors.textPrimaryLight,
       );
 
-  static TextStyle titleMedium(BuildContext context) => GoogleFonts.poppins(
+  static TextStyle titleMedium(BuildContext context) => TextStyle(
+        fontFamily: 'Headway',
         fontSize: 16,
         fontWeight: FontWeight.w500,
         color: Theme.of(context).brightness == Brightness.dark

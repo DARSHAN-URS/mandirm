@@ -143,7 +143,7 @@ class _AstrologerOnboardingScreenState extends State<AstrologerOnboardingScreen>
                     children: [
                       Text(
                         'MANDIRM',
-                        style: GoogleFonts.cinzel(
+                        style: TextStyle(fontFamily: 'Headway', 
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 2.0,
@@ -349,7 +349,7 @@ class _AstrologerOnboardingScreenState extends State<AstrologerOnboardingScreen>
                               children: [
                                 Text(
                                   slide.badge,
-                                  style: GoogleFonts.cinzel(
+                                  style: TextStyle(fontFamily: 'Headway', 
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: const Color(0xFFFFD54F),
@@ -382,7 +382,7 @@ class _AstrologerOnboardingScreenState extends State<AstrologerOnboardingScreen>
                   children: [
                     Text(
                       slide.title,
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,

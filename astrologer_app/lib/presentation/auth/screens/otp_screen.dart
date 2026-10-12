@@ -187,7 +187,7 @@ class _AstrologerOtpScreenState extends State<AstrologerOtpScreen> {
 
                   Text(
                     'Enter Verification Code',
-                    style: GoogleFonts.cinzel(
+                    style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,

@@ -200,7 +200,7 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
                   children: [
                     Text(
                       'Edit Acharya Profile',
-                      style: GoogleFonts.cinzel(
+                      style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -548,7 +548,7 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
               const SizedBox(width: 8),
               Text(
                 title,
-                style: GoogleFonts.cinzel(
+                style: TextStyle(fontFamily: 'Headway', 
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,

@@ -386,7 +386,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                           children: [
                             Text(
                               isHi ? 'सभी लोकप्रिय चढ़ावा' : 'All Popular Chadavas',
-                              style: GoogleFonts.marcellus(
+                              style: TextStyle(fontFamily: 'Headway', 
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 color: _primaryMaroon,
@@ -602,7 +602,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                       children: [
                         Text(
                           isHi ? 'चढ़ावा के सभी प्रकार' : 'All Types of Chadava',
-                          style: GoogleFonts.marcellus(
+                          style: TextStyle(fontFamily: 'Headway', 
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: _primaryMaroon,
@@ -756,7 +756,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                       children: [
                         Text(
                           isHi ? 'सभी प्रसिद्ध मंदिर' : 'All Popular Temples',
-                          style: GoogleFonts.marcellus(
+                          style: TextStyle(fontFamily: 'Headway', 
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: _primaryMaroon,
@@ -953,7 +953,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                       children: [
                         Text(
                           isHi ? 'विशेष चढ़ावा पैकेज' : 'Special Chadava Packages',
-                          style: GoogleFonts.marcellus(
+                          style: TextStyle(fontFamily: 'Headway', 
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: _primaryMaroon,
@@ -1107,7 +1107,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                       const SizedBox(width: 8),
                       Text(
                         isHi ? 'मंदिरम् विश्वसनीयता एवं संकल्प' : 'Mandirm Trust Assurance',
-                        style: GoogleFonts.marcellus(fontSize: 17, fontWeight: FontWeight.w700, color: _primaryMaroon),
+                        style: TextStyle(fontFamily: 'Headway', fontSize: 17, fontWeight: FontWeight.w700, color: _primaryMaroon),
                       ),
                     ],
                   ),
@@ -1223,7 +1223,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                           const SizedBox(width: 8),
                           Text(
                             'Offer Sacred Chadava',
-                            style: GoogleFonts.cinzel(
+                            style: TextStyle(fontFamily: 'Headway', 
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                               color: _primaryMaroon,
@@ -1665,7 +1665,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
               child: Center(
                 child: Text(
                   'Offer Chadava From Home',
-                  style: GoogleFonts.marcellus(
+                  style: TextStyle(fontFamily: 'Headway', 
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: _primaryMaroon,

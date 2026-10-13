@@ -23,10 +23,8 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   Timer? _pollingTimer;
-  final List<DevoteeConsultationRequest> _liveQueue =
-      List.from(DevoteeConsultationRequest.mockQueue);
-  final List<AstrologerServiceBooking> _serviceBookings =
-      List.from(AstrologerServiceBooking.mockBookings);
+  final List<DevoteeConsultationRequest> _liveQueue = [];
+  final List<AstrologerServiceBooking> _serviceBookings = [];
 
   @override
   void initState() {
@@ -44,20 +42,18 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
     final astroId = AuthService().currentProfile?.id ?? 'astro_1';
     try {
       final cons = await ApiService().getAstrologerConsultations(astroId);
-      if (cons.isNotEmpty && mounted) {
-        final List<DevoteeConsultationRequest> fetchedQueue = [];
-        for (var c in cons) {
-          final status = (c['status'] ?? 'requested').toString().toLowerCase();
-          if (status == 'requested' || status == 'active') {
-            fetchedQueue.add(DevoteeConsultationRequest.fromJson(c));
-          }
+      final List<DevoteeConsultationRequest> fetchedQueue = [];
+      for (var c in cons) {
+        final status = (c['status'] ?? 'requested').toString().toLowerCase();
+        if (status == 'requested' || status == 'active') {
+          fetchedQueue.add(DevoteeConsultationRequest.fromJson(c));
         }
-        if (fetchedQueue.isNotEmpty) {
-          setState(() {
-            _liveQueue.clear();
-            _liveQueue.addAll(fetchedQueue);
-          });
-        }
+      }
+      if (mounted) {
+        setState(() {
+          _liveQueue.clear();
+          _liveQueue.addAll(fetchedQueue);
+        });
       }
     } catch (e) {
       debugPrint('[ConsultationsScreen] Error loading queue: $e');
@@ -65,12 +61,14 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
 
     try {
       final bookingsData = await ApiService().getAstrologerServiceBookings(astroId);
-      if (bookingsData.isNotEmpty && mounted) {
+      if (mounted) {
         setState(() {
           _serviceBookings.clear();
-          _serviceBookings.addAll(
-            bookingsData.map((b) => AstrologerServiceBooking.fromJson(b)).toList(),
-          );
+          if (bookingsData.isNotEmpty) {
+            _serviceBookings.addAll(
+              bookingsData.map((b) => AstrologerServiceBooking.fromJson(b)).toList(),
+            );
+          }
         });
       }
     } catch (e) {

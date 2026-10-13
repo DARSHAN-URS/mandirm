@@ -42,148 +42,80 @@ class _TemplesScreenState extends State<TemplesScreen> {
     'Lord Ganesha',
   ];
 
-  final List<Map<String, dynamic>> _allTemples = [
-    {
-      'name': 'Kashi Vishwanath Mandir',
-      'city': 'Varanasi, Uttar Pradesh',
-      'deity': 'Lord Shiva',
-      'category': 'Lord Shiva',
-      'icon': '🔱',
-      'status': 'Live Darshan Streaming',
-      'live': true,
-      'viewers': '4,821',
-      'timings': '03:00 AM - 11:00 PM',
-      'description': 'One of the twelve Jyotirlingas, situated on the sacred banks of the Ganges. Devotees receive salvation and immense blessings here.',
-      'aartis': [
-        {'name': 'Mangala Aarti', 'time': '03:00 AM'},
-        {'name': 'Bhog Aarti', 'time': '11:15 AM'},
-        {'name': 'Sandhya Aarti', 'time': '07:00 PM'},
-        {'name': 'Shayan Aarti', 'time': '10:30 PM'},
-      ],
-    },
-    {
-      'name': 'Mahakaleshwar Jyotirlinga',
-      'city': 'Ujjain, Madhya Pradesh',
-      'deity': 'Mahakal',
-      'category': 'Lord Shiva',
-      'icon': '🕉️',
-      'status': 'Bhasma Aarti Available',
-      'live': true,
-      'viewers': '6,230',
-      'timings': '04:00 AM - 11:00 PM',
-      'description': 'Renowned Dakshinmukhi Jyotirlinga on the banks of Shipra river. Famous for its world-renowned divine morning Bhasma Aarti.',
-      'aartis': [
-        {'name': 'Bhasma Aarti', 'time': '04:00 AM'},
-        {'name': 'Naivedya Aarti', 'time': '10:30 AM'},
-        {'name': 'Sandhya Aarti', 'time': '05:00 PM'},
-        {'name': 'Shayan Aarti', 'time': '10:30 PM'},
-      ],
-    },
-    {
-      'name': 'Tirupati Balaji Mandir',
-      'city': 'Tirumala, Andhra Pradesh',
-      'deity': 'Lord Venkateswara',
-      'category': 'Vishnu / Krishna',
-      'icon': '🪷',
-      'status': 'Suprabhatam & Darshan Open',
-      'live': true,
-      'viewers': '12,490',
-      'timings': '02:30 AM - 01:30 AM',
-      'description': 'The abode of Sri Venkateswara on the sacred Seshachalam hills. Devotees pray for boundless prosperity and spiritual liberation.',
-      'aartis': [
-        {'name': 'Suprabhatam', 'time': '03:00 AM'},
-        {'name': 'Thomala Seva', 'time': '03:45 AM'},
-        {'name': 'Archana', 'time': '04:30 AM'},
-        {'name': 'Ekanta Seva', 'time': '01:30 AM'},
-      ],
-    },
-    {
-      'name': 'Siddhivinayak Mandir',
-      'city': 'Prabhadevi, Mumbai',
-      'deity': 'Lord Ganesha',
-      'category': 'Lord Ganesha',
-      'icon': '🐘',
-      'status': 'Live Darshan Streaming',
-      'live': true,
-      'viewers': '3,105',
-      'timings': '05:30 AM - 10:00 PM',
-      'description': 'Sacred two-century-old shrine fulfilling all noble wishes. Devotees offer Modaks and Durva grass to remove all life obstacles.',
-      'aartis': [
-        {'name': 'Kakad Aarti', 'time': '05:30 AM'},
-        {'name': 'Shree Darshan', 'time': '06:00 AM'},
-        {'name': 'Noon Aarti', 'time': '12:05 PM'},
-        {'name': 'Shejaarti', 'time': '09:50 PM'},
-      ],
-    },
-    {
-      'name': 'Maa Vaishno Devi Shrine',
-      'city': 'Katra, Jammu & Kashmir',
-      'deity': 'Maa Vaishno Devi',
-      'category': 'Maa Durga / Devi',
-      'icon': '🌸',
-      'status': 'Pindi Darshan Open',
-      'live': true,
-      'viewers': '5,800',
-      'timings': '05:00 AM - 10:00 PM',
-      'description': 'Holy cave shrine nestled in the Trikuta hills housing the three sacred natural rock formations (Pindis) representing Mahakali, Mahalakshmi, and Mahasaraswati.',
-      'aartis': [
-        {'name': 'Pratah Aarti', 'time': '06:00 AM'},
-        {'name': 'Madhyahna Darshan', 'time': '12:00 PM'},
-        {'name': 'Sandhya Aarti', 'time': '07:00 PM'},
-      ],
-    },
-    {
-      'name': 'Hanuman Garhi Mandir',
-      'city': 'Ayodhya, Uttar Pradesh',
-      'deity': 'Hanuman Ji',
-      'category': 'Hanuman Ji',
-      'icon': '🚩',
-      'status': 'Live Aarti Live',
-      'live': true,
-      'viewers': '2,980',
-      'timings': '04:00 AM - 10:00 PM',
-      'description': '10th-century temple in the form of a 4-sided fort with 76 steps. Believed that visiting Hanuman Garhi is essential before visiting Ram Janmabhoomi.',
-      'aartis': [
+  // Live Temples loaded exclusively from database
+  final List<Map<String, dynamic>> _allTemples = [];
+
+  Map<String, dynamic> _normalizeTemple(Map<String, dynamic> raw) {
+    final deity = raw['deity']?.toString() ?? 'Lord Shiva';
+    final deityLower = deity.toLowerCase();
+    String icon = '🔱';
+    String category = 'Lord Shiva';
+
+    if (deityLower.contains('ganesh')) {
+      icon = '🐘';
+      category = 'Lord Ganesha';
+    } else if (deityLower.contains('venkateswara') ||
+        deityLower.contains('vishnu') ||
+        deityLower.contains('krishna') ||
+        deityLower.contains('ram')) {
+      icon = '🪷';
+      category = 'Vishnu / Krishna';
+    } else if (deityLower.contains('devi') ||
+        deityLower.contains('durga') ||
+        deityLower.contains('lakshmi') ||
+        deityLower.contains('vaishno')) {
+      icon = '🌸';
+      category = 'Maa Durga / Devi';
+    } else if (deityLower.contains('hanuman')) {
+      icon = '🚩';
+      category = 'Hanuman Ji';
+    } else if (deityLower.contains('shiva') || deityLower.contains('mahakal')) {
+      icon = '🔱';
+      category = 'Lord Shiva';
+    }
+
+    List<Map<String, String>> aartis = [];
+    final aartisRaw = raw['aarti_timings']?.toString();
+    if (aartisRaw != null && aartisRaw.isNotEmpty) {
+      final parts = aartisRaw.split(',');
+      for (var part in parts) {
+        final colonIdx = part.indexOf(':');
+        if (colonIdx != -1) {
+          final name = part.substring(0, colonIdx).trim();
+          final time = part.substring(colonIdx + 1).trim();
+          aartis.add({'name': name, 'time': time});
+        }
+      }
+    }
+    if (aartis.isEmpty) {
+      aartis = [
         {'name': 'Mangala Aarti', 'time': '04:00 AM'},
-        {'name': 'Shringar Aarti', 'time': '09:00 AM'},
+        {'name': 'Bhog Aarti', 'time': '12:00 PM'},
         {'name': 'Sandhya Aarti', 'time': '07:00 PM'},
-      ],
-    },
-    {
-      'name': 'Somnath Jyotirlinga',
-      'city': 'Prabhas Patan, Gujarat',
-      'deity': 'Lord Shiva',
-      'category': 'Lord Shiva',
-      'icon': '🔱',
-      'status': 'Triveni Sangam Darshan',
+      ];
+    }
+
+    final city = raw['city']?.toString() ?? 'Holy City';
+    final state = raw['state']?.toString() ?? '';
+    final fullLocation = state.isNotEmpty ? '$city, $state' : city;
+
+    return {
+      'id': raw['id']?.toString() ?? 'temple_${raw.hashCode}',
+      'name': raw['name']?.toString() ?? 'Sacred Mandir',
+      'city': fullLocation,
+      'deity': deity,
+      'category': category,
+      'icon': icon,
+      'status': 'Live Darshan Streaming',
       'live': true,
-      'viewers': '3,450',
-      'timings': '06:00 AM - 09:30 PM',
-      'description': 'The eternal shrine and first among the 12 holy Jyotirlingas, located on the Arabian Sea coast.',
-      'aartis': [
-        {'name': 'Pratah Aarti', 'time': '07:00 AM'},
-        {'name': 'Madhyahna Aarti', 'time': '12:00 PM'},
-        {'name': 'Sandhya Aarti', 'time': '07:00 PM'},
-      ],
-    },
-    {
-      'name': 'Banke Bihari Mandir',
-      'city': 'Vrindavan, Uttar Pradesh',
-      'deity': 'Radha Krishna',
-      'category': 'Vishnu / Krishna',
-      'icon': '🪈',
-      'status': 'Darshan Open (Parda Darshan)',
-      'live': false,
-      'viewers': '1,920',
-      'timings': '07:45 AM - 12:00 PM, 05:30 PM - 09:30 PM',
-      'description': 'Iconic shrine established by Swami Haridas where Thakur Ji is adorned with charming eyes and joyful presence.',
-      'aartis': [
-        {'name': 'Shringar Aarti', 'time': '08:00 AM'},
-        {'name': 'Rajbhog Aarti', 'time': '12:00 PM'},
-        {'name': 'Shayan Aarti', 'time': '09:30 PM'},
-      ],
-    },
-  ];
+      'viewers': '${((raw['reviews_count'] as num?)?.toInt() ?? 1200) * 3}',
+      'timings': raw['darshan_timings']?.toString() ?? '04:00 AM - 11:00 PM',
+      'description': raw['description']?.toString() ?? 'Ancient sacred temple sanctum.',
+      'aartis': aartis,
+      'image_url': raw['image_url']?.toString() ?? '',
+      'live_darshan_url': raw['live_darshan_url']?.toString() ?? '',
+    };
+  }
 
   @override
   void initState() {
@@ -196,11 +128,9 @@ class _TemplesScreenState extends State<TemplesScreen> {
       final backendTemples = await ApiService().getTemples();
       if (backendTemples.isNotEmpty && mounted) {
         setState(() {
+          _allTemples.clear();
           for (final bt in backendTemples) {
-            final name = bt['name'] as String?;
-            if (name != null && !_allTemples.any((t) => t['name'] == name)) {
-              _allTemples.add(bt);
-            }
+            _allTemples.add(_normalizeTemple(bt));
           }
         });
       }

@@ -22,9 +22,15 @@ class AstrologerDashboardScreen extends StatefulWidget {
 class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
   AstrologerProfile? _profile;
   String _astrologerStatus = 'online'; // online, busy, offline
-  final List<DevoteeConsultationRequest> _queue = List.from(DevoteeConsultationRequest.mockQueue);
-  EarningsSummary _earnings = EarningsSummary.mockData;
-  final List<PastConsultation> _recentHistory = List.from(PastConsultation.mockHistory);
+  final List<DevoteeConsultationRequest> _queue = [];
+  EarningsSummary _earnings = EarningsSummary(
+    todayEarnings: 0.0,
+    todayMinutes: 0,
+    todayConsultations: 0,
+    walletBalance: 0.0,
+    rating: 4.95,
+  );
+  final List<PastConsultation> _recentHistory = [];
 
   @override
   void initState() {
@@ -56,38 +62,34 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       if (earningsData != null && mounted) {
         setState(() {
           _earnings = EarningsSummary(
-            todayEarnings: (earningsData['total_earned'] as num?)?.toDouble() ?? 2450.0,
-            todayMinutes: 82,
-            todayConsultations: (earningsData['completed_consultations'] as num?)?.toInt() ?? 6,
-            walletBalance: (earningsData['wallet_balance'] as num?)?.toDouble() ?? 18750.0,
+            todayEarnings: (earningsData['total_earned'] as num?)?.toDouble() ?? 0.0,
+            todayMinutes: 45,
+            todayConsultations: (earningsData['completed_consultations'] as num?)?.toInt() ?? 0,
+            walletBalance: (earningsData['wallet_balance'] as num?)?.toDouble() ?? 0.0,
             rating: _profile?.rating ?? 4.95,
           );
         });
       }
 
       final cons = await ApiService().getAstrologerConsultations(astroId);
-      if (cons.isNotEmpty && mounted) {
-        final List<DevoteeConsultationRequest> fetchedQueue = [];
-        final List<PastConsultation> fetchedHistory = [];
+      final List<DevoteeConsultationRequest> fetchedQueue = [];
+      final List<PastConsultation> fetchedHistory = [];
 
-        for (var c in cons) {
-          final status = (c['status'] ?? 'requested').toString().toLowerCase();
-          if (status == 'requested' || status == 'active') {
-            fetchedQueue.add(DevoteeConsultationRequest.fromJson(c));
-          } else if (status == 'completed') {
-            fetchedHistory.add(PastConsultation.fromJson(c));
-          }
+      for (var c in cons) {
+        final status = (c['status'] ?? 'requested').toString().toLowerCase();
+        if (status == 'requested' || status == 'active') {
+          fetchedQueue.add(DevoteeConsultationRequest.fromJson(c));
+        } else if (status == 'completed') {
+          fetchedHistory.add(PastConsultation.fromJson(c));
         }
+      }
 
+      if (mounted) {
         setState(() {
-          if (fetchedQueue.isNotEmpty) {
-            _queue.clear();
-            _queue.addAll(fetchedQueue);
-          }
-          if (fetchedHistory.isNotEmpty) {
-            _recentHistory.clear();
-            _recentHistory.addAll(fetchedHistory);
-          }
+          _queue.clear();
+          _queue.addAll(fetchedQueue);
+          _recentHistory.clear();
+          _recentHistory.addAll(fetchedHistory);
         });
       }
     } catch (e) {
@@ -824,7 +826,23 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        ..._recentHistory.map((item) => _buildHistoryCard(item)),
+        if (_recentHistory.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.lightBorder),
+            ),
+            child: Center(
+              child: Text(
+                isHi ? 'कोई पूर्ण परामर्श उपलब्ध नहीं है' : 'No completed consultations yet',
+                style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textSecondary),
+              ),
+            ),
+          )
+        else
+          ..._recentHistory.map((item) => _buildHistoryCard(item)),
       ],
     );
   }

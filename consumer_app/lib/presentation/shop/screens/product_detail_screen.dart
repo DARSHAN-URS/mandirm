@@ -4,8 +4,10 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/l10n/locale_service.dart';
 import '../../../services/api_service.dart';
+import '../../../services/cart_service.dart';
 import '../../../services/devotee_data_service.dart';
 import 'prasad_orders_screen.dart';
+import '../widgets/cart_drawer_sheet.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../../common/widgets/app_image.dart';
 
@@ -148,7 +150,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _addToCart() {
-    setState(() => _cartCount += _quantity);
+    final title = widget.initialProduct?['title'] ?? 'Mahakal Trishul Nandi Pendant';
+    final price = widget.initialProduct?['price'] is num
+        ? (widget.initialProduct?['price'] as num).toInt()
+        : int.tryParse(widget.initialProduct?['price']?.toString() ?? '1149') ?? 1149;
+    final image = widget.initialProduct?['image'] ?? widget.initialProduct?['image_url'] ?? '';
+    final mandir = widget.initialProduct?['mandir'] ?? 'Ujjain Mahakaleshwar Consecrated';
+    final id = widget.initialProduct?['id']?.toString() ?? 'prod_custom';
+
+    for (int i = 0; i < _quantity; i++) {
+      CartService().addItem({
+        'id': id,
+        'title': title,
+        'price': price,
+        'image': image,
+        'mandir': mandir,
+      });
+    }
+
+    setState(() => _cartCount = CartService().totalCount);
+
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -158,24 +179,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Added $_quantity x Mahakal Trishul Pendant to Sacred Cart!',
+                'Added $_quantity x $title to Sacred Bag!',
                 style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w500),
-              ),
-            ),
-            Text(
-              'CART ($_cartCount)',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: _accentGold,
               ),
             ),
           ],
         ),
+        action: SnackBarAction(
+          label: 'VIEW BAG',
+          textColor: const Color(0xFFFDCB06),
+          onPressed: () => CartDrawerSheet.show(context),
+        ),
         backgroundColor: _primaryMaroon,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
       ),
     );
   }

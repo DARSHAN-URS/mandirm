@@ -78,121 +78,46 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
     ];
   }
 
-  // 2. Popular Chadava Cards (Enriched across Shiva, Vishnu, Ganesh, Hanuman, Devi)
-  final List<Map<String, dynamic>> _popularChadavas = [
-    {
-      'id': 'CHD-01',
-      'title': 'Mahakal Special Chadava',
-      'title_hi': 'महाकाल विशेष चढ़ावा',
-      'location': 'Ujjain, Madhya Pradesh',
-      'location_hi': 'उज्जैन, मध्य प्रदेश',
-      'rating': '4.9',
-      'reviews': '12,450',
-      'price': 251,
-      'isMostPopular': true,
-      'asset': AppConstants.chadavaCardMahakalAsset,
-      'category': 'shiva',
-      'includes': ['Bhasma Aarti Darshan', 'Gotra Sankalp Path', 'Desi Ghee Lamp'],
-    },
-    {
-      'id': 'CHD-02',
-      'title': 'Vishnu Sahasranam Path Chadava',
-      'title_hi': 'विष्णु सहस्रनाम पाठ चढ़ावा',
-      'location': 'Tirupati, Andhra Pradesh',
-      'location_hi': 'तिरुपति, आंध्र प्रदेश',
-      'rating': '4.8',
-      'reviews': '9,820',
-      'price': 501,
-      'isMostPopular': false,
-      'asset': AppConstants.chadavaCardVishnuAsset,
-      'category': 'vishnu',
-      'includes': ['Pitambar Vastra', 'Tulsi Garlands', 'Laddu Prasad Dispatch'],
-    },
-    {
-      'id': 'CHD-03',
-      'title': 'Ganesh Special Chadava',
-      'title_hi': 'गणेश विशेष चढ़ावा',
-      'location': 'Siddhivinayak, Mumbai',
-      'location_hi': 'सिद्धिविनायक, मुंबई',
-      'rating': '4.8',
-      'reviews': '8,760',
-      'price': 351,
-      'isMostPopular': false,
-      'asset': AppConstants.chadavaCardGaneshAsset,
-      'category': 'ganesh',
-      'includes': ['Fresh Durva Grass', 'Modak Bhog', 'Red Sandalwood Tilak'],
-    },
-    {
-      'id': 'CHD-04',
-      'title': 'Kashi Vishwanath Rudra Chadava',
-      'title_hi': 'काशी विश्वनाथ रुद्राभिषेक चढ़ावा',
-      'location': 'Varanasi, Uttar Pradesh',
-      'location_hi': 'वाराणसी, उत्तर प्रदेश',
-      'rating': '4.9',
-      'reviews': '15,200',
-      'price': 301,
-      'isMostPopular': true,
-      'asset': AppConstants.chadavaTempleKashiAsset,
-      'category': 'shiva',
-      'includes': ['108 Bilva Patra', 'Pure Gangajal', 'Kashi Sanctum Aarti'],
-    },
-    {
-      'id': 'CHD-05',
-      'title': 'Sankat Mochan Sindoor & Chola',
-      'title_hi': 'संकट मोचन सिंदूर व चोला अर्पण',
-      'location': 'Varanasi, Uttar Pradesh',
-      'location_hi': 'वाराणसी, उत्तर प्रदेश',
-      'rating': '4.9',
-      'reviews': '11,100',
-      'price': 201,
-      'isMostPopular': false,
-      'asset': AppConstants.chadavaCatHanumanAsset,
-      'category': 'hanuman',
-      'includes': ['Desi Ghee Chola', 'Chameli Oil Deepam', 'Hanuman Chalisa Path'],
-    },
-    {
-      'id': 'CHD-06',
-      'title': 'Kamakhya Devi Chunri & Kumkum',
-      'title_hi': 'कामाख्या देवी चुनरी एवं कुमकुम अर्पण',
-      'location': 'Guwahati, Assam',
-      'location_hi': 'गुवाहाटी, असम',
-      'rating': '4.9',
-      'reviews': '7,650',
-      'price': 351,
-      'isMostPopular': false,
-      'asset': AppConstants.chadavaCatDeviAsset,
-      'category': 'devi',
-      'includes': ['Red Rakt Vastra', 'Siddh Sindoor', 'Shakti Peeth Aarti'],
-    },
-    {
-      'id': 'CHD-07',
-      'title': 'Kedarnath Dham Akhand Deepam',
-      'title_hi': 'केदारनाथ धाम अखंड दीप अर्पण',
-      'location': 'Kedarnath, Uttarakhand',
-      'location_hi': 'केदारनाथ, उत्तराखंड',
-      'rating': '5.0',
-      'reviews': '18,400',
-      'price': 501,
-      'isMostPopular': true,
-      'asset': AppConstants.chadavaTempleKedarnathAsset,
-      'category': 'shiva',
-      'includes': ['Akhand Ghee Diya', 'Himalayan Flowers', 'Shiva Sankalp'],
-    },
-    {
-      'id': 'CHD-08',
-      'title': 'Banke Bihari Makhan Misri Bhog',
-      'title_hi': 'बांके बिहारी माखन मिश्री भोग चढ़ावा',
-      'location': 'Vrindavan, Uttar Pradesh',
-      'location_hi': 'वृंदावन, उत्तर प्रदेश',
-      'rating': '4.9',
-      'reviews': '14,300',
-      'price': 251,
-      'isMostPopular': false,
-      'asset': AppConstants.chadavaTypeSweetAsset,
-      'category': 'vishnu',
-      'includes': ['Fresh Makhan Bhog', 'Tulsi Dal Arpan', 'Vrindavan Ashirwad'],
-    },
-  ];
+  // Popular Chadava Cards loaded directly from database
+  final List<Map<String, dynamic>> _popularChadavas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBackendChadhawa();
+  }
+
+  Future<void> _loadBackendChadhawa() async {
+    try {
+      final backendOfferings = await ApiService().getChadhawaOfferings();
+      if (backendOfferings.isNotEmpty && mounted) {
+        setState(() {
+          _popularChadavas.clear();
+          for (final bo in backendOfferings) {
+            final id = bo['id']?.toString() ?? 'CHD_${bo.hashCode}';
+            _popularChadavas.add({
+              'id': id,
+              'title': bo['title'] ?? 'Divine Chadava Offering',
+              'title_hi': bo['title'] ?? 'पवित्र चढ़ावा अर्पण',
+              'location': bo['temple_name'] ?? 'Sacred Temple Sanctum',
+              'location_hi': bo['temple_name'] ?? 'पवित्र तीर्थ स्थल',
+              'rating': '4.9',
+              'reviews': '1,250',
+              'price': (bo['price'] as num?)?.toInt() ?? 251,
+              'isMostPopular': true,
+              'asset': bo['image_url'] ?? AppConstants.chadavaCardMahakalAsset,
+              'category': (bo['category'] ?? 'shiva').toString().toLowerCase(),
+              'includes': [
+                'Gotra Sankalp Arpan',
+                'Priest Vedic Recitation',
+                'Sanctified Temple Prasadam',
+              ],
+            });
+          }
+        });
+      }
+    } catch (_) {}
+  }
 
   // 3. Types of Chadava (8 items)
   List<Map<String, dynamic>> get _chadavaTypes {

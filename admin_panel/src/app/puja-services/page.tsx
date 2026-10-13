@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 interface PujaService {
   id: string;
@@ -8,280 +9,724 @@ interface PujaService {
   deity: string;
   category: string;
   temple_name: string;
+  temple_id?: string;
   price: number;
-  vip_price: number;
+  vip_price?: number;
   duration_minutes: number;
   is_popular: boolean;
-  benefits: string;
+  benefits?: string;
+  description?: string;
+  image_url: string;
 }
 
-const SEED_PUJAS: PujaService[] = [
-  { id: 'PJ-01', title: 'Maha Mrityunjaya Jaap & Havan (54,000 Chants)', deity: 'Lord Shiva', category: 'Health & Protection', temple_name: 'Mahakaleshwar Jyotirlinga, Ujjain', price: 2100, vip_price: 5100, duration_minutes: 120, is_popular: true, benefits: 'Cures severe chronic illnesses, relieves untimely death fears & planetary malefic doshas.' },
-  { id: 'PJ-02', title: 'Kashi Vishwanath Rudrabhishek with Bilva Patra', deity: 'Lord Shiva', category: 'Moksha & Peace', temple_name: 'Kashi Vishwanath, Varanasi', price: 1100, vip_price: 2500, duration_minutes: 60, is_popular: true, benefits: 'Attains mental tranquility, spiritual elevation and fulfills inner heartfelt desires.' },
-  { id: 'PJ-03', title: 'Kaal Sarp Dosh Nivaran Maha Puja', deity: 'Lord Shiva & Rahu-Ketu', category: 'Dosha Nivaran', temple_name: 'Trimbakeshwar Shiva Temple, Nashik', price: 2500, vip_price: 5500, duration_minutes: 90, is_popular: true, benefits: 'Eradicates continuous hurdles, career setbacks and delay in marital harmony caused by Kaal Sarp yoga.' },
-  { id: 'PJ-04', title: 'Siddhivinayak Sankat Nashan Ganesha Puja', deity: 'Lord Ganesha', category: 'Obstacle Removal & Prosperity', temple_name: 'Siddhivinayak Temple, Mumbai', price: 850, vip_price: 2100, duration_minutes: 45, is_popular: true, benefits: 'Removes financial hurdles, business obstacles and brings auspicious beginnings.' },
-  { id: 'PJ-05', title: 'Navgrah Shanti Maha Puja with 9 Grains', deity: 'Navgraha Devatas', category: 'Astrological Balance', temple_name: 'Kalahasti Temple, Andhra Pradesh', price: 1500, vip_price: 3500, duration_minutes: 75, is_popular: false, benefits: 'Balances nine planetary transits and neutralizes Sade Sati, Dhaiya and debilitated planets.' },
-  { id: 'PJ-06', title: 'Mata Baglamukhi Shatru Vinashak Puja', deity: 'Mata Baglamukhi', category: 'Victory & Court Cases', temple_name: 'Baglamukhi Pitambara Peeth, Nalkheda', price: 3100, vip_price: 7500, duration_minutes: 90, is_popular: false, benefits: 'Grants invincibility in legal litigations, dissolves malice, jealousy and false allegations.' },
+const PUJA_IMAGE_PRESETS = [
+  { label: 'Rudrabhishek Lingam', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Ganesha Homam', url: 'https://images.unsplash.com/photo-1609358905596-f94632a67307?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Tirupati Kalyanotsavam', url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Vedic Havan Agni', url: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Chandi Path Durga', url: 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Somnath Navgrah Shanti', url: 'https://images.unsplash.com/photo-1590076212472-a7d1891b05ff?auto=format&fit=crop&w=800&q=80' },
+];
+
+const CATEGORIES = [
+  'Health & Protection',
+  'Moksha & Peace',
+  'Dosha Nivaran',
+  'Obstacle Removal & Prosperity',
+  'Astrological Balance',
+  'Victory & Court Cases',
+  'Family & Marriage',
 ];
 
 export default function PujaServicesPage() {
-  const [pujas, setPujas] = useState<PujaService[]>(SEED_PUJAS);
+  const [pujas, setPujas] = useState<PujaService[]>([]);
+  const [templeList, setTempleList] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [selectedPuja, setSelectedPuja] = useState<PujaService | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPuja, setEditingPuja] = useState<PujaService | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
-    title: '', deity: '', category: 'Health & Protection', temple_name: 'Kashi Vishwanath, Varanasi',
-    price: 1100, vip_price: 2500, duration_minutes: 60, is_popular: false, benefits: ''
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    deity: '',
+    category: 'Health & Protection',
+    temple_name: '',
+    price: '',
+    vip_price: '',
+    duration_minutes: '60',
+    description: '',
+    benefits: '',
+    image_url: '',
+    is_popular: true,
   });
 
-  const categories = ['all', 'Health & Protection', 'Moksha & Peace', 'Dosha Nivaran', 'Obstacle Removal & Prosperity', 'Astrological Balance', 'Victory & Court Cases'];
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const filtered = pujas.filter(p => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.deity.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    fetchPujas();
+    fetchTemples();
+  }, []);
+
+  const fetchTemples = async () => {
+    try {
+      const { data } = await supabase.from('temples').select('name');
+      if (data && data.length > 0) {
+        setTempleList(data.map((t) => t.name));
+      }
+    } catch (_) {}
+  };
+
+  const fetchPujas = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/puja-services');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setPujas(json.data);
+      } else {
+        const { data } = await supabase.from('puja_services').select('*').order('title');
+        if (data && data.length > 0) {
+          setPujas(data as PujaService[]);
+        }
+      }
+    } catch (_) {
+      const { data } = await supabase.from('puja_services').select('*').order('title');
+      if (data && data.length > 0) {
+        setPujas(data as PujaService[]);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const showToast = (msg: string) => {
+    setSuccessToast(msg);
+    setTimeout(() => setSuccessToast(null), 3500);
+  };
+
+  const validateForm = () => {
+    const errs: Record<string, string> = {};
+    if (!formData.title.trim()) errs.title = 'Puja title is required';
+    if (!formData.temple_name.trim()) errs.temple_name = 'Temple name is required';
+    if (!formData.deity.trim()) errs.deity = 'Deity name is required';
+    if (!formData.category.trim()) errs.category = 'Category is required';
+    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+      errs.price = 'Valid general dakshina (₹) is required';
+    }
+    if (!formData.description.trim()) errs.description = 'Puja description is required';
+    if (!formData.image_url.trim()) errs.image_url = 'Puja image URL is required';
+    setFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setErrorMsg(null);
+
+    const payload = {
+      ...(selectedPuja ? { id: selectedPuja.id } : { id: `puja_${Date.now()}` }),
+      title: formData.title.trim(),
+      temple_name: formData.temple_name.trim(),
+      deity: formData.deity.trim(),
+      category: formData.category.trim(),
+      price: Number(formData.price),
+      vip_price: formData.vip_price ? Number(formData.vip_price) : Number(formData.price) * 2,
+      duration_minutes: Number(formData.duration_minutes) || 60,
+      description: formData.description.trim(),
+      benefits: formData.benefits.trim() || 'Brings peace, health, and spiritual blessings.',
+      image_url: formData.image_url.trim(),
+      is_popular: formData.is_popular,
+    };
+
+    try {
+      const res = await fetch('/api/puja-services', {
+        method: selectedPuja ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to save puja service');
+
+      showToast(selectedPuja ? 'Puja ceremony updated in database!' : 'New Vedic puja ceremony listed in database!');
+      setIsModalOpen(false);
+      setSelectedPuja(null);
+      fetchPujas();
+    } catch (err: any) {
+      // Direct Supabase upsert fallback
+      const { error: sbErr } = await supabase.from('puja_services').upsert(payload);
+      if (!sbErr) {
+        showToast('Puja service saved to database!');
+        setIsModalOpen(false);
+        setSelectedPuja(null);
+        fetchPujas();
+      } else {
+        setErrorMsg(err.message || sbErr.message || 'Error saving puja service');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/puja-services?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        await supabase.from('puja_services').delete().eq('id', id);
+      }
+      showToast('Puja service deleted.');
+      setDeleteId(null);
+      fetchPujas();
+    } catch (_) {
+      await supabase.from('puja_services').delete().eq('id', id);
+      fetchPujas();
+    }
+  };
+
+  const openAdd = () => {
+    setSelectedPuja(null);
+    setFormData({
+      title: '',
+      deity: '',
+      category: 'Health & Protection',
+      temple_name: templeList.length > 0 ? templeList[0] : 'Kashi Vishwanath Temple',
+      price: '',
+      vip_price: '',
+      duration_minutes: '60',
+      description: '',
+      benefits: '',
+      image_url: '',
+      is_popular: true,
+    });
+    setFormErrors({});
+    setErrorMsg(null);
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (p: PujaService) => {
+    setSelectedPuja(p);
+    setFormData({
+      title: p.title,
+      deity: p.deity,
+      category: p.category || 'Health & Protection',
+      temple_name: p.temple_name,
+      price: p.price.toString(),
+      vip_price: p.vip_price?.toString() || '',
+      duration_minutes: p.duration_minutes?.toString() || '60',
+      description: p.description || '',
+      benefits: p.benefits || '',
+      image_url: p.image_url || '',
+      is_popular: p.is_popular ?? false,
+    });
+    setFormErrors({});
+    setErrorMsg(null);
+    setIsModalOpen(true);
+  };
+
+  const filtered = pujas.filter((p) => {
+    const matchSearch =
+      p.title?.toLowerCase().includes(search.toLowerCase()) ||
+      p.deity?.toLowerCase().includes(search.toLowerCase()) ||
+      p.temple_name?.toLowerCase().includes(search.toLowerCase());
     const matchCat = categoryFilter === 'all' || p.category === categoryFilter;
     return matchSearch && matchCat;
   });
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingPuja) {
-      setPujas(pujas.map(p => p.id === editingPuja.id ? { ...p, ...form } : p));
-    } else {
-      const newP: PujaService = {
-        id: `PJ-${String(pujas.length + 1).padStart(2, '0')}`,
-        ...form
-      };
-      setPujas([...pujas, newP]);
-    }
-    setIsModalOpen(false);
-    setEditingPuja(null);
-  };
-
-  const openEdit = (p: PujaService) => {
-    setEditingPuja(p);
-    setForm({
-      title: p.title, deity: p.deity, category: p.category, temple_name: p.temple_name,
-      price: p.price, vip_price: p.vip_price, duration_minutes: p.duration_minutes, is_popular: p.is_popular, benefits: p.benefits
-    });
-    setIsModalOpen(true);
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {successToast && (
+        <div className="fixed top-6 right-6 z-50 bg-emerald-700 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-500 animate-bounce">
+          <span className="text-lg">🪔</span>
+          <span className="text-xs font-bold">{successToast}</span>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-orange-950 via-amber-900 to-mandir-maroon p-6 rounded-2xl text-white shadow-xl border border-amber-900/30">
         <div>
-          <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
-            <span>🪔</span> Sacred Puja Ceremonies & Rituals
-          </h1>
-          <p className="text-xs text-gray-500">
-            Configure Vedic pujas, deity rituals, temple associations, and regular vs. VIP Sankalp Dakshina
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-2xl">🪔</span>
+            <h1 className="text-2xl font-bold font-cinzel tracking-wide text-amber-200">
+              Vedic Puja Ceremonies & Rituals Catalog
+            </h1>
+          </div>
+          <p className="text-xs text-amber-100/80">
+            Manage sacred rituals, Gotra sankalp ceremonies, pandit samagri inclusion, and pricing across participating temples.
           </p>
         </div>
         <button
-          onClick={() => {
-            setEditingPuja(null);
-            setForm({ title: '', deity: '', category: 'Health & Protection', temple_name: 'Kashi Vishwanath, Varanasi', price: 1100, vip_price: 2500, duration_minutes: 60, is_popular: false, benefits: '' });
-            setIsModalOpen(true);
-          }}
-          className="px-4 py-2 bg-mandir-maroon hover:bg-mandir-maroon-dark text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
+          onClick={openAdd}
+          className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-bold rounded-xl text-xs shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95"
         >
-          <span>+</span> Create New Puja
+          <span className="text-base font-extrabold">+</span> Add Puja Ceremony
         </button>
       </div>
 
-      {/* Filter and Category Pills */}
+      {/* Filter and Stats Toolbar */}
       <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-3 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative w-full sm:w-80">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:w-96">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">🔍</span>
             <input
               type="text"
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search pujas by title or deity..."
-              className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by puja title, deity, or temple..."
+              className="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-mandir-maroon"
             />
           </div>
-          <div className="text-xs text-gray-500 font-medium">
-            Active Rituals: <strong>{pujas.length}</strong>
+          <div className="flex items-center gap-3 text-xs font-semibold text-gray-600">
+            <span className="bg-amber-50 text-amber-900 px-3 py-1 rounded-full border border-amber-200">
+              Total Pujas: <strong>{pujas.length}</strong>
+            </span>
           </div>
         </div>
 
         {/* Category Pills */}
-        <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-100">
-          {categories.map(c => (
-            <button
-              key={c}
-              onClick={() => setCategoryFilter(c)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                categoryFilter === c
-                  ? 'bg-mandir-maroon text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+        <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
+          <button
+            onClick={() => setCategoryFilter('all')}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              categoryFilter === 'all'
+                ? 'bg-mandir-maroon text-white shadow-sm'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            All Pujas ({pujas.length})
+          </button>
+          {CATEGORIES.map((cat) => {
+            const count = pujas.filter((p) => p.category === cat).length;
+            return (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  categoryFilter === cat
+                    ? 'bg-mandir-maroon text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {cat} {count > 0 && `(${count})`}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Loading Indicator */}
+      {isLoading ? (
+        <div className="py-20 flex flex-col items-center justify-center space-y-3">
+          <div className="w-10 h-10 border-4 border-mandir-maroon border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xs font-semibold text-gray-500">Loading Puja services from database...</span>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center space-y-3 shadow-sm">
+          <span className="text-4xl block">🪔</span>
+          <h3 className="font-cinzel text-base font-bold text-gray-800">No Pujas Found</h3>
+          <p className="text-xs text-gray-500 max-w-md mx-auto">
+            {search ? 'No ceremonies match your current search query.' : 'No puja services in the database yet. Click below to add the first Vedic ritual!'}
+          </p>
+          <button
+            onClick={openAdd}
+            className="px-4 py-2 bg-mandir-maroon text-white font-bold text-xs rounded-xl hover:bg-mandir-maroon-dark transition-all"
+          >
+            + Add First Puja
+          </button>
+        </div>
+      ) : (
+        /* Pujas Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-lg transition-all flex flex-col justify-between group"
             >
-              {c === 'all' ? 'All Categories' : c}
-            </button>
+              <div>
+                {/* Puja Image */}
+                <div className="relative h-44 w-full bg-gray-100 overflow-hidden">
+                  <img
+                    src={item.image_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80'}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span className="text-[10px] font-bold text-amber-950 bg-amber-300 px-2.5 py-1 rounded-md uppercase tracking-wide shadow-md">
+                      {item.deity}
+                    </span>
+                    {item.is_popular && (
+                      <span className="text-[10px] font-bold text-white bg-mandir-maroon px-2 py-0.5 rounded-md shadow-md">
+                        ★ Popular
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="absolute top-3 right-3">
+                    <span className="text-xs font-black text-amber-950 bg-amber-400 px-3 py-1 rounded-full shadow-lg">
+                      ₹ {Number(item.price).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <h3 className="font-bold text-sm font-cinzel text-white leading-tight drop-shadow-md">
+                      {item.title}
+                    </h3>
+                    <p className="text-[11px] text-amber-200/90 flex items-center gap-1 mt-0.5">
+                      🛕 {item.temple_name}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Details & Benefits */}
+                <div className="p-4 space-y-2 text-xs">
+                  <p className="text-gray-600 text-xs line-clamp-2 leading-relaxed">
+                    {item.description || 'Sacred Vedic ritual performed by certified acharyas.'}
+                  </p>
+                  <p className="text-emerald-700 text-[11px] line-clamp-1 font-medium">
+                    ✨ {item.benefits || 'Brings peace, health, and spiritual blessings.'}
+                  </p>
+                  <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                    <span>Duration: <strong className="text-gray-800">{item.duration_minutes} mins</strong></span>
+                    {item.vip_price && (
+                      <span>VIP Sankalp: <strong className="text-mandir-maroon">₹{Number(item.vip_price).toLocaleString('en-IN')}</strong></span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-500 font-mono">ID: {item.id}</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setDeleteId(item.id)}
+                    className="px-2.5 py-1 text-red-600 hover:bg-red-50 font-semibold text-xs rounded-lg transition-colors"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="px-3 py-1 bg-mandir-maroon hover:bg-mandir-maroon-dark text-white font-semibold text-xs rounded-lg transition-all shadow-sm"
+                  >
+                    Edit Puja
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
+      )}
 
-      {/* Pujas Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
-              <tr>
-                <th className="py-3 px-4">Puja Ceremony</th>
-                <th className="py-3 px-4">Deity & Category</th>
-                <th className="py-3 px-4">Temple Sanctum</th>
-                <th className="py-3 px-4">Duration</th>
-                <th className="py-3 px-4">Regular Dakshina</th>
-                <th className="py-3 px-4">VIP Sankalp</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filtered.map(p => (
-                <tr key={p.id} className="hover:bg-amber-50/20 transition-colors">
-                  <td className="py-3.5 px-4">
-                    <div className="font-bold text-gray-900 font-cinzel text-xs">{p.title}</div>
-                    <div className="text-[11px] text-gray-500 max-w-sm line-clamp-1">{p.benefits}</div>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <div className="font-semibold text-gray-800">{p.deity}</div>
-                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800 mt-0.5">
-                      {p.category}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-gray-600 font-medium">{p.temple_name}</td>
-                  <td className="py-3.5 px-4 font-mono text-gray-700">{p.duration_minutes} mins</td>
-                  <td className="py-3.5 px-4 font-bold text-gray-900">₹ {p.price.toLocaleString('en-IN')}</td>
-                  <td className="py-3.5 px-4 font-bold text-amber-700">₹ {p.vip_price.toLocaleString('en-IN')}</td>
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      onClick={() => openEdit(p)}
-                      className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg text-xs transition-colors shadow-sm"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+            <span className="text-3xl block">⚠️</span>
+            <h3 className="font-bold text-base text-gray-900 font-cinzel">Confirm Puja Deletion</h3>
+            <p className="text-xs text-gray-500">
+              Are you sure you want to remove this sacred Puja ritual from the live database?
+            </p>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="px-4 py-2 border border-gray-300 rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteId)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Edit/Create Modal */}
+      {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-base font-bold font-cinzel text-gray-900 mb-4">
-              {editingPuja ? 'Edit Sacred Puja Ceremony' : 'Create Sacred Puja Ceremony'}
-            </h2>
-            <form onSubmit={handleSave} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-gray-700 font-semibold mb-1">Puja Title</label>
-                <input
-                  type="text"
-                  required
-                  value={form.title}
-                  onChange={e => setForm({ ...form, title: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-lg text-xs"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 my-8">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🪔</span>
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1">Deity</label>
+                  <h2 className="text-lg font-bold font-cinzel text-gray-900">
+                    {selectedPuja ? 'Edit Puja Ceremony' : 'Fill & List New Vedic Puja Ceremony'}
+                  </h2>
+                  <p className="text-[11px] text-gray-500">
+                    All required fields marked with <span className="text-red-500 font-bold">*</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {errorMsg && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-semibold">
+                ⚠️ {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleSave} className="space-y-4 mt-4 text-xs">
+              {/* Row 1: Title & Temple */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-bold mb-1">
+                    Puja Title <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
-                    required
-                    value={form.deity}
-                    onChange={e => setForm({ ...form, deity: e.target.value })}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs"
+                    placeholder="e.g. Maha Rudrabhishek with Bilva Patra"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className={`w-full p-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon ${
+                      formErrors.title ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                    }`}
                   />
+                  {formErrors.title && <p className="text-[10px] text-red-600 mt-1">{formErrors.title}</p>}
                 </div>
+
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1">Category</label>
+                  <label className="block text-gray-700 font-bold mb-1">
+                    Temple Destination <span className="text-red-500">*</span>
+                  </label>
+                  {templeList.length > 0 ? (
+                    <select
+                      value={formData.temple_name}
+                      onChange={(e) => setFormData({ ...formData, temple_name: e.target.value })}
+                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon text-xs"
+                    >
+                      {templeList.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="e.g. Kashi Vishwanath Temple, Varanasi"
+                      value={formData.temple_name}
+                      onChange={(e) => setFormData({ ...formData, temple_name: e.target.value })}
+                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon"
+                    />
+                  )}
+                  {formErrors.temple_name && <p className="text-[10px] text-red-600 mt-1">{formErrors.temple_name}</p>}
+                </div>
+              </div>
+
+              {/* Row 2: Deity & Category */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-bold mb-1">
+                    Presiding Deity <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Lord Shiva, Lord Ganesha"
+                    value={formData.deity}
+                    onChange={(e) => setFormData({ ...formData, deity: e.target.value })}
+                    className={`w-full p-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon ${
+                      formErrors.deity ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                    }`}
+                  />
+                  {formErrors.deity && <p className="text-[10px] text-red-600 mt-1">{formErrors.deity}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-bold mb-1">
+                    Ceremony Category <span className="text-red-500">*</span>
+                  </label>
                   <select
-                    value={form.category}
-                    onChange={e => setForm({ ...form, category: e.target.value })}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon text-xs"
                   >
-                    {categories.filter(c => c !== 'all').map(c => (
-                      <option key={c} value={c}>{c}</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-gray-700 font-semibold mb-1">Temple Sanctum</label>
-                <input
-                  type="text"
-                  required
-                  value={form.temple_name}
-                  onChange={e => setForm({ ...form, temple_name: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-lg text-xs"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
+
+              {/* Row 3: Price, VIP Price, Duration */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1">Regular (₹)</label>
+                  <label className="block text-gray-700 font-bold mb-1">
+                    General Dakshina (₹) <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="number"
-                    required
-                    value={form.price}
-                    onChange={e => setForm({ ...form, price: Number(e.target.value) })}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
+                    min="1"
+                    placeholder="e.g. 1100"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className={`w-full p-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon ${
+                      formErrors.price ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                    }`}
                   />
+                  {formErrors.price && <p className="text-[10px] text-red-600 mt-1">{formErrors.price}</p>}
                 </div>
+
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1">VIP Sankalp (₹)</label>
+                  <label className="block text-gray-700 font-bold mb-1">VIP Sankalp Rate (₹)</label>
                   <input
                     type="number"
-                    required
-                    value={form.vip_price}
-                    onChange={e => setForm({ ...form, vip_price: Number(e.target.value) })}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
+                    min="1"
+                    placeholder="e.g. 2500"
+                    value={formData.vip_price}
+                    onChange={(e) => setFormData({ ...formData, vip_price: e.target.value })}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1">Duration (Min)</label>
+                  <label className="block text-gray-700 font-bold mb-1">Duration (Minutes)</label>
                   <input
                     type="number"
-                    required
-                    value={form.duration_minutes}
-                    onChange={e => setForm({ ...form, duration_minutes: Number(e.target.value) })}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
+                    min="15"
+                    step="5"
+                    placeholder="e.g. 60"
+                    value={formData.duration_minutes}
+                    onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="block text-gray-700 font-semibold mb-1">Divine Benefits & Spiritual Significance</label>
-                <textarea
-                  rows={3}
-                  value={form.benefits}
-                  onChange={e => setForm({ ...form, benefits: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-lg text-xs"
-                />
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
+              {/* Row 4: Description & Benefits */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-bold mb-1">
+                    Puja Description & Vedic Rites <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Explain the havan, recitations, mantra chanting, and sacred gotra sankalp process..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className={`w-full p-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon ${
+                      formErrors.description ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                    }`}
+                  />
+                  {formErrors.description && <p className="text-[10px] text-red-600 mt-1">{formErrors.description}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-bold mb-1">Spiritual Benefits to Devotee</label>
+                  <textarea
+                    rows={3}
+                    placeholder="e.g. Eradicates obstacles, restores good health, neutralizes planetary doshas..."
+                    value={formData.benefits}
+                    onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-mandir-maroon"
+                  />
+                </div>
+              </div>
+
+              {/* Row 5: Image URL & Quick Presets */}
+              <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-200/70 space-y-2">
+                <label className="block text-amber-950 font-bold mb-1">
+                  Puja Ceremony Image URL <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className={`flex-1 p-2.5 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-mandir-maroon ${
+                      formErrors.image_url ? 'border-red-500' : 'border-amber-200'
+                    }`}
+                  />
+                  {formData.image_url && (
+                    <div className="w-12 h-10 rounded-lg overflow-hidden border border-amber-300 shadow-sm shrink-0">
+                      <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+                {formErrors.image_url && <p className="text-[10px] text-red-600">{formErrors.image_url}</p>}
+
+                {/* Quick Presets */}
+                <div>
+                  <span className="text-[10px] font-bold text-amber-900 block mb-1">
+                    Quick Sample Ceremony Image Presets:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PUJA_IMAGE_PRESETS.map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, image_url: preset.url })}
+                        className="px-2 py-1 bg-white hover:bg-amber-100 text-amber-900 rounded-lg text-[10px] font-semibold border border-amber-300 transition-colors shadow-2xs"
+                      >
+                        🪔 {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Popular Checkbox */}
+              <div className="flex items-center gap-2 p-2.5 bg-gray-50 border border-gray-200 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="puja_popular"
+                  checked={formData.is_popular}
+                  onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })}
+                  className="w-4 h-4 text-mandir-maroon rounded focus:ring-mandir-maroon"
+                />
+                <label htmlFor="puja_popular" className="text-gray-700 font-bold text-xs select-none">
+                  Highlight as Popular Ceremony on Home & Puja Directory
+                </label>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-mandir-maroon hover:bg-mandir-maroon-dark text-white rounded-lg font-bold shadow-md"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-gradient-to-r from-mandir-maroon to-mandir-maroon-dark text-white font-bold rounded-xl shadow-md hover:scale-102 active:scale-98 transition-all disabled:opacity-50 flex items-center gap-2"
                 >
-                  Save Ceremony
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Saving to Database...
+                    </>
+                  ) : (
+                    <span>💾 Save to Live Database</span>
+                  )}
                 </button>
               </div>
             </form>

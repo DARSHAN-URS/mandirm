@@ -31,158 +31,16 @@ class _PujasScreenState extends State<PujasScreen> {
     final isHi = LocaleService().isHindi;
     return [
       {'id': 'all', 'label': isHi ? 'सभी पूजा' : 'All Pujas', 'icon': Icons.grid_view_rounded},
-      {'id': 'Pitr Dosha', 'label': isHi ? 'पितृ दोष' : 'Pitr Dosha', 'icon': Icons.people_outline_rounded},
-      {'id': 'Health', 'label': isHi ? 'स्वास्थ्य' : 'Health', 'icon': Icons.favorite_border_rounded},
-      {'id': 'Wealth', 'label': isHi ? 'समृद्धि' : 'Wealth', 'icon': Icons.account_balance_wallet_outlined},
-      {'id': 'Career', 'label': isHi ? 'करियर' : 'Career', 'icon': Icons.trending_up_rounded},
+      {'id': 'Rudra & Health', 'label': isHi ? 'रुद्र व स्वास्थ्य' : 'Rudra & Health', 'icon': Icons.favorite_border_rounded},
+      {'id': 'Vighnaharta Puja', 'label': isHi ? 'विघ्नहर्ता पूजा' : 'Vighnaharta Puja', 'icon': Icons.spa_rounded},
+      {'id': 'Wealth & Family', 'label': isHi ? 'समृद्धि व परिवार' : 'Wealth & Family', 'icon': Icons.account_balance_wallet_outlined},
+      {'id': 'Dosha Nivaran', 'label': isHi ? 'दोष निवारण' : 'Dosha Nivaran', 'icon': Icons.people_outline_rounded},
+      {'id': 'Planetary Balance', 'label': isHi ? 'ग्रह शांति' : 'Planetary Balance', 'icon': Icons.auto_awesome_rounded},
     ];
   }
 
-  final List<Map<String, dynamic>> _allPujas = [
-    {
-      'id': 'pj_pitru_1',
-      'title': 'Haridwar Pitru Dosh Shanti Mahapuja, Ganga Aarti and Brahmin Bhojan',
-      'title_hi': 'हरिद्वार पितृ दोष शांति महापूजा, गंगा आरती व ब्राह्मण भोजन',
-      'subtitle': 'For Pitru Dosh relief and ancestral blessings',
-      'subtitle_hi': 'पितृ दोष से मुक्ति एवं पूर्वजों के आशीर्वाद हेतु',
-      'badge': 'Maha Bharani Special',
-      'badge_hi': 'महा भरणी विशेष',
-      'badgeColor': const Color(0xFFFDE68A),
-      'badgeTextColor': const Color(0xFF78350F),
-      'badgeIcon': Icons.people_alt_rounded,
-      'mandir': 'Ganga Ghat, Haridwar, Uttarakhand',
-      'mandir_hi': 'गंगा घाट, हरिद्वार, उत्तराखंड',
-      'date': '29 Sep, Tue • 7:00 AM\nAshwin Krishna Tritiya',
-      'date_hi': '29 सितंबर, मंगल • सुबह 7:00\nअश्विन कृष्ण तृतीया',
-      'category': 'Pitr Dosha',
-      'price': '₹851',
-      'numericPrice': 851,
-      'imageAsset': AppConstants.pujaGangaDiyaAsset,
-      'pandits': '3 Ganga Tirtha Purohits',
-      'duration': '60 mins',
-      'benefits': 'Relief from Pitru Dosh, ancestral peace, removal of hurdles in family prosperity.',
-      'inclusions': [
-        'Personalized Sankalp with ancestral names & Gotra',
-        'Ganga Aarti offering with fresh lotus flowers',
-        'Brahmin Bhojan and cow grass seva conducted in your name',
-        'Blessed Ganga Jal and dry fruits prasad dispatched to home',
-      ],
-    },
-    {
-      'id': 'pj_guru_2',
-      'title': 'Guru Chandal Dosh Nivaran Puja',
-      'title_hi': 'गुरु चांडाल दोष निवारण पूजा',
-      'subtitle': 'For financial stability, removing hurdles in career and mental clarity',
-      'subtitle_hi': 'आर्थिक स्थिरता, करियर की बाधाएं दूर करने व मानसिक शांति हेतु',
-      'badge': 'Thursday Guru Chandal Special',
-      'badge_hi': 'गुरुवार गुरु चांडाल विशेष',
-      'badgeColor': const Color(0xFFFED7AA),
-      'badgeTextColor': const Color(0xFF9A3412),
-      'badgeIcon': Icons.public_rounded,
-      'mandir': 'Brihaspati Temple, Kashi, Uttar Pradesh',
-      'mandir_hi': 'बृहस्पति मंदिर, काशी, उत्तर प्रदेश',
-      'date': '29 Oct, Thu • 7:00 PM\nAsvayujamu Krishna Chaviti',
-      'date_hi': '29 अक्टूबर, गुरु • शाम 7:00\nआश्वयुज कृष्ण चतुर्थी',
-      'category': 'Career',
-      'price': '₹1,101',
-      'numericPrice': 1101,
-      'imageAsset': AppConstants.pujaGuruBrihaspatiAsset,
-      'pandits': '2 Vedic Brihaspati Acharyas',
-      'duration': '50 mins',
-      'benefits': 'Removes Guru & Rahu afflictions, eliminates career stagnation, enhances intellect and stability.',
-      'inclusions': [
-        'Brihaspati Beej Mantra 11,000 Japa Sankalp',
-        'Chana Dal and Yellow Flower archana to Lord Guru',
-        'Energized Yellow Sapphire yantra card by post',
-        'Prasad box with sanctified Kashi chandan',
-      ],
-    },
-    {
-      'id': 'pj_navgraha_3',
-      'title': 'Navgraha Shanti Puja',
-      'title_hi': 'नवग्रह शांति महापूजा',
-      'subtitle': 'Bring balance and positivity in life by pacifying the nine planets',
-      'subtitle_hi': 'नौ ग्रहों को शांत कर जीवन में संतुलन व सकारात्मकता लाएं',
-      'badge': 'Navgraha Special',
-      'badge_hi': 'नवग्रह विशेष',
-      'badgeColor': const Color(0xFFFEE2E2),
-      'badgeTextColor': const Color(0xFF991B1B),
-      'badgeIcon': Icons.local_fire_department_rounded,
-      'mandir': 'Online / At Your Location',
-      'mandir_hi': 'ऑनलाइन / आपके स्थान पर',
-      'date': 'Select Date & Time',
-      'date_hi': 'तिथि व समय चुनें',
-      'category': 'Wealth',
-      'price': '₹1,501',
-      'numericPrice': 1501,
-      'imageAsset': AppConstants.pujaNavgrahaAsset,
-      'pandits': '3 Navgraha Specialists',
-      'duration': '75 mins',
-      'benefits': 'Harmonizes all nine planetary influences, neutralizes Sade Sati, bestows health & financial growth.',
-      'inclusions': [
-        '9 Planetary Homa with sacred Samidha sticks',
-        'Personal Navgraha Stotram recital for all family members',
-        'Energized 9-Gem Navratna Raksha Yantra',
-        'Doorstep consecrated Prasad delivery',
-      ],
-    },
-    {
-      'id': 'pj_shiva_4',
-      'title': 'Maha Rudrabhishek with 108 Bilva Patra',
-      'title_hi': '108 बिल्व पत्र महा रुद्राभिषेक',
-      'subtitle': 'Supreme remedy for health recovery, peace, and spiritual elevation',
-      'subtitle_hi': 'स्वास्थ्य लाभ, शांति व आध्यात्मिक उन्नति हेतु सर्वश्रेष्ठ उपाय',
-      'badge': 'Shiva Pradosh Special',
-      'badge_hi': 'शिव प्रदोष विशेष',
-      'badgeColor': const Color(0xFFE0E7FF),
-      'badgeTextColor': const Color(0xFF3730A3),
-      'badgeIcon': Icons.temple_hindu_rounded,
-      'mandir': 'Kashi Vishwanath Mandir, Varanasi',
-      'mandir_hi': 'काशी विश्वनाथ मंदिर, वाराणसी',
-      'date': 'Coming Monday • 08:00 AM\nShukla Trayodashi',
-      'date_hi': 'आगामी सोमवार • सुबह 8:00\nशुक्ल त्रयोदशी',
-      'category': 'Health',
-      'price': '₹1,100',
-      'numericPrice': 1100,
-      'imageAsset': AppConstants.pujaGangaDiyaAsset,
-      'pandits': '3 Vedic Acharyas',
-      'duration': '45 mins',
-      'benefits': 'Removes fear, bestows mental calmness, purifies karmic debts.',
-      'inclusions': [
-        'Jyotirlinga Jalabhishek with Milk, Honey & Holy Ganga Jal',
-        '108 Bilva Patra offering in devotee Gotra',
-        'Sanctum Bhasma and Rudraksha delivered by courier',
-      ],
-    },
-    {
-      'id': 'pj_wealth_5',
-      'title': 'Sri Lakshmi Kuber Dhan Prapti Puja',
-      'title_hi': 'श्री लक्ष्मी कुबेर धन प्राप्ति पूजा',
-      'subtitle': 'Attracts auspicious prosperity, business abundance, and debt freedom',
-      'subtitle_hi': 'व्यापार में लाभ, धन-समृद्धि व ऋण मुक्ति हेतु',
-      'badge': 'Friday Mahalakshmi Special',
-      'badge_hi': 'शुक्रवार महालक्ष्मी विशेष',
-      'badgeColor': const Color(0xFFFEF3C7),
-      'badgeTextColor': const Color(0xFF92400E),
-      'badgeIcon': Icons.account_balance_wallet_rounded,
-      'mandir': 'Tirupati Balaji Mandir, AP',
-      'mandir_hi': 'तिरुपति बालाजी मंदिर, आंध्र प्रदेश',
-      'date': 'Coming Friday • 09:00 AM\nShukla Ashtami',
-      'date_hi': 'आगामी शुक्रवार • सुबह 9:00\nशुक्ल अष्टमी',
-      'category': 'Wealth',
-      'price': '₹2,100',
-      'numericPrice': 2100,
-      'imageAsset': AppConstants.pujaNavgrahaAsset,
-      'pandits': '3 Sri Vaishnava Archakas',
-      'duration': '50 mins',
-      'benefits': 'Unblocks frozen financial channels, blesses new business ventures, attracts Mahalakshmi grace.',
-      'inclusions': [
-        'Sri Suktam and Kanakadhara Stotram recitations',
-        'Lotus Archana with energized Kuber Yantra',
-        'Blessed Tirupati Laddu Prasadam delivered to home',
-      ],
-    },
-  ];
+  // Only real pujas from database
+  final List<Map<String, dynamic>> _allPujas = [];
 
   @override
   void initState() {
@@ -199,32 +57,49 @@ class _PujasScreenState extends State<PujasScreen> {
       final backendPujas = await ApiService().getPujas();
       if (backendPujas.isNotEmpty && mounted) {
         setState(() {
+          _allPujas.clear();
           for (final bp in backendPujas) {
             final id = bp['id']?.toString() ?? 'pj_${bp.hashCode}';
-            if (!_allPujas.any((item) => item['id'] == id)) {
-              _allPujas.add({
-                'id': id,
-                'title': bp['title'] ?? bp['name'] ?? 'Vedic Puja Ritual',
-                'subtitle': bp['description'] ?? bp['subtitle'] ?? 'Holy ceremony conducted by certified temple priests',
-                'badge': bp['badge'] ?? 'Special Seva',
-                'badgeColor': const Color(0xFFFDE68A),
-                'badgeTextColor': const Color(0xFF78350F),
-                'badgeIcon': Icons.spa_rounded,
-                'mandir': bp['temple_name'] ?? bp['mandir'] ?? 'Sacred Temple Sanctum',
-                'date': bp['date'] ?? 'Upcoming Auspicious Muhurat',
-                'category': bp['category'] ?? 'All Pujas',
-                'price': '₹${bp['price'] ?? 1100}',
-                'numericPrice': (bp['price'] as num?)?.toInt() ?? 1100,
-                'imageAsset': bp['image_url'] ?? AppConstants.pujaGangaDiyaAsset,
-                'pandits': bp['pandits'] ?? '3 Vedic Purohits',
-                'duration': bp['duration'] ?? '45 mins',
-                'benefits': bp['benefits'] ?? 'Spiritual peace, obstacle removal, divine blessings.',
-                'inclusions': [
-                  'Personalized Sankalp in devotee Gotra',
-                  'Live Video Link & Prasad Delivery',
-                ],
-              });
+            final inclusionsRaw = bp['samagri_included'];
+            List<String> inclusions = [];
+            if (inclusionsRaw is List) {
+              inclusions = inclusionsRaw.map((e) => e.toString()).toList();
+            } else if (inclusionsRaw is String && inclusionsRaw.isNotEmpty) {
+              inclusions = inclusionsRaw.split(',').map((e) => e.trim()).toList();
             }
+            if (inclusions.isEmpty) {
+              inclusions = [
+                'Personalized Sankalp in devotee Gotra',
+                'Live Darshan Link & Consecrated Prasad Delivery',
+              ];
+            }
+
+            _allPujas.add({
+              'id': id,
+              'title': bp['title'] ?? bp['name'] ?? 'Vedic Puja Ritual',
+              'title_hi': bp['title_hi'] ?? bp['title'] ?? 'वैदिक पूजा अनुष्ठान',
+              'subtitle': bp['description'] ?? bp['subtitle'] ?? 'Holy ceremony conducted by certified temple priests',
+              'subtitle_hi': bp['subtitle_hi'] ?? bp['description'] ?? 'पवित्र तीर्थ पुरोहितों द्वारा संपन्न वैदिक विधि',
+              'badge': bp['is_popular'] == true ? 'Most Popular' : 'Special Seva',
+              'badge_hi': bp['is_popular'] == true ? 'सर्वाधिक लोकप्रिय' : 'विशेष सेवा',
+              'badgeColor': const Color(0xFFFDE68A),
+              'badgeTextColor': const Color(0xFF78350F),
+              'badgeIcon': Icons.spa_rounded,
+              'mandir': bp['temple_name'] ?? bp['mandir'] ?? 'Sacred Temple Sanctum',
+              'mandir_hi': bp['mandir_hi'] ?? bp['temple_name'] ?? 'पवित्र तीर्थ धाम',
+              'date': bp['date'] ?? 'Upcoming Auspicious Muhurat',
+              'date_hi': bp['date_hi'] ?? 'आगामी शुभ मुहूर्त',
+              'category': bp['category'] ?? 'All Pujas',
+              'price': '₹${(bp['price'] as num?)?.toInt() ?? 1100}',
+              'numericPrice': (bp['price'] as num?)?.toInt() ?? 1100,
+              'imageAsset': (bp['image_url'] != null && bp['image_url'].toString().isNotEmpty)
+                  ? bp['image_url']
+                  : AppConstants.pujaGangaDiyaAsset,
+              'pandits': bp['pandits'] ?? '3 Vedic Purohits',
+              'duration': '${bp['duration_minutes'] ?? 60} mins',
+              'benefits': bp['benefits'] ?? 'Spiritual peace, obstacle removal, divine blessings.',
+              'inclusions': inclusions,
+            });
           }
         });
       }

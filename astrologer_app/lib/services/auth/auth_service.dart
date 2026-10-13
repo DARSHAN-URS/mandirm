@@ -282,15 +282,14 @@ class AuthService {
           phone: formattedPhone,
           email: cleanEmail,
           otp: cleanOtp,
-          role: 'astrologer',
         );
 
-        if (backendRes['success'] == true && backendRes['token'] != null) {
+        if (backendRes != null && backendRes['success'] == true && backendRes['token'] != null) {
           authToken = backendRes['token'] as String;
           userPayload = backendRes['user'] as Map<String, dynamic>?;
           debugPrint('[AuthService] Verified successfully via Backend Auth Provider!');
         } else {
-          throw Exception(backendRes['message'] ?? 'Invalid verification code');
+          throw Exception(backendRes?['message'] ?? 'Invalid verification code');
         }
       } catch (e) {
         debugPrint('[AuthService] Backend verifyOtp error: $e');

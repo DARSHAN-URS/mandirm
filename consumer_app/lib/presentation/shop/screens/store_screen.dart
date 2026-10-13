@@ -133,72 +133,46 @@ class _StoreScreenState extends State<StoreScreen> {
   }
 
   // Featured Products matching reference screenshot
-  final List<Map<String, dynamic>> _featuredProducts = [
-    {
-      'id': 'FP-01',
-      'title': 'Lord Ganesha Idol',
-      'subtitle': '5 inch (Brass)',
-      'price': 1299,
-      'originalPrice': 1699,
-      'badge': 'Bestseller',
-      'badgeBg': const Color(0xFFFFE082),
-      'badgeText': const Color(0xFF4A3000),
-      'asset': AppConstants.prodGaneshaAsset,
-      'category': 'idols',
-      'mandir': 'Siddhivinayak Sanctum Blessed',
-      'rating': 4.9,
-      'reviews': 428,
-      'description':
-          'Handcrafted 5-inch pure brass Lord Ganesha Idol, energized with sacred Ganapati Atharvashirsha Vedic chanting. Bestows wisdom, auspicious prosperity, and removes obstacles.',
-    },
-    {
-      'id': 'FP-02',
-      'title': 'Rudraksha Mala',
-      'subtitle': '108 Beads',
-      'price': 599,
-      'originalPrice': 799,
-      'badge': 'Popular',
-      'badgeBg': const Color(0xFFD32F2F),
-      'badgeText': Colors.white,
-      'asset': AppConstants.prodRudrakshaAsset,
-      'category': 'essentials',
-      'mandir': 'Kashi Vishwanath Consecrated',
-      'rating': 4.9,
-      'reviews': 612,
-      'description':
-          'Authentic 5-Mukhi Nepali Rudraksha Mala with 108+1 consecrated beads and sacred red tassel. Energized through Vedic Maha Rudra Abhishekam at holy Kashi.',
-    },
-    {
-      'id': 'FP-03',
-      'title': 'Puja Thali Set',
-      'subtitle': '7 Pieces (Brass)',
-      'price': 899,
-      'originalPrice': 1299,
-      'badge': null,
-      'asset': AppConstants.prodThaliAsset,
-      'category': 'samagri',
-      'mandir': 'Ayodhya Ram Janmabhoomi Blessed',
-      'rating': 4.8,
-      'reviews': 319,
-      'description':
-          'Complete 7-piece premium brass Puja Thali set including Diya, Agarbatti stand, Ghanti (bell), Panchamrit bowl, and sacred ritual spoon for daily home worship.',
-    },
-    {
-      'id': 'FP-04',
-      'title': 'Om Wall Plate',
-      'subtitle': '8 inch',
-      'price': 649,
-      'originalPrice': 999,
-      'badge': null,
-      'asset': AppConstants.prodOmPlateAsset,
-      'category': 'essentials',
-      'mandir': 'Haridwar Ganga Sanctum Blessed',
-      'rating': 4.8,
-      'reviews': 245,
-      'description':
-          'Sacred 8-inch Om Wall Plate crafted with antique golden brass finish and cosmic Vedic symmetry. Radiates positive vibrations, protection, and spiritual calm.',
-    },
-  ];
+  // Featured Products loaded exclusively from database
+  final List<Map<String, dynamic>> _featuredProducts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBackendProducts();
+  }
+
+  Future<void> _loadBackendProducts() async {
+    try {
+      final backendProducts = await ApiService().getProducts();
+      if (backendProducts.isNotEmpty && mounted) {
+        setState(() {
+          _featuredProducts.clear();
+          for (final bp in backendProducts) {
+            final id = bp['id']?.toString() ?? 'prod_${bp.hashCode}';
+            final catStr = (bp['category'] ?? 'idols').toString().toLowerCase();
+            _featuredProducts.add({
+              'id': id,
+              'title': bp['name'] ?? 'Sacred Item',
+              'subtitle': bp['material'] ?? bp['category'] ?? 'Consecrated Spiritual Item',
+              'price': (bp['price'] as num?)?.toInt() ?? 999,
+              'originalPrice': (bp['original_price'] as num?)?.toInt() ?? 1499,
+              'badge': bp['is_featured'] == true ? 'Bestseller' : null,
+              'badgeBg': const Color(0xFFFFE082),
+              'badgeText': const Color(0xFF4A3000),
+              'asset': bp['image_url'] ?? AppConstants.prodRudrakshaAsset,
+              'category': catStr,
+              'mandir': 'Vedic Temple Blessed',
+              'rating': (bp['rating'] as num?)?.toDouble() ?? 4.9,
+              'reviews': (bp['reviews_count'] as num?)?.toInt() ?? 108,
+              'description': bp['description'] ??
+                  'Pure authentic spiritual store item consecrated at sacred temple.',
+            });
+          }
+        });
+      }
+    } catch (_) {}
+  }
 
   // Festival Specials
   List<Map<String, dynamic>> get _festivalSpecials {
@@ -538,7 +512,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                   ),
                                   onPressed: () {
                                     Navigator.pop(ctx);
-                                    _proceedToCheckout(_cartItems.first);
+                                    _proceedToCartCheckout(List<Map<String, dynamic>>.from(_cartItems));
                                   },
                                   child: Row(
                                     children: [
@@ -579,7 +553,8 @@ class _StoreScreenState extends State<StoreScreen> {
     );
   }
 
-  void _proceedToCheckout(Map<String, dynamic> product) {
+  void _proceedToCartCheckout(List<Map<String, dynamic>> items) {
+    if (items.isEmpty) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -587,6 +562,13 @@ class _StoreScreenState extends State<StoreScreen> {
       builder: (ctx) {
         final addressController = TextEditingController(
           text: 'Flat 402, Shanti Vihar, Mumbai, Maharashtra 400050',
+        );
+        final int grandTotal = items.fold<int>(
+          0,
+          (sum, item) =>
+              sum +
+              (((item['price'] as num?)?.toInt() ?? 499) *
+                  ((item['qty'] as int?) ?? 1)),
         );
 
         return Container(
@@ -608,7 +590,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Sacred Order Checkout 📦',
+                    'Cart Checkout (${items.length} items) 📦',
                     style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -646,50 +628,32 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
                 child: Column(
                   children: [
+                    ...items.map((it) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${it['title']} (x${it['qty'] ?? 1})',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(fontSize: 12),
+                            ),
+                          ),
+                          Text(
+                            '₹${((it['price'] as num?)?.toInt() ?? 499) * ((it['qty'] as int?) ?? 1)}',
+                            style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    )),
+                    const Divider(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Item Total', style: GoogleFonts.poppins(fontSize: 13)),
-                        Text('₹${product['price']}',
-                            style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Vedic Consecration & Packing',
-                            style: GoogleFonts.poppins(
-                                fontSize: 12, color: Colors.grey.shade700)),
-                        Text('FREE',
-                            style: GoogleFonts.poppins(
-                                color: AppColors.success, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Doorstep SpeedPost Courier',
-                            style: GoogleFonts.poppins(
-                                fontSize: 12, color: Colors.grey.shade700)),
-                        Text('FREE',
-                            style: GoogleFonts.poppins(
-                                color: AppColors.success, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const Divider(height: 14),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Payable',
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold, fontSize: 14)),
-                        Text('₹${product['price']}',
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: _primaryMaroon)),
+                        Text('Total Payable', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text('₹$grandTotal', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16, color: _primaryMaroon)),
                       ],
                     ),
                   ],
@@ -703,51 +667,60 @@ class _StoreScreenState extends State<StoreScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _primaryMaroon,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () {
                     Navigator.pop(ctx);
-                    final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch % 100000}';
-                    final trackingNo = 'BLUEDART-${DateTime.now().millisecondsSinceEpoch % 9000000}';
+                    final addr = addressController.text.trim();
 
-                    final orderData = {
-                      'id': orderId,
-                      'title': product['title'],
-                      'mandir': product['mandir'] ?? 'Mandirm Divine Store',
-                      'orderDate': 'Today, Just Now',
-                      'status': 'Processing',
-                      'currentStep': 0,
-                      'trackingNumber': trackingNo,
-                      'carrier': 'BlueDart Express',
-                      'expectedDelivery': 'In 2-3 Days',
-                      'address': addressController.text.trim(),
-                    };
+                    for (final product in items) {
+                      final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+                      final trackingNo = 'BLUEDART-${DateTime.now().millisecondsSinceEpoch % 9000000}';
+                      final itemPrice = (product['price'] as num?)?.toDouble() ?? 499.0;
+                      final qty = (product['qty'] as int?) ?? 1;
 
-                    DevoteeDataService().addPrasadOrder(orderData);
-                    DevoteeDataService().addBooking({
-                      'id': orderId,
-                      'title': product['title'],
-                      'mandir': product['mandir'],
-                      'date': 'Today, Just Now',
-                      'amount': '₹${product['price']}',
-                      'status': 'Confirmed',
-                      'gotra': 'Devotee Gotra',
-                      'devoteeName': 'Sunil Kumar',
-                      'pandit': 'Mandirm Store Sanctum',
-                      'prasadTracking': trackingNo,
-                      'prasadStatus': 'Processing Consecration',
-                    });
+                      final orderData = {
+                        'id': orderId,
+                        'title': product['title'],
+                        'mandir': product['mandir'] ?? 'Mandirm Divine Store',
+                        'orderDate': 'Today, Just Now',
+                        'status': 'Processing Consecration',
+                        'currentStep': 0,
+                        'trackingNumber': trackingNo,
+                        'carrier': 'BlueDart Express',
+                        'expectedDelivery': 'In 2-3 Days',
+                        'address': addr,
+                      };
 
-                    // Persist to FastAPI backend
-                    ApiService().placeOrder({
-                      'product_id': product['id'] ?? 'prod_custom',
-                      'quantity': 1,
-                      'total_amount': product['price'],
-                      'shipping_address': addressController.text.trim(),
-                    }).catchError((e) {
-                      debugPrint('[StoreScreen] Backend note: $e');
-                      return null;
+                      DevoteeDataService().addPrasadOrder(orderData);
+                      DevoteeDataService().addBooking({
+                        'id': orderId,
+                        'title': product['title'],
+                        'mandir': product['mandir'] ?? 'Mandirm Divine Store',
+                        'date': 'Today, Auspicious Muhurat',
+                        'amount': '₹${(itemPrice * qty).toInt()}',
+                        'status': 'Confirmed',
+                        'gotra': 'Devotee Gotra',
+                        'devoteeName': 'Sunil Kumar',
+                        'pandit': 'Mandirm Store Sanctum',
+                        'prasadTracking': trackingNo,
+                        'prasadStatus': 'Processing Consecration',
+                      });
+
+                      ApiService().placeOrder({
+                        'product_id': product['id'] ?? 'prod_custom',
+                        'quantity': qty,
+                        'total_amount': itemPrice * qty,
+                        'shipping_address': addr,
+                      }).catchError((e) {
+                        debugPrint('[StoreScreen] Backend note: $e');
+                        return null;
+                      });
+                    }
+
+                    setState(() {
+                      _cartItems.clear();
+                      _cartCount = 0;
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -757,44 +730,21 @@ class _StoreScreenState extends State<StoreScreen> {
                             Icon(Icons.check_circle, color: Colors.white),
                             SizedBox(width: 10),
                             Expanded(
-                              child: Text(
-                                  'Order Placed! Holy item will be consecrated and shipped in 24h.'),
+                              child: Text('All items ordered! Holy items will be consecrated and shipped in 24h.'),
                             ),
                           ],
                         ),
                         action: SnackBarAction(
                           label: 'TRACK',
                           textColor: const Color(0xFFFDCB06),
-                          onPressed: () {
-                            _openMyOrders();
-                          },
+                          onPressed: _openMyOrders,
                         ),
                         backgroundColor: AppColors.success,
                         duration: const Duration(seconds: 4),
                       ),
                     );
                   },
-                  child: Text('Confirm Order • Pay ₹${product['price']}',
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600, fontSize: 15)),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    _openMyOrders();
-                  },
-                  icon: const Icon(Icons.history_rounded, size: 16, color: _primaryMaroon),
-                  label: Text(
-                    'View My Prasad & Store Orders',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: _primaryMaroon,
-                    ),
-                  ),
+                  child: Text('Confirm All Items • Pay ₹$grandTotal', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 15)),
                 ),
               ),
             ],
@@ -1264,7 +1214,7 @@ class _StoreScreenState extends State<StoreScreen> {
               final deity = _deityIdols[index];
               return GestureDetector(
                 onTap: () {
-                  // Filter or show product
+                  if (_featuredProducts.isEmpty) return;
                   final match = _featuredProducts.firstWhere(
                     (p) => p['category'] == deity['category'],
                     orElse: () => _featuredProducts[0],
@@ -1344,7 +1294,9 @@ class _StoreScreenState extends State<StoreScreen> {
         borderRadius: BorderRadius.circular(10),
         child: GestureDetector(
           onTap: () {
-            _openProductDetailModal(_featuredProducts[0]);
+            if (_featuredProducts.isNotEmpty) {
+              _openProductDetailModal(_featuredProducts[0]);
+            }
           },
           child: AppImage.asset(
             AppConstants.storePromoBannerAsset,

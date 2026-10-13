@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../services/supabase_service.dart';
+import '../../../services/api_service.dart';
 import '../../astrologers/screens/astrologers_screen.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
@@ -33,6 +34,27 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentTabIndex = 0;
   String? _selectedMandirFilter;
+  List<Map<String, dynamic>> _realTemples = [];
+  List<Map<String, dynamic>> _realPujas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLiveBackendData();
+  }
+
+  Future<void> _loadLiveBackendData() async {
+    try {
+      final temples = await ApiService().getTemples(limit: 6);
+      final pujas = await ApiService().getPujas(limit: 6);
+      if (mounted) {
+        setState(() {
+          if (temples.isNotEmpty) _realTemples = temples;
+          if (pujas.isNotEmpty) _realPujas = pujas;
+        });
+      }
+    } catch (_) {}
+  }
 
   void _openGlobalSearch() {
     showDialog(
@@ -243,44 +265,121 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              bottomNavigationBar: NavigationBar(
-                selectedIndex: _currentTabIndex,
-                onDestinationSelected: (index) {
-                  setState(() {
-                    _currentTabIndex = index;
-                    if (index != 1) _selectedMandirFilter = null;
-                  });
-                },
-                destinations: [
-                  NavigationDestination(
-                    icon: const Icon(Icons.home_outlined),
-                    selectedIcon: const Icon(Icons.home_rounded, color: AppColors.saffronPrimary),
-                    label: AppStrings.t('home'),
+              bottomNavigationBar: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x0F000000),
+                      blurRadius: 16,
+                      offset: Offset(0, -4),
+                    ),
+                  ],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildBottomNavItem(
+                          index: 0,
+                          icon: Icons.home_outlined,
+                          activeIcon: Icons.home_rounded,
+                          label: AppStrings.t('home'),
+                        ),
+                        _buildBottomNavItem(
+                          index: 1,
+                          icon: Icons.spa_outlined,
+                          activeIcon: Icons.spa_rounded,
+                          label: AppStrings.t('pujas'),
+                        ),
+                        _buildBottomNavItem(
+                          index: 2,
+                          icon: Icons.brightness_7_outlined,
+                          activeIcon: Icons.brightness_7_rounded,
+                          label: AppStrings.t('astrology'),
+                        ),
+                        _buildBottomNavItem(
+                          index: 3,
+                          icon: Icons.volunteer_activism_outlined,
+                          activeIcon: Icons.volunteer_activism_rounded,
+                          label: AppStrings.t('chadhawa'),
+                        ),
+                        _buildBottomNavItem(
+                          index: 4,
+                          icon: Icons.shopping_cart_outlined,
+                          activeIcon: Icons.shopping_cart_rounded,
+                          label: AppStrings.t('puja_store'),
+                        ),
+                      ],
+                    ),
                   ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.spa_outlined),
-                    selectedIcon: const Icon(Icons.spa_rounded, color: AppColors.saffronPrimary),
-                    label: AppStrings.t('pujas'),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.brightness_7_outlined),
-                    selectedIcon: const Icon(Icons.brightness_7_rounded, color: AppColors.sacredCrimson),
-                    label: AppStrings.t('astrology'),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.volunteer_activism_outlined),
-                    selectedIcon: const Icon(Icons.volunteer_activism_rounded, color: AppColors.sacredCrimson),
-                    label: AppStrings.t('chadhawa'),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.shopping_cart_outlined),
-                    selectedIcon: const Icon(Icons.shopping_cart_rounded, color: AppColors.saffronPrimary),
-                    label: AppStrings.t('puja_store'),
-                  ),
-                ],
+                ),
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavItem({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+  }) {
+    final isSelected = _currentTabIndex == index;
+    const activeColor = Color(0xFF7A0C16);
+    const inactiveColor = Color(0xFF8E8E93);
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _currentTabIndex = index;
+            if (index != 1) _selectedMandirFilter = null;
+          });
+        },
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                size: 24,
+                color: isSelected ? activeColor : inactiveColor,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected ? activeColor : inactiveColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                height: 3.5,
+                width: isSelected ? 24 : 0,
+                decoration: BoxDecoration(
+                  color: isSelected ? activeColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1144,26 +1243,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMandirsHorizontalList() {
-    final mandirs = [
-      {
-        'name': 'Kashi Vishwanath Mandir',
-        'city': 'Varanasi, UP',
-        'deity': 'Lord Shiva',
-        'status': 'Live Darshan Open',
-      },
-      {
-        'name': 'Mahakaleshwar Jyotirlinga',
-        'city': 'Ujjain, MP',
-        'deity': 'Mahakal',
-        'status': 'Bhasma Aarti Available',
-      },
-      {
-        'name': 'Tirupati Balaji Mandir',
-        'city': 'Tirumala, AP',
-        'deity': 'Lord Venkateswara',
-        'status': 'Seva Booking Open',
-      },
-    ];
+    final List<Map<String, String>> mandirs = _realTemples.map((t) => {
+      'name': (t['name'] ?? 'Sacred Temple').toString(),
+      'city': (t['city'] != null ? '${t['city']}, ${t['state'] ?? ''}' : 'Holy City').toString(),
+      'deity': (t['deity'] ?? 'Lord Shiva').toString(),
+      'status': 'Live Darshan Open',
+    }).toList();
+
+    if (mandirs.isEmpty) {
+      return const SizedBox(
+        height: 120,
+        child: Center(
+          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.saffronPrimary),
+        ),
+      );
+    }
 
     return SizedBox(
       height: 160,
@@ -1273,20 +1367,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPujaCards() {
-    final pujas = [
-      {
-        'title': 'Maha Rudrabhishek with 108 Bilva Patra',
-        'mandir': 'Kashi Vishwanath, Varanasi',
-        'date': 'Tomorrow, 08:00 AM',
-        'price': '₹ 1,100',
-      },
-      {
-        'title': 'Navchandi Shatru & Graha Shanti Homa',
-        'mandir': 'Kamakhya Devi, Guwahati',
-        'date': 'Coming Sunday',
-        'price': '₹ 2,501',
-      },
-    ];
+    final List<Map<String, String>> pujas = _realPujas.map((p) => {
+      'title': (p['title'] ?? 'Vedic Puja').toString(),
+      'mandir': (p['temple_name'] ?? 'Temple Sanctum').toString(),
+      'date': 'Daily Auspicious Muhurat',
+      'price': '₹ ${p['price'] ?? 1100}',
+    }).toList();
+
+    if (pujas.isEmpty) {
+      return const SizedBox(
+        height: 80,
+        child: Center(
+          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.saffronPrimary),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),

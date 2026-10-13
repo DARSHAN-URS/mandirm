@@ -43,22 +43,20 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          color: AppColors.headerBg,
-          border: Border(
-            top: BorderSide(color: AppColors.lightBorder, width: 1.2),
-          ),
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
-              color: Color(0x0C000000),
-              blurRadius: 10,
-              offset: Offset(0, -3),
+              color: Color(0x0F000000),
+              blurRadius: 16,
+              offset: Offset(0, -4),
             ),
           ],
         ),
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            padding: const EdgeInsets.only(top: 8, bottom: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -109,6 +107,8 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
     int? badgeCount,
   }) {
     final isSelected = _currentIndex == index;
+    const activeColor = AppColors.primaryMaroon;
+    const inactiveColor = Color(0xFF8E8E93);
 
     return Expanded(
       child: InkWell(
@@ -119,15 +119,8 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
         },
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: isSelected
-                ? AppColors.primaryMaroon.withOpacity(0.08)
-                : Colors.transparent,
-          ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -136,10 +129,8 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
                 children: [
                   Icon(
                     isSelected ? activeIcon : icon,
-                    size: 23,
-                    color: isSelected
-                        ? AppColors.primaryMaroon
-                        : const Color(0xFF8C7B70),
+                    size: 24,
+                    color: isSelected ? activeColor : inactiveColor,
                   ),
                   if (badgeCount != null && badgeCount > 0)
                     Positioned(
@@ -151,7 +142,7 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
                           vertical: 1.5,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryMaroon,
+                          color: activeColor,
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: const [
                             BoxShadow(
@@ -180,9 +171,18 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected
-                      ? AppColors.primaryMaroon
-                      : const Color(0xFF8C7B70),
+                  color: isSelected ? activeColor : inactiveColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                height: 3.5,
+                width: isSelected ? 24 : 0,
+                decoration: BoxDecoration(
+                  color: isSelected ? activeColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ],

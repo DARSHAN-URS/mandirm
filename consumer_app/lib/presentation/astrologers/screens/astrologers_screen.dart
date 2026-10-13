@@ -50,115 +50,55 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
     ];
   }
 
-  // Astrologers list including 24/7 AI Jyotish
+  // 24/7 AI Jyotish Bot
+  static final Map<String, dynamic> _aiAstrologerItem = {
+    'id': 'ast_ai_jyotish',
+    'name': 'Acharya AI Jyotish (एआई ज्योतिषी)',
+    'badge': 'Instant 24x7 AI',
+    'badgeIcon': Icons.auto_awesome_rounded,
+    'isVerified': true,
+    'isAi': true,
+    'specialties': 'AI Kundli Analysis • Real-time Vedic Predictions • Dosha Remedies • 24/7 Instant',
+    'categories': ['All Astrologers', 'AI Jyotish', 'Vedic Astrology', 'Kundli Analysis'],
+    'topics': ['Love & Relationships', 'Career & Jobs', 'Wealth & Prosperity', 'Health', 'Home & Vastu'],
+    'rating': '4.9',
+    'reviews': '(28,500+ reviews)',
+    'sessions': '52,800 sessions',
+    'experience': 'Vedic AI Intelligence',
+    'expNumeric': 99,
+    'languages': 'Hindi, English, Sanskrit',
+    'isOnline': true,
+    'price': 'FREE Instant',
+    'priceNumeric': 0,
+    'originalPrice': '₹ 22/min',
+    'imageAsset': AppConstants.logoAsset,
+  };
+
+  // Only real astrologers from database + 24/7 AI Jyotish
   final List<Map<String, dynamic>> _allAstrologers = [
-    {
-      'id': 'ast_ai_jyotish',
-      'name': 'Acharya AI Jyotish (एआई ज्योतिषी)',
-      'badge': 'Instant 24x7 AI',
-      'badgeIcon': Icons.auto_awesome_rounded,
-      'isVerified': true,
-      'isAi': true,
-      'specialties': 'AI Kundli Analysis • Real-time Vedic Predictions • Dosha Remedies • 24/7 Instant',
-      'categories': ['All Astrologers', 'AI Jyotish', 'Vedic Astrology', 'Kundli Analysis'],
-      'topics': ['Love & Relationships', 'Career & Jobs', 'Wealth & Prosperity', 'Health', 'Home & Vastu'],
-      'rating': '4.9',
-      'reviews': '(28,500+ reviews)',
-      'sessions': '52,800 sessions',
-      'experience': 'Vedic AI Intelligence',
-      'expNumeric': 99,
-      'languages': 'Hindi, English, Sanskrit',
-      'isOnline': true,
-      'price': 'FREE Instant',
-      'priceNumeric': 0,
-      'originalPrice': '₹ 22/min',
-      'imageAsset': AppConstants.logoAsset,
-    },
-    {
-      'id': 'ast_rajesh',
-      'name': 'Pandit Acharya Rajesh Sharma',
-      'badge': 'Top Rated',
-      'badgeIcon': Icons.emoji_events_rounded,
-      'isVerified': true,
-      'specialties': 'Vedic Astrology • Kundli Analysis • Marriage • Career',
-      'categories': ['All Astrologers', 'Vedic Astrology', 'Kundli Analysis'],
-      'topics': ['Career & Jobs', 'Love & Relationships'],
-      'rating': '4.9',
-      'reviews': '(12,350+ reviews)',
-      'sessions': '1180 sessions',
-      'experience': '15+ Years Experience',
-      'expNumeric': 15,
-      'languages': 'Hindi, English',
-      'isOnline': true,
-      'price': '₹ 22/min',
-      'priceNumeric': 22,
-      'originalPrice': '₹ 33',
-      'imageAsset': AppConstants.astroRajeshAsset,
-    },
-    {
-      'id': 'ast_shraddha',
-      'name': 'Dr. Shraddha Tripathi',
-      'badge': 'Rising Star',
-      'badgeIcon': Icons.star_rounded,
-      'isVerified': true,
-      'specialties': 'Love & Relationships • Vedic Life Guidance • Family Issues',
-      'categories': ['All Astrologers', 'Vedic Astrology'],
-      'topics': ['Love & Relationships', 'Health'],
-      'rating': '4.8',
-      'reviews': '(9,870+ reviews)',
-      'sessions': '1145 sessions',
-      'experience': '12+ Years Experience',
-      'expNumeric': 12,
-      'languages': 'Hindi',
-      'isOnline': true,
-      'price': '₹ 22/min',
-      'priceNumeric': 22,
-      'originalPrice': '₹ 33',
-      'imageAsset': AppConstants.astroShraddhaAsset,
-    },
-    {
-      'id': 'ast_nishant',
-      'name': 'Acharya Nishant Bhatnagar',
-      'badge': 'Specialist',
-      'badgeIcon': Icons.workspace_premium_rounded,
-      'isVerified': true,
-      'specialties': 'Home & Vastu • Career • Wealth • Health',
-      'categories': ['All Astrologers', 'Kundli Analysis', 'Numerology'],
-      'topics': ['Home & Vastu', 'Career & Jobs', 'Wealth & Prosperity', 'Health'],
-      'rating': '4.8',
-      'reviews': '(11,420+ reviews)',
-      'sessions': '982 sessions',
-      'experience': '10+ Years Experience',
-      'expNumeric': 10,
-      'languages': 'Hindi, English',
-      'isOnline': true,
-      'price': '₹ 25/min',
-      'priceNumeric': 25,
-      'originalPrice': '₹ 33',
-      'imageAsset': AppConstants.astroNishantAsset,
-    },
-    {
-      'id': 'ast_shakti',
-      'name': 'Tarot Shakti Shukla',
-      'badge': 'Popular',
-      'badgeIcon': Icons.favorite_rounded,
-      'isVerified': true,
-      'specialties': 'Tarot Card Reading • Love & Relationships • Career • Life Guidance',
-      'categories': ['All Astrologers', 'Tarot Cards'],
-      'topics': ['Love & Relationships', 'Career & Jobs'],
-      'rating': '4.9',
-      'reviews': '(3,973+ reviews)',
-      'sessions': '3973 sessions',
-      'experience': '12+ Years Experience',
-      'expNumeric': 12,
-      'languages': 'Hindi, English',
-      'isOnline': true,
-      'price': '₹ 30/min',
-      'priceNumeric': 30,
-      'originalPrice': '₹ 33',
-      'imageAsset': AppConstants.astroShaktiAsset,
-    },
+    _aiAstrologerItem,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAstrologers();
+  }
+
+  Future<void> _loadAstrologers() async {
+    try {
+      final dbAstros = await ApiService().getAstrologers();
+      if (dbAstros.isNotEmpty && mounted) {
+        setState(() {
+          _allAstrologers.clear();
+          _allAstrologers.add(_aiAstrologerItem);
+          for (final raw in dbAstros) {
+            _allAstrologers.add(_normalizeAstrologer(raw));
+          }
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {

@@ -16,32 +16,10 @@ class AstrologerEarningsScreen extends StatefulWidget {
 }
 
 class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
-  double _walletBalance = 18750.0;
-  double _pendingSettlement = 2450.0;
-  int _completedConsultations = 6;
-  final List<Map<String, dynamic>> _payoutTransactions = [
-    {
-      'id': 'TXN-882193',
-      'desc': 'Settled to HDFC •••• 8912',
-      'amount': '₹14,500',
-      'date': '25 Sep 2026',
-      'is_success': true,
-    },
-    {
-      'id': 'TXN-774011',
-      'desc': 'Settled to HDFC •••• 8912',
-      'amount': '₹12,800',
-      'date': '18 Sep 2026',
-      'is_success': true,
-    },
-    {
-      'id': 'TXN-661902',
-      'desc': 'Settled to HDFC •••• 8912',
-      'amount': '₹9,450',
-      'date': '11 Sep 2026',
-      'is_success': true,
-    },
-  ];
+  double _walletBalance = 0.0;
+  double _pendingSettlement = 0.0;
+  int _completedConsultations = 0;
+  final List<Map<String, dynamic>> _payoutTransactions = [];
 
   @override
   void initState() {
@@ -55,25 +33,27 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
       final res = await ApiService().getAstrologerEarnings(astroId);
       if (res != null && mounted) {
         setState(() {
-          _walletBalance = (res['wallet_balance'] as num?)?.toDouble() ?? _walletBalance;
-          _pendingSettlement = (res['total_earned'] as num?)?.toDouble() ?? _pendingSettlement;
-          _completedConsultations = (res['completed_consultations'] as num?)?.toInt() ?? _completedConsultations;
+          _walletBalance = (res['wallet_balance'] as num?)?.toDouble() ?? 0.0;
+          _pendingSettlement = (res['total_earned'] as num?)?.toDouble() ?? 0.0;
+          _completedConsultations = (res['completed_consultations'] as num?)?.toInt() ?? 0;
         });
       }
     } catch (_) {}
 
     try {
       final payouts = await ApiService().getAstrologerPayouts(astroId);
-      if (payouts.isNotEmpty && mounted) {
+      if (mounted) {
         setState(() {
           _payoutTransactions.clear();
           for (var p in payouts) {
             _payoutTransactions.add({
               'id': p['id']?.toString() ?? 'TXN-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
-              'desc': p['description']?.toString() ?? 'Settled to HDFC •••• 8912',
+              'desc': p['bank_account'] != null
+                  ? 'Settled to Bank •••• ${p['bank_account'].toString().length > 4 ? p['bank_account'].toString().substring(p['bank_account'].toString().length - 4) : 'Acct'}'
+                  : (p['upi_id'] != null ? 'Settled to UPI ${p['upi_id']}' : 'Bank Settlement'),
               'amount': '₹${((p['amount'] as num?)?.toDouble() ?? 0.0).toStringAsFixed(0)}',
               'date': p['created_at']?.toString().split('T').first ?? 'Recent',
-              'is_success': (p['status'] ?? 'settled').toString().toLowerCase() != 'failed',
+              'is_success': (p['status'] ?? 'Processing').toString().toLowerCase() != 'failed',
             });
           }
         });
@@ -405,15 +385,31 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                     style: TextStyle(fontFamily: 'Headway', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 12),
-                  ..._payoutTransactions.map(
-                    (tx) => _buildPayoutRow(
-                      tx['id'] as String,
-                      tx['desc'] as String,
-                      tx['amount'] as String,
-                      tx['date'] as String,
-                      tx['is_success'] as bool,
+                  if (_payoutTransactions.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.lightBorder),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'No payout withdrawals requested yet.',
+                          style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textSecondary),
+                        ),
+                      ),
+                    )
+                  else
+                    ..._payoutTransactions.map(
+                      (tx) => _buildPayoutRow(
+                        tx['id'] as String,
+                        tx['desc'] as String,
+                        tx['amount'] as String,
+                        tx['date'] as String,
+                        tx['is_success'] as bool,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

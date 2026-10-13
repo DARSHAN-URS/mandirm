@@ -16,7 +16,7 @@ class AstrologerHistoryScreen extends StatefulWidget {
 }
 
 class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
-  final List<PastConsultation> _history = List.from(PastConsultation.mockHistory);
+  final List<PastConsultation> _history = [];
   String _filterType = 'all'; // all, audio, video
 
   @override
@@ -29,20 +29,18 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
     final astroId = AuthService().currentProfile?.id ?? 'astro_1';
     try {
       final cons = await ApiService().getAstrologerConsultations(astroId);
-      if (cons.isNotEmpty && mounted) {
-        final List<PastConsultation> fetched = [];
-        for (var c in cons) {
-          final status = (c['status'] ?? 'completed').toString().toLowerCase();
-          if (status == 'completed') {
-            fetched.add(PastConsultation.fromJson(c));
-          }
+      final List<PastConsultation> fetched = [];
+      for (var c in cons) {
+        final status = (c['status'] ?? 'completed').toString().toLowerCase();
+        if (status == 'completed') {
+          fetched.add(PastConsultation.fromJson(c));
         }
-        if (fetched.isNotEmpty) {
-          setState(() {
-            _history.clear();
-            _history.addAll(fetched);
-          });
-        }
+      }
+      if (mounted) {
+        setState(() {
+          _history.clear();
+          _history.addAll(fetched);
+        });
       }
     } catch (e) {
       debugPrint('[HistoryScreen] Error loading history: $e');

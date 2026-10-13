@@ -300,31 +300,6 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchBackendAstrologers();
-  }
-
-  Future<void> _fetchBackendAstrologers() async {
-    try {
-      final backendAstros = await ApiService().getAstrologers();
-      if (backendAstros.isNotEmpty && mounted) {
-        setState(() {
-          for (final ba in backendAstros) {
-            final normalized = _normalizeAstrologer(ba);
-            final id = normalized['id'] as String;
-            final idx = _allAstrologers.indexWhere((a) => a['id'] == id || a['name'] == normalized['name']);
-            if (idx >= 0) {
-              _allAstrologers[idx] = {..._allAstrologers[idx], ...normalized};
-            } else {
-              _allAstrologers.add(normalized);
-            }
-          }
-        });
-      }
-    } catch (_) {}
-  }
 
   @override
   Widget build(BuildContext context) {

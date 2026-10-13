@@ -858,12 +858,20 @@ class ApiService {
   // FAQS
   // ─────────────────────────────────────────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> getFAQs({String? category}) async {
+  Future<List<Map<String, dynamic>>> getFAQs({
+    String? category,
+    String? serviceType,
+    String? serviceId,
+    int? limit,
+  }) async {
     try {
       final response = await _dio.get(
         '/faqs',
         queryParameters: {
           if (category != null) 'category': category,
+          if (serviceType != null) 'service_type': serviceType,
+          if (serviceId != null) 'service_id': serviceId,
+          if (limit != null) 'limit': limit,
         },
       );
       final data = response.data;
@@ -872,5 +880,13 @@ class ApiService {
       }
     } catch (_) {}
     return [];
+  }
+
+  String getPujaCertificateUrl(String referenceId) {
+    return '${AppConstants.backendUrl}/certificates/puja/$referenceId';
+  }
+
+  String getChaDhawaCertificateUrl(String referenceId) {
+    return '${AppConstants.backendUrl}/certificates/chadhawa/$referenceId';
   }
 }

@@ -19,12 +19,12 @@ interface Product {
 }
 
 const PRODUCT_IMAGE_PRESETS = [
-  { label: 'Sphatik Shivling', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Royal Brass Akhand Diya', url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Nepali Rudraksha Mala', url: 'https://images.unsplash.com/photo-1610444583713-176865668efb?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Pure Mysore Dhoop Cones', url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Siddh Gomati Chakra Box', url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Pure Silver Coin (20g)', url: 'https://images.unsplash.com/photo-1590076212472-a7d1891b05ff?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Sphatik Shivling', url: '/images/products/prod_sphatik_shivling.jpg' },
+  { label: 'Royal Brass Akhand Diya', url: '/images/products/prod_akhand_diya.jpg' },
+  { label: 'Nepali Rudraksha Mala', url: '/images/products/prod_rudraksha_mala.jpg' },
+  { label: 'Pure Mysore Dhoop Cones', url: '/images/products/prod_mysore_dhoop.jpg' },
+  { label: 'Siddh Gomati Chakra Box', url: '/images/products/prod_gomati_chakra.jpg' },
+  { label: 'Pure Silver Coin (20g)', url: '/images/products/prod_silver_coin.jpg' },
 ];
 
 const CATEGORIES = [
@@ -339,12 +339,27 @@ export default function ProductsPage() {
                 {/* Product Image */}
                 <div className="relative h-44 w-full bg-gray-100 overflow-hidden">
                   <img
-                    src={item.image_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80'}
+                    src={
+                      item.image_url && !item.image_url.includes('1544005313-94ddf0286df2') && !item.image_url.includes('1509198397868') && !item.image_url.includes('1610444583713') && !item.image_url.includes('1517841905240') && !item.image_url.includes('1599488615731') && !item.image_url.includes('1590076212472')
+                        ? item.image_url
+                        : item.id === 'prod_1'
+                        ? '/images/products/prod_sphatik_shivling.jpg'
+                        : item.id === 'prod_2'
+                        ? '/images/products/prod_akhand_diya.jpg'
+                        : item.id === 'prod_3'
+                        ? '/images/products/prod_rudraksha_mala.jpg'
+                        : item.id === 'prod_4'
+                        ? '/images/products/prod_mysore_dhoop.jpg'
+                        : item.id === 'prod_5'
+                        ? '/images/products/prod_gomati_chakra.jpg'
+                        : item.id === 'prod_6'
+                        ? '/images/products/prod_silver_coin.jpg'
+                        : '/images/products/prod_sphatik_shivling.jpg'
+                    }
                     alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80';
+                      (e.target as HTMLImageElement).src = '/images/products/prod_sphatik_shivling.jpg';
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>

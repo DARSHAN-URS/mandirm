@@ -102,7 +102,10 @@ export default function CertificatesPage() {
   const [activeTab, setActiveTab] = useState<CertType>('puja');
   const [search, setSearch] = useState('');
 
-  const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+  const API_BASE =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    (process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '') : '') ||
+    'https://api.mandirm.in';
   const ADMIN_TOKEN =
     typeof window !== 'undefined' ? localStorage.getItem('adminToken') || '' : '';
 

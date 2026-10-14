@@ -20,12 +20,13 @@ interface Temple {
 }
 
 const TEMPLE_IMAGE_PRESETS = [
-  { label: 'Kashi Vishwanath', url: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Tirupati Balaji', url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Siddhivinayak', url: 'https://images.unsplash.com/photo-1609358905596-f94632a67307?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Mahakaleshwar', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Vaishno Devi', url: 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Somnath Dham', url: 'https://images.unsplash.com/photo-1590076212472-a7d1891b05ff?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Kashi Vishwanath', url: '/images/temples/kashi_vishwanath.jpg' },
+  { label: 'Tirupati Balaji', url: '/images/temples/tirupati_balaji.jpg' },
+  { label: 'Siddhivinayak', url: '/images/temples/siddhivinayak.jpg' },
+  { label: 'Mahakaleshwar', url: '/images/temples/mahakaleshwar.jpg' },
+  { label: 'Vaishno Devi', url: '/images/temples/vaishno_devi.jpg' },
+  { label: 'Somnath Dham', url: '/images/temples/somnath.jpg' },
+  { label: 'Kedarnath Dham', url: '/images/temples/kedarnath.jpg' },
 ];
 
 export default function TemplesPage() {
@@ -295,12 +296,27 @@ export default function TemplesPage() {
                 {/* Temple Banner Image */}
                 <div className="relative h-44 w-full bg-gray-100 overflow-hidden">
                   <img
-                    src={t.image_url || 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=600&q=80'}
+                    src={
+                      t.image_url && !t.image_url.includes('1561361513-2d000a50f0dc') && !t.image_url.includes('1544005313-94ddf0286df2') && !t.image_url.includes('1609358905596') && !t.image_url.includes('1590076212472')
+                        ? t.image_url
+                        : t.id === 'temple_1'
+                        ? '/images/temples/kashi_vishwanath.jpg'
+                        : t.id === 'temple_2'
+                        ? '/images/temples/tirupati_balaji.jpg'
+                        : t.id === 'temple_3'
+                        ? '/images/temples/siddhivinayak.jpg'
+                        : t.id === 'temple_4'
+                        ? '/images/temples/mahakaleshwar.jpg'
+                        : t.id === 'temple_5'
+                        ? '/images/temples/vaishno_devi.jpg'
+                        : t.id === 'temple_6'
+                        ? '/images/temples/somnath.jpg'
+                        : '/images/temples/kashi_vishwanath.jpg'
+                    }
                     alt={t.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=600&q=80';
+                      (e.target as HTMLImageElement).src = '/images/temples/kashi_vishwanath.jpg';
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>

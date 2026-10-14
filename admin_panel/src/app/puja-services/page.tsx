@@ -20,12 +20,12 @@ interface PujaService {
 }
 
 const PUJA_IMAGE_PRESETS = [
-  { label: 'Rudrabhishek Lingam', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Ganesha Homam', url: 'https://images.unsplash.com/photo-1609358905596-f94632a67307?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Tirupati Kalyanotsavam', url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Vedic Havan Agni', url: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Chandi Path Durga', url: 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?auto=format&fit=crop&w=800&q=80' },
-  { label: 'Somnath Navgrah Shanti', url: 'https://images.unsplash.com/photo-1590076212472-a7d1891b05ff?auto=format&fit=crop&w=800&q=80' },
+  { label: 'Rudrabhishek Lingam', url: '/images/pujas/puja_rudrabhishek.jpg' },
+  { label: 'Ganesha Homam', url: '/images/pujas/puja_ganesha_homam.jpg' },
+  { label: 'Tirupati Kalyanotsavam', url: '/images/pujas/puja_venkateswara.jpg' },
+  { label: 'Kaal Sarp Shanti', url: '/images/pujas/puja_kaal_sarp.jpg' },
+  { label: 'Chandi Path Durga', url: '/images/pujas/puja_chandi_path.jpg' },
+  { label: 'Navgrah Shanti Havan', url: '/images/pujas/puja_navgrah_shanti.jpg' },
 ];
 
 const CATEGORIES = [
@@ -355,12 +355,27 @@ export default function PujaServicesPage() {
                 {/* Puja Image */}
                 <div className="relative h-44 w-full bg-gray-100 overflow-hidden">
                   <img
-                    src={item.image_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80'}
+                    src={
+                      item.image_url && !item.image_url.includes('1544005313-94ddf0286df2') && !item.image_url.includes('1609358905596') && !item.image_url.includes('1582510003544') && !item.image_url.includes('1561361513-2d000a50f0dc') && !item.image_url.includes('1620766182966') && !item.image_url.includes('1590076212472')
+                        ? item.image_url
+                        : item.id === 'puja_1'
+                        ? '/images/pujas/puja_rudrabhishek.jpg'
+                        : item.id === 'puja_2'
+                        ? '/images/pujas/puja_ganesha_homam.jpg'
+                        : item.id === 'puja_3'
+                        ? '/images/pujas/puja_venkateswara.jpg'
+                        : item.id === 'puja_4'
+                        ? '/images/pujas/puja_kaal_sarp.jpg'
+                        : item.id === 'puja_5'
+                        ? '/images/pujas/puja_chandi_path.jpg'
+                        : item.id === 'puja_6'
+                        ? '/images/pujas/puja_navgrah_shanti.jpg'
+                        : '/images/pujas/puja_rudrabhishek.jpg'
+                    }
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80';
+                      (e.target as HTMLImageElement).src = '/images/pujas/puja_rudrabhishek.jpg';
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
@@ -655,8 +670,8 @@ export default function PujaServicesPage() {
                 </label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/photo-..."
+                    type="text"
+                    placeholder="/images/pujas/puja_rudrabhishek.jpg"
                     value={formData.image_url}
                     onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                     className={`flex-1 p-2.5 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-mandir-maroon ${

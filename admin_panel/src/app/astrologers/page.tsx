@@ -21,6 +21,22 @@ interface Astrologer {
   created_at: string;
 }
 
+const REAL_ASTRO_IMAGES: Record<string, string> = {
+  astro_1: '/images/astrologers/astro_1.jpg',
+  astro_2: '/images/astrologers/astro_2.jpg',
+  astro_3: '/images/astrologers/astro_3.jpg',
+  astro_4: '/images/astrologers/astro_4.jpg',
+  astro_5: '/images/astrologers/astro_5.jpg',
+};
+
+const getAstrologerImage = (astro: Astrologer) => {
+  if (REAL_ASTRO_IMAGES[astro.id]) return REAL_ASTRO_IMAGES[astro.id];
+  if (astro.avatar_url && !astro.avatar_url.includes('unsplash.com')) return astro.avatar_url;
+  const hash = Math.abs(astro.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0));
+  const index = (hash % 5) + 1;
+  return `/images/astrologers/astro_${index}.jpg`;
+};
+
 export default function AstrologersPage() {
   const [astrologers, setAstrologers] = useState<Astrologer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,12 +249,15 @@ export default function AstrologersPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-mandir-maroon text-white font-bold flex items-center justify-center text-lg shadow-sm">
-                    {a.avatar_url ? (
-                      <img src={a.avatar_url} alt={a.name} className="w-full h-full object-cover rounded-xl" />
-                    ) : (
-                      '🧘‍♂️'
-                    )}
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-mandir-maroon text-white font-bold flex items-center justify-center text-lg shadow-sm overflow-hidden shrink-0">
+                    <img
+                      src={getAstrologerImage(a)}
+                      alt={a.name}
+                      className="w-full h-full object-cover rounded-xl"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/astrologers/astro_1.jpg';
+                      }}
+                    />
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 text-sm">{a.name}</h3>

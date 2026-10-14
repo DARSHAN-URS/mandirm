@@ -15,12 +15,12 @@ interface ChadhawaOffering {
 }
 
 const CHADAWA_IMAGE_PRESETS = [
-  { label: 'Silver Bilva Patra', url: 'https://images.unsplash.com/photo-1610444583713-176865668efb?auto=format&fit=crop&w=600&q=80' },
-  { label: 'Tirupati Laddu Mahaprasad', url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=600&q=80' },
-  { label: 'Golden Modak & Garland', url: 'https://images.unsplash.com/photo-1609358905596-f94632a67307?auto=format&fit=crop&w=600&q=80' },
-  { label: 'Akhand Desi Ghee Diya', url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80' },
-  { label: 'Red Banarasi Zari Chunri', url: 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?auto=format&fit=crop&w=600&q=80' },
-  { label: 'Ceremonial Temple Flag', url: 'https://images.unsplash.com/photo-1590076212472-a7d1891b05ff?auto=format&fit=crop&w=600&q=80' },
+  { label: 'Silver Bilva Patra', url: '/images/chadhawa/chadhawa_bilva_patra.jpg' },
+  { label: 'Tirupati Laddu Mahaprasad', url: '/images/chadhawa/chadhawa_tirupati_laddu.jpg' },
+  { label: 'Golden Modak & Garland', url: '/images/chadhawa/chadhawa_modak_garland.jpg' },
+  { label: 'Akhand Desi Ghee Diya', url: '/images/chadhawa/chadhawa_akhand_jyoti.jpg' },
+  { label: 'Red Banarasi Zari Chunri', url: '/images/chadhawa/chadhawa_red_chunri.jpg' },
+  { label: 'Ceremonial Temple Flag', url: '/images/chadhawa/chadhawa_somnath_dhwaja.jpg' },
 ];
 
 const CATEGORIES = [
@@ -329,12 +329,27 @@ export default function ChadhawaPage() {
                 {/* Offering Image */}
                 <div className="relative h-44 w-full bg-gray-100 overflow-hidden">
                   <img
-                    src={item.image_url || 'https://images.unsplash.com/photo-1610444583713-176865668efb?auto=format&fit=crop&w=600&q=80'}
+                    src={
+                      item.image_url && !item.image_url.includes('unsplash.com')
+                        ? item.image_url
+                        : item.id === 'chadhawa_1'
+                        ? '/images/chadhawa/chadhawa_bilva_patra.jpg'
+                        : item.id === 'chadhawa_2'
+                        ? '/images/chadhawa/chadhawa_tirupati_laddu.jpg'
+                        : item.id === 'chadhawa_3'
+                        ? '/images/chadhawa/chadhawa_modak_garland.jpg'
+                        : item.id === 'chadhawa_4'
+                        ? '/images/chadhawa/chadhawa_akhand_jyoti.jpg'
+                        : item.id === 'chadhawa_5'
+                        ? '/images/chadhawa/chadhawa_red_chunri.jpg'
+                        : item.id === 'chadhawa_6'
+                        ? '/images/chadhawa/chadhawa_somnath_dhwaja.jpg'
+                        : '/images/chadhawa/chadhawa_akhand_jyoti.jpg'
+                    }
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1610444583713-176865668efb?auto=format&fit=crop&w=600&q=80';
+                      (e.target as HTMLImageElement).src = '/images/chadhawa/chadhawa_akhand_jyoti.jpg';
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
@@ -560,8 +575,8 @@ export default function ChadhawaPage() {
                 </label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/photo-..."
+                    type="text"
+                    placeholder="/images/chadhawa/chadhawa_akhand_jyoti.jpg"
                     value={formData.image_url}
                     onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                     className={`flex-1 p-2.5 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-900 ${

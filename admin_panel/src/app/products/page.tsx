@@ -628,8 +628,8 @@ export default function ProductsPage() {
                 </label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/photo-..."
+                    type="text"
+                    placeholder="/images/products/prod_sphatik_shivling.jpg"
                     value={formData.image_url}
                     onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                     className={`flex-1 p-2.5 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-900 ${

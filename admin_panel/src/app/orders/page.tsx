@@ -1,37 +1,92 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 interface Order {
   id: string;
-  devotee_name: string;
-  items: string;
-  amount: number;
-  delivery_city: string;
-  date: string;
-  status: 'processing' | 'shipped' | 'delivered';
-  tracking_id?: string;
+  user_id?: string;
+  user_name: string;
+  user_phone?: string;
+  shipping_address?: string;
+  total_amount: number;
+  payment_id?: string;
+  payment_status?: string;
+  order_status: string; // Pending, Processing, Shipped, Delivered, Cancelled
+  created_at: string;
 }
 
-const SEED_ORDERS: Order[] = [
-  { id: 'ORD-8910', devotee_name: 'Mehul Trivedi', items: 'Consecrated Brass Ganesha Murti + 5-Mukhi Mala', amount: 2100, delivery_city: 'Ahmedabad, Gujarat', date: 'Today, 09:30 AM', status: 'processing' },
-  { id: 'ORD-8908', devotee_name: 'Priyanka Sen', items: 'Pure Parad Shivlinga + Jaladhari', amount: 2100, delivery_city: 'Kolkata, West Bengal', date: 'Today, 08:15 AM', status: 'shipped', tracking_id: 'BD-8891234IN' },
-  { id: 'ORD-8902', devotee_name: 'Harish Chandra', items: 'Sandalwood Dhoop (x2) + Kashi Gangajal', amount: 950, delivery_city: 'Jaipur, Rajasthan', date: 'Yesterday', status: 'shipped', tracking_id: 'DEL-4412990IN' },
-  { id: 'ORD-8895', devotee_name: 'Swati Ranganathan', items: 'Navgrah Yantra (Gold Plated Plate)', amount: 650, delivery_city: 'Bengaluru, Karnataka', date: '2026-10-09', status: 'delivered', tracking_id: 'EXP-1092881IN' },
-];
-
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(SEED_ORDERS);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [toast, setToast] = useState<string | null>(null);
 
-  const filtered = orders.filter(o => statusFilter === 'all' || o.status === statusFilter);
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
-  const updateStatus = (id: string, st: Order['status']) => {
-    setOrders(orders.map(o => o.id === id ? { ...o, status: st } : o));
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
   };
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching orders:', error);
+      } else {
+        setOrders((data as Order[]) || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateStatus = async (id: string, st: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ order_status: st })
+        .eq('id', id);
+
+      if (error) {
+        showToast(`Failed: ${error.message}`);
+      } else {
+        showToast(`Order ${id} marked as ${st}`);
+        setOrders(
+          orders.map((o) => (o.id === id ? { ...o, order_status: st } : o))
+        );
+      }
+    } catch (err: any) {
+      showToast(`Error: ${err.message}`);
+    }
+  };
+
+  const filtered = orders.filter(
+    (o) =>
+      statusFilter === 'all' ||
+      (o.order_status || '').toLowerCase() === statusFilter.toLowerCase()
+  );
 
   return (
     <div className="space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-20 right-6 z-50 bg-mandir-maroon text-amber-200 px-4 py-2.5 rounded-xl shadow-2xl border border-amber-400/40 text-xs font-semibold flex items-center gap-2 animate-bounce">
+          <span>✓</span>
+          <span>{toast}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -39,59 +94,124 @@ export default function OrdersPage() {
             <span>📦</span> Spiritual Prasad & Samagri Orders Dispatch
           </h1>
           <p className="text-xs text-gray-500">
-            Fulfill devotee merchandise orders, dispatch consecrated Prasad boxes, and track courier logistics
+            Live Supabase database • Fulfill store orders, track payments, and update courier shipments
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchOrders}
+            disabled={loading}
+            className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <span>{loading ? '⏳' : '🔄'}</span>
+            <span>Refresh</span>
+          </button>
+          <span className="px-3 py-1.5 rounded-xl bg-blue-100 text-blue-900 text-xs font-bold border border-blue-200">
+            {orders.length} Total Orders
+          </span>
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex gap-2">
+        {['all', 'pending', 'processing', 'shipped', 'delivered'].map((st) => (
+          <button
+            key={st}
+            onClick={() => setStatusFilter(st)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
+              statusFilter === st
+                ? 'bg-mandir-maroon text-amber-200'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {st}
+          </button>
+        ))}
       </div>
 
       {/* Orders Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
-              <tr>
-                <th className="py-3 px-4">Order ID</th>
-                <th className="py-3 px-4">Devotee</th>
-                <th className="py-3 px-4">Items Ordered</th>
-                <th className="py-3 px-4">Destination</th>
-                <th className="py-3 px-4">Order Total</th>
-                <th className="py-3 px-4">Fulfillment Status</th>
-                <th className="py-3 px-4 text-right">Update Logistics</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filtered.map(o => (
-                <tr key={o.id} className="hover:bg-blue-50/20 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-gray-800">{o.id}</td>
-                  <td className="py-3.5 px-4 font-bold text-gray-900">{o.devotee_name}</td>
-                  <td className="py-3.5 px-4 text-gray-700 font-medium max-w-xs">{o.items}</td>
-                  <td className="py-3.5 px-4 text-gray-500">{o.delivery_city}</td>
-                  <td className="py-3.5 px-4 font-bold text-gray-900 font-mono">₹ {o.amount}</td>
-                  <td className="py-3.5 px-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold capitalize ${
-                      o.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
-                      o.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                      'bg-amber-100 text-amber-800'
-                    }`}>
-                      {o.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <select
-                      value={o.status}
-                      onChange={e => updateStatus(o.id, e.target.value as Order['status'])}
-                      className="p-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white"
-                    >
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                    </select>
-                  </td>
+        {loading ? (
+          <div className="py-20 text-center text-gray-400 text-xs">
+            <span className="text-3xl block mb-2 animate-spin">⏳</span>
+            <span>Loading live store orders from database...</span>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-20 text-center text-gray-400 text-xs">
+            <span className="text-4xl block mb-2">📦</span>
+            <p className="font-semibold text-gray-700">No orders recorded in database yet</p>
+            <p className="mt-1 text-[11px]">
+              Orders placed by devotees on the store will arrive here in real time.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
+                <tr>
+                  <th className="py-3 px-4">Order ID</th>
+                  <th className="py-3 px-4">Devotee Name</th>
+                  <th className="py-3 px-4">Shipping Destination</th>
+                  <th className="py-3 px-4">Amount</th>
+                  <th className="py-3 px-4">Payment</th>
+                  <th className="py-3 px-4">Fulfillment Status</th>
+                  <th className="py-3 px-4 text-right">Update Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-gray-700">
+                {filtered.map((o) => (
+                  <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="py-3 px-4 font-mono font-semibold text-gray-900">
+                      {o.id}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="font-semibold text-gray-900 block">{o.user_name}</span>
+                      {o.user_phone && (
+                        <span className="text-[10px] text-gray-500 font-mono">{o.user_phone}</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 max-w-xs truncate">
+                      {o.shipping_address || 'Not specified'}
+                    </td>
+                    <td className="py-3 px-4 font-bold font-cinzel text-gray-900">
+                      ₹ {Number(o.total_amount || 0).toLocaleString('en-IN')}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-semibold">
+                        {o.payment_status || 'Verified'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${
+                          o.order_status === 'Delivered'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : o.order_status === 'Shipped'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {o.order_status || 'Processing'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <select
+                        value={o.order_status}
+                        onChange={(e) => updateStatus(o.id, e.target.value)}
+                        className="p-1 rounded border border-gray-200 text-xs font-semibold bg-white"
+                      >
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

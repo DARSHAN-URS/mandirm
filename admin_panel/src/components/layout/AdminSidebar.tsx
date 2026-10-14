@@ -53,23 +53,30 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
   },
 ];
 
+import { useAdminAuth } from '@/components/auth/AdminAuthGuard';
+
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { lockConsole } = useAdminAuth();
 
   return (
     <aside className="w-64 bg-mandir-maroon-deep text-white border-r border-amber-900/30 flex flex-col h-screen sticky top-0 select-none shadow-2xl z-40">
-      {/* Brand Logo Header */}
-      <div className="h-16 px-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-mandir-maroon to-mandir-maroon-dark">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-400 text-mandir-maroon font-bold text-xl flex items-center justify-center shadow-md">
-            🕉️
+      {/* Brand Logo Header with Real Logo */}
+      <div className="h-20 px-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-mandir-maroon to-mandir-maroon-dark">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="h-12 w-12 rounded-xl bg-black/30 border border-amber-400/20 p-1 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+            <img
+              src="/images/inner_logo_clean.png"
+              alt="Mandirm मंदिरम्"
+              className="h-10 w-auto object-contain"
+            />
           </div>
           <div>
             <span className="font-cinzel font-bold text-base tracking-wider text-amber-200 block leading-tight">
               MANDIRM
             </span>
-            <span className="text-[10px] uppercase font-semibold text-amber-300/80 tracking-widest">
-              Admin Console
+            <span className="text-[10px] uppercase font-semibold text-amber-300/80 tracking-widest block">
+              Admin Sanctum
             </span>
           </div>
         </Link>
@@ -110,6 +117,18 @@ export default function AdminSidebar() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Passkey Security & Lock */}
+      <div className="px-3 pb-2">
+        <button
+          onClick={lockConsole}
+          className="w-full py-2 px-3 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-200 text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+          title="Lock Admin Console"
+        >
+          <span>🔒</span>
+          <span>Lock Sanctum (Passkey)</span>
+        </button>
       </div>
 
       {/* Safety Compliance Footer */}

@@ -1,175 +1,438 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 interface Astrologer {
   id: string;
   name: string;
   title: string;
-  specialties: string[];
+  bio?: string;
   experience_years: number;
-  languages: string[];
-  call_rate: number;
-  chat_rate: number;
+  per_minute_chat_rate: number;
+  per_minute_call_rate: number;
+  specialities?: string;
+  languages?: string;
   rating: number;
   consultations_count: number;
-  kyc_status: 'verified' | 'pending' | 'suspended';
-  phone: string;
+  is_online: boolean;
+  avatar_url?: string;
+  phone?: string;
+  created_at: string;
 }
 
-const SEED_ASTROLOGERS: Astrologer[] = [
-  { id: 'AST-01', name: 'Pandit Radheshyam Shastri', title: 'Jyotish Acharya & Gold Medalist', specialties: ['Vedic Astrology', 'Kundli Milan', 'Prashna Kundli'], experience_years: 18, languages: ['Hindi', 'Sanskrit', 'English'], call_rate: 35, chat_rate: 25, rating: 4.9, consultations_count: 3240, kyc_status: 'verified', phone: '+91 98765 43210' },
-  { id: 'AST-02', name: 'Acharya Vidyadhar Vyas', title: 'Vedic Scholar & Vastu Specialist', specialties: ['Vastu Shastra', 'Muhurat', 'Navgrah Dosh'], experience_years: 22, languages: ['Hindi', 'Gujarati'], call_rate: 45, chat_rate: 30, rating: 5.0, consultations_count: 4890, kyc_status: 'verified', phone: '+91 98220 12345' },
-  { id: 'AST-03', name: 'Dr. Jyotishacharya Devraj', title: 'Ph.D. in Vedic Astrology', specialties: ['Career Guidance', 'Medical Astrology', 'Gemology'], experience_years: 15, languages: ['Hindi', 'English', 'Bengali'], call_rate: 50, chat_rate: 35, rating: 4.8, consultations_count: 2150, kyc_status: 'verified', phone: '+91 94112 34567' },
-  { id: 'AST-04', name: 'Swami Anand Swaroop', title: 'Kundli & Spiritual Mentor', specialties: ['Spiritual Healing', 'Mantra Shastra', 'Tarot'], experience_years: 12, languages: ['Hindi', 'English'], call_rate: 30, chat_rate: 20, rating: 4.7, consultations_count: 1420, kyc_status: 'pending', phone: '+91 97180 98765' },
-  { id: 'AST-05', name: 'Smt. Gayatri Devi', title: 'Vedic Palmistry & Numerology Expert', specialties: ['Palmistry', 'Numerology', 'Marriage Matching'], experience_years: 10, languages: ['Hindi', 'Marathi'], call_rate: 25, chat_rate: 18, rating: 4.9, consultations_count: 980, kyc_status: 'pending', phone: '+91 98901 23456' },
-  { id: 'AST-06', name: 'Pandit Rameshwar Trivedi', title: 'Karmakanda & Tantra Shanti Specialist', specialties: ['Dosha Nivaran', 'Karmakanda'], experience_years: 8, languages: ['Hindi'], call_rate: 20, chat_rate: 15, rating: 4.2, consultations_count: 410, kyc_status: 'suspended', phone: '+91 99887 76655' },
-];
-
 export default function AstrologersPage() {
-  const [astrologers, setAstrologers] = useState<Astrologer[]>(SEED_ASTROLOGERS);
+  const [astrologers, setAstrologers] = useState<Astrologer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [toast, setToast] = useState<string | null>(null);
+  const [editingAstro, setEditingAstro] = useState<Astrologer | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
-  const filtered = astrologers.filter(a => {
-    const matchSearch = a.name.toLowerCase().includes(search.toLowerCase()) ||
-                        a.specialties.some(s => s.toLowerCase().includes(search.toLowerCase()));
-    const matchStatus = statusFilter === 'all' || a.kyc_status === statusFilter;
-    return matchSearch && matchStatus;
+  const [formData, setFormData] = useState({
+    name: '',
+    title: '',
+    specialities: 'Vedic Astrology, Kundli Milan',
+    languages: 'Hindi, English, Sanskrit',
+    experience_years: 10,
+    per_minute_chat_rate: 21,
+    per_minute_call_rate: 35,
+    phone: '',
+    rating: 4.9,
+    consultations_count: 500,
+    is_online: true,
   });
 
-  const toggleKyc = (id: string, status: Astrologer['kyc_status']) => {
-    setAstrologers(astrologers.map(a => a.id === id ? { ...a, kyc_status: status } : a));
+  useEffect(() => {
+    fetchAstrologers();
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
   };
+
+  const fetchAstrologers = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('astrologers')
+        .select('*')
+        .order('rating', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching astrologers:', error);
+      } else {
+        setAstrologers((data as Astrologer[]) || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleOnline = async (id: string, current: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('astrologers')
+        .update({ is_online: !current })
+        .eq('id', id);
+
+      if (error) {
+        showToast(`Failed: ${error.message}`);
+      } else {
+        showToast(`Updated astrologer status`);
+        setAstrologers(
+          astrologers.map((a) => (a.id === id ? { ...a, is_online: !current } : a))
+        );
+      }
+    } catch (err: any) {
+      showToast(`Error: ${err.message}`);
+    }
+  };
+
+  const handleSaveAstrologer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.title.trim()) {
+      showToast('Name and Vedic Title are required');
+      return;
+    }
+
+    try {
+      const payload = {
+        id: editingAstro?.id || `ast_${Date.now()}`,
+        name: formData.name.trim(),
+        title: formData.title.trim(),
+        specialities: formData.specialities,
+        languages: formData.languages,
+        experience_years: Number(formData.experience_years) || 5,
+        per_minute_chat_rate: Number(formData.per_minute_chat_rate) || 21,
+        per_minute_call_rate: Number(formData.per_minute_call_rate) || 35,
+        phone: formData.phone.trim() || '+91 98000 00000',
+        rating: Number(formData.rating) || 4.9,
+        consultations_count: Number(formData.consultations_count) || 108,
+        is_online: formData.is_online,
+      };
+
+      const { error } = await supabase.from('astrologers').upsert(payload);
+
+      if (error) {
+        showToast(`Error: ${error.message}`);
+      } else {
+        showToast(editingAstro ? 'Astrologer updated!' : 'Astrologer registered!');
+        setShowModal(false);
+        setEditingAstro(null);
+        fetchAstrologers();
+      }
+    } catch (err: any) {
+      showToast(`Error: ${err.message}`);
+    }
+  };
+
+  const filtered = astrologers.filter(
+    (a) =>
+      a.name.toLowerCase().includes(search.toLowerCase()) ||
+      (a.specialities || '').toLowerCase().includes(search.toLowerCase()) ||
+      (a.title || '').toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-20 right-6 z-50 bg-mandir-maroon text-amber-200 px-4 py-2.5 rounded-xl shadow-2xl border border-amber-400/40 text-xs font-semibold flex items-center gap-2 animate-bounce">
+          <span>✓</span>
+          <span>{toast}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
-            <span>🧘‍♂️</span> Astrologers & Acharyas KYC Console
+            <span>🧘‍♂️</span> Verified Astrologers & Acharyas
           </h1>
           <p className="text-xs text-gray-500">
-            Verify Vedic Jyotish credentials, approve onboarding applications, and regulate call/chat dakshina rates
+            Live Supabase database • Regulate per-minute Dakshina rates, online presence, and KYC credentials
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1.5 rounded-xl bg-indigo-100 text-indigo-900 text-xs font-bold border border-indigo-200">
-            {astrologers.filter(a => a.kyc_status === 'pending').length} KYC Applications Awaiting Approval
-          </span>
+          <button
+            onClick={fetchAstrologers}
+            disabled={loading}
+            className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <span>{loading ? '⏳' : '🔄'}</span>
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={() => {
+              setEditingAstro(null);
+              setFormData({
+                name: '',
+                title: 'Vedic Jyotish Acharya',
+                specialities: 'Vedic Astrology, Kundli Milan, Prashna Kundli',
+                languages: 'Hindi, English, Sanskrit',
+                experience_years: 12,
+                per_minute_chat_rate: 25,
+                per_minute_call_rate: 35,
+                phone: '',
+                rating: 4.95,
+                consultations_count: 500,
+                is_online: true,
+              });
+              setShowModal(true);
+            }}
+            className="px-3.5 py-1.5 bg-mandir-maroon hover:bg-mandir-maroon-dark text-amber-200 font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
+          >
+            <span>+</span> Register Astrologer
+          </button>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+      {/* Search Toolbar */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between gap-3 shadow-sm">
         <div className="relative w-full sm:w-80">
-          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">🔍</span>
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
+            🔍
+          </span>
           <input
             type="text"
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search by Acharya name or specialty..."
-            className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, specialty, or title..."
+            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {['all', 'verified', 'pending', 'suspended'].map(st => (
-            <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize transition-all ${
-                statusFilter === st
-                  ? 'bg-mandir-maroon text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {st === 'pending' ? 'Pending KYC' : st}
-            </button>
-          ))}
+        <div className="text-xs font-bold text-indigo-900 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100">
+          {astrologers.filter((a) => a.is_online).length} Currently Online
         </div>
       </div>
 
       {/* Astrologers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filtered.map(a => (
-          <div key={a.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col justify-between">
-            <div className="p-5">
-              {/* Profile Card Header */}
-              <div className="flex items-start justify-between mb-3">
+      {loading ? (
+        <div className="py-20 text-center text-gray-400 text-xs">
+          <span className="text-3xl block mb-2 animate-spin">⏳</span>
+          <span>Loading live astrologer catalog from database...</span>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400 text-xs">
+          <span className="text-4xl block mb-2">🧘‍♂️</span>
+          <p className="font-semibold text-gray-700">No astrologers found in database</p>
+          <p className="mt-1 text-[11px]">
+            Click &ldquo;+ Register Astrologer&rdquo; above to onboard your first Vedic scholar.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map((a) => (
+            <div
+              key={a.id}
+              className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all space-y-4"
+            >
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-200 to-amber-300 text-mandir-maroon font-bold flex items-center justify-center text-xl shadow-inner">
-                    🧘‍♂️
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-mandir-maroon text-white font-bold flex items-center justify-center text-lg shadow-sm">
+                    {a.avatar_url ? (
+                      <img src={a.avatar_url} alt={a.name} className="w-full h-full object-cover rounded-xl" />
+                    ) : (
+                      '🧘‍♂️'
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-gray-900 font-cinzel leading-tight">{a.name}</h3>
-                    <p className="text-[11px] text-amber-800 font-medium">{a.title}</p>
-                    <p className="text-[10px] text-gray-400">{a.experience_years} Years Experience</p>
+                    <h3 className="font-bold text-gray-900 text-sm">{a.name}</h3>
+                    <p className="text-[11px] text-gray-500">{a.title}</p>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                  a.kyc_status === 'verified' ? 'bg-emerald-100 text-emerald-800' :
-                  a.kyc_status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {a.kyc_status}
-                </span>
+
+                {/* Online Toggle */}
+                <button
+                  onClick={() => toggleOnline(a.id, a.is_online)}
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all ${
+                    a.is_online
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      : 'bg-gray-100 text-gray-500 border border-gray-200'
+                  }`}
+                >
+                  {a.is_online ? '● Online' : '○ Offline'}
+                </button>
               </div>
 
-              {/* Specialties */}
-              <div className="space-y-2 text-xs mb-4">
-                <div className="flex flex-wrap gap-1">
-                  {a.specialties.map(s => (
-                    <span key={s} className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-[10px] font-medium">
-                      {s}
-                    </span>
-                  ))}
+              {/* Specialties & Languages */}
+              <div className="text-xs space-y-1">
+                <div className="text-gray-600">
+                  <strong>Specialities:</strong> {a.specialities || 'Vedic Astrology'}
                 </div>
+                <div className="text-gray-500 text-[11px]">
+                  <strong>Languages:</strong> {a.languages || 'Hindi, Sanskrit'}
+                </div>
+              </div>
 
-                <div className="text-[11px] text-gray-500">
-                  Languages: <strong>{a.languages.join(', ')}</strong>
+              {/* Rates & Stats */}
+              <div className="grid grid-cols-2 gap-2 p-2.5 bg-gray-50 rounded-xl text-center text-xs">
+                <div>
+                  <span className="text-[10px] text-gray-400 block uppercase font-semibold">Chat Rate</span>
+                  <span className="font-bold text-gray-900 font-cinzel">₹ {a.per_minute_chat_rate} / min</span>
                 </div>
+                <div>
+                  <span className="text-[10px] text-gray-400 block uppercase font-semibold">Call Rate</span>
+                  <span className="font-bold text-gray-900 font-cinzel">₹ {a.per_minute_call_rate} / min</span>
+                </div>
+              </div>
 
-                {/* Rates & Consultations */}
-                <div className="p-2.5 bg-gray-50 rounded-xl grid grid-cols-2 gap-2 text-center text-xs">
-                  <div>
-                    <span className="text-[10px] text-gray-400 block">Call Dakshina</span>
-                    <strong className="text-gray-900">₹{a.call_rate}/min</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-gray-400 block">WhatsApp Chat</span>
-                    <strong className="text-gray-900">₹{a.chat_rate}/min</strong>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-100 text-gray-500">
+                <span>⭐ {a.rating || 4.9} ({a.consultations_count || 108} sessions)</span>
+                <button
+                  onClick={() => {
+                    setEditingAstro(a);
+                    setFormData({
+                      name: a.name,
+                      title: a.title,
+                      specialities: a.specialities || '',
+                      languages: a.languages || '',
+                      experience_years: a.experience_years,
+                      per_minute_chat_rate: a.per_minute_chat_rate,
+                      per_minute_call_rate: a.per_minute_call_rate,
+                      phone: a.phone || '',
+                      rating: a.rating,
+                      consultations_count: a.consultations_count,
+                      is_online: a.is_online,
+                    });
+                    setShowModal(true);
+                  }}
+                  className="text-amber-800 hover:text-amber-900 font-semibold text-[11px]"
+                >
+                  Edit Rates & Info →
+                </button>
               </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            {/* Actions Bar */}
-            <div className="p-3 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-700">⭐ {a.rating} ({a.consultations_count} calls)</span>
-              <div className="flex items-center gap-1.5">
-                {a.kyc_status !== 'verified' && (
-                  <button
-                    onClick={() => toggleKyc(a.id, 'verified')}
-                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm"
-                  >
-                    Approve KYC
-                  </button>
-                )}
-                {a.kyc_status !== 'suspended' && (
-                  <button
-                    onClick={() => toggleKyc(a.id, 'suspended')}
-                    className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-xs font-semibold transition-all"
-                  >
-                    Suspend
-                  </button>
-                )}
-              </div>
+      {/* Edit/Create Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h2 className="text-base font-bold font-cinzel text-gray-900">
+                {editingAstro ? 'Edit Astrologer Details' : 'Register New Astrologer'}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500"
+              >
+                ✕
+              </button>
             </div>
+
+            <form onSubmit={handleSaveAstrologer} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Pandit Radheshyam Shastri"
+                  className="w-full p-2 border border-gray-200 rounded-lg text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Vedic Title / Honors</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="e.g. Jyotish Acharya & Gold Medalist"
+                  className="w-full p-2 border border-gray-200 rounded-lg text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Chat Rate (₹ / min)</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.per_minute_chat_rate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, per_minute_chat_rate: Number(e.target.value) })
+                    }
+                    className="w-full p-2 border border-gray-200 rounded-lg text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">Call Rate (₹ / min)</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.per_minute_call_rate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, per_minute_call_rate: Number(e.target.value) })
+                    }
+                    className="w-full p-2 border border-gray-200 rounded-lg text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Specialties</label>
+                <input
+                  type="text"
+                  value={formData.specialities}
+                  onChange={(e) => setFormData({ ...formData, specialities: e.target.value })}
+                  placeholder="Kundli Milan, Vastu, Prashna Kundli"
+                  className="w-full p-2 border border-gray-200 rounded-lg text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Languages</label>
+                <input
+                  type="text"
+                  value={formData.languages}
+                  onChange={(e) => setFormData({ ...formData, languages: e.target.value })}
+                  placeholder="Hindi, English, Gujarati"
+                  className="w-full p-2 border border-gray-200 rounded-lg text-xs"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="onlineCheck"
+                  checked={formData.is_online}
+                  onChange={(e) => setFormData({ ...formData, is_online: e.target.checked })}
+                  className="rounded text-mandir-maroon"
+                />
+                <label htmlFor="onlineCheck" className="text-gray-700 font-semibold">
+                  Enable Online Status Immediately
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-mandir-maroon hover:bg-mandir-maroon-dark text-amber-200 font-bold shadow"
+                >
+                  Save Astrologer
+                </button>
+              </div>
+            </form>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

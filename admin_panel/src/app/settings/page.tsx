@@ -30,6 +30,33 @@ export default function SettingsPage() {
       )}
 
       <form onSubmit={handleSave} className="space-y-6">
+        {/* Sanctum Security Passkey Configuration */}
+        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+          <h2 className="text-sm font-bold font-cinzel text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-2">
+            <span>🔑</span> Master Sanctum Admin Passkey
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="block text-gray-700 font-semibold mb-1">Active Sanctum Passkey</label>
+              <input
+                type="text"
+                defaultValue="mandirm@2026"
+                className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono bg-amber-50/50"
+              />
+              <p className="text-[10px] text-gray-400 mt-1">
+                You can override this anytime via <code className="bg-gray-100 px-1 rounded font-mono">NEXT_PUBLIC_ADMIN_PASSKEY</code> environment variable on Netlify.
+              </p>
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-1">Passkey Mode</label>
+              <div className="p-2 border border-emerald-200 bg-emerald-50 rounded-lg text-emerald-800 font-semibold flex items-center gap-2">
+                <span>🛡️</span>
+                <span>WebAuthn Biometrics + Master Passkey Enabled</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Payment Gateways Section */}
         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
           <h2 className="text-sm font-bold font-cinzel text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-2">

@@ -1,38 +1,76 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
-interface Devotee {
+interface Profile {
   id: string;
+  email?: string;
+  phone?: string;
   full_name: string;
-  email: string;
-  phone: string;
-  gotra: string;
-  rashi: string;
-  nakshatra: string;
+  role: string;
+  gotra?: string;
+  rashi?: string;
+  nakshatra?: string;
   wallet_balance: number;
   created_at: string;
 }
 
-const SEED_DEVOTEES: Devotee[] = [
-  { id: 'USR-101', full_name: 'Sunil Kumar Sharma', email: 'sunil.sharma@gmail.com', phone: '+91 98765 43210', gotra: 'Kashyapa', rashi: 'Vrishabha (Taurus)', nakshatra: 'Rohini', wallet_balance: 1250, created_at: '2026-08-14' },
-  { id: 'USR-102', full_name: 'Pooja Agarwal', email: 'pooja.agarwal@outlook.com', phone: '+91 98110 54321', gotra: 'Garg', rashi: 'Kanya (Virgo)', nakshatra: 'Hasta', wallet_balance: 500, created_at: '2026-09-02' },
-  { id: 'USR-103', full_name: 'Rameshwar Iyer', email: 'iyer.ramesh@gmail.com', phone: '+91 94440 12345', gotra: 'Bharadwaja', rashi: 'Dhanu (Sagittarius)', nakshatra: 'Moola', wallet_balance: 2100, created_at: '2026-09-18' },
-  { id: 'USR-104', full_name: 'Ananya Deshmukh', email: 'ananya.deshmukh@yahoo.com', phone: '+91 98200 98765', gotra: 'Vashistha', rashi: 'Makar (Capricorn)', nakshatra: 'Shravana', wallet_balance: 350, created_at: '2026-10-01' },
-];
-
 export default function UsersPage() {
-  const [devotees, setDevotees] = useState<Devotee[]>(SEED_DEVOTEES);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [toast, setToast] = useState<string | null>(null);
 
-  const filtered = devotees.filter(d =>
-    d.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    d.phone.includes(search) ||
-    d.gotra.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    fetchProfiles();
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const fetchProfiles = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching profiles:', error);
+      } else {
+        setProfiles((data as Profile[]) || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = profiles.filter((p) => {
+    const q = search.toLowerCase();
+    return (
+      (p.full_name || '').toLowerCase().includes(q) ||
+      (p.phone || '').includes(q) ||
+      (p.email || '').toLowerCase().includes(q) ||
+      (p.gotra || '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-20 right-6 z-50 bg-mandir-maroon text-amber-200 px-4 py-2.5 rounded-xl shadow-2xl border border-amber-400/40 text-xs font-semibold flex items-center gap-2 animate-bounce">
+          <span>✓</span>
+          <span>{toast}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -40,54 +78,123 @@ export default function UsersPage() {
             <span>👥</span> Devotees & User Registry
           </h1>
           <p className="text-xs text-gray-500">
-            Devotee spiritual profiles, Gotras, Vedic Rashis, Nakshatra lineages, and devotional wallets
+            Live Supabase database • Devotee spiritual profiles, Gotras, Vedic Rashis, Nakshatra lineages, and wallets
           </p>
         </div>
-        <div className="text-xs font-bold bg-purple-100 text-purple-900 px-3 py-1.5 rounded-xl border border-purple-200">
-          Total Registered Devotees: 18,450
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchProfiles}
+            disabled={loading}
+            className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <span>{loading ? '⏳' : '🔄'}</span>
+            <span>Refresh</span>
+          </button>
+          <span className="px-3 py-1.5 rounded-xl bg-purple-100 text-purple-900 text-xs font-bold border border-purple-200">
+            {profiles.length} Registered Devotees
+          </span>
         </div>
       </div>
 
-      {/* Devotees Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
-              <tr>
-                <th className="py-3 px-4">User ID</th>
-                <th className="py-3 px-4">Devotee Name</th>
-                <th className="py-3 px-4">Contact Details</th>
-                <th className="py-3 px-4">Gotra & Lineage</th>
-                <th className="py-3 px-4">Rashi & Nakshatra</th>
-                <th className="py-3 px-4">Wallet Balance</th>
-                <th className="py-3 px-4 text-right">Member Since</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filtered.map(d => (
-                <tr key={d.id} className="hover:bg-purple-50/20 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-semibold text-gray-800">{d.id}</td>
-                  <td className="py-3.5 px-4 font-bold text-gray-900">{d.full_name}</td>
-                  <td className="py-3.5 px-4">
-                    <div className="text-gray-800 font-mono text-[11px]">{d.phone}</div>
-                    <div className="text-[10px] text-gray-400">{d.email}</div>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="font-semibold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                      Gotra: {d.gotra}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-gray-700">
-                    <div>{d.rashi}</div>
-                    <div className="text-[10px] text-gray-400 font-medium">Nakshatra: {d.nakshatra}</div>
-                  </td>
-                  <td className="py-3.5 px-4 font-bold text-emerald-700 font-mono">₹ {d.wallet_balance}</td>
-                  <td className="py-3.5 px-4 text-right text-gray-500 font-mono">{d.created_at}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Search Toolbar */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between gap-3 shadow-sm">
+        <div className="relative w-full sm:w-80">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
+            🔍
+          </span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, phone, email, or Gotra..."
+            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
+          />
         </div>
+      </div>
+
+      {/* Profiles Table */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="py-20 text-center text-gray-400 text-xs">
+            <span className="text-3xl block mb-2 animate-spin">⏳</span>
+            <span>Loading real devotee registry from database...</span>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-20 text-center text-gray-400 text-xs">
+            <span className="text-4xl block mb-2">👥</span>
+            <p className="font-semibold text-gray-700">No devotee profiles recorded yet</p>
+            <p className="mt-1 text-[11px]">
+              Users who sign up via phone OTP or Google login in the mobile app or website will automatically appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
+                <tr>
+                  <th className="py-3 px-4">Profile ID</th>
+                  <th className="py-3 px-4">Devotee Name</th>
+                  <th className="py-3 px-4">Phone / Email</th>
+                  <th className="py-3 px-4">Gotra & Rashi</th>
+                  <th className="py-3 px-4">Role</th>
+                  <th className="py-3 px-4">Wallet Balance</th>
+                  <th className="py-3 px-4 text-right">Joined</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-gray-700">
+                {filtered.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="py-3 px-4 font-mono text-gray-500 text-[11px] max-w-[120px] truncate">
+                      {p.id}
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-gray-900">
+                      {p.full_name || 'Devotee'}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="block font-mono text-[11px] text-gray-800">
+                        {p.phone || '—'}
+                      </span>
+                      {p.email && (
+                        <span className="text-[10px] text-gray-400 block">{p.email}</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">
+                      {p.gotra ? (
+                        <span className="font-semibold text-amber-900 font-mono">
+                          Gotra: {p.gotra}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                      {p.rashi && (
+                        <span className="text-[10px] text-gray-500 block">Rashi: {p.rashi}</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                          p.role === 'admin'
+                            ? 'bg-amber-100 text-amber-800'
+                            : p.role === 'astrologer'
+                            ? 'bg-indigo-100 text-indigo-800'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {p.role || 'user'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 font-bold font-cinzel text-gray-900">
+                      ₹ {Number(p.wallet_balance || 0).toLocaleString('en-IN')}
+                    </td>
+                    <td className="py-3 px-4 text-right text-gray-400 font-mono text-[10px]">
+                      {p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

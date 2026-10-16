@@ -24,9 +24,10 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     {'title': 'Navchandi Shatru & Graha Shanti Homa', 'subtitle': '₹2,501 • Kamakhya Devi', 'type': 'Puja', 'icon': '🔥', 'tab': 2},
     {'title': 'Kaal Sarp & Rahu-Ketu Shanti Puja', 'subtitle': '₹3,100 • Mahakaleshwar', 'type': 'Puja', 'icon': '🔥', 'tab': 2},
     {'title': 'Mahamrityunjaya 1.25 Lakh Japa', 'subtitle': '₹5,100 • Kedarnath Dham', 'type': 'Puja', 'icon': '🔥', 'tab': 2},
-    {'title': 'Pt. Devendra Shastri', 'subtitle': 'Vedic • Kundali • Vastu • ₹25/min', 'type': 'Astrologer', 'icon': '🧘‍♂️', 'tab': 3},
-    {'title': 'Acharya Radheshyam', 'subtitle': 'Prashna Kundali • Career • ₹20/min', 'type': 'Astrologer', 'icon': '🔮', 'tab': 3},
-    {'title': 'Dr. Gayatri Devi', 'subtitle': 'Numerology • Gemology • ₹30/min', 'type': 'Astrologer', 'icon': '🪷', 'tab': 3},
+    {'title': 'Acharya AI Jyotish (24/7)', 'subtitle': 'Instant Vedic Kundli & Dosha Chatbot • Free', 'type': 'AI Astrologer', 'icon': '🔮', 'tab': 2, 'filter': 'AI Jyotish'},
+    {'title': 'Pt. Devendra Shastri', 'subtitle': 'Vedic • Kundali • Vastu • ₹25/min', 'type': 'Astrologer', 'icon': '🧘‍♂️', 'tab': 2},
+    {'title': 'Acharya Radheshyam', 'subtitle': 'Prashna Kundali • Career • ₹20/min', 'type': 'Astrologer', 'icon': '🔮', 'tab': 2},
+    {'title': 'Dr. Gayatri Devi', 'subtitle': 'Numerology • Gemology • ₹30/min', 'type': 'Astrologer', 'icon': '🪷', 'tab': 2},
   ];
 
   @override

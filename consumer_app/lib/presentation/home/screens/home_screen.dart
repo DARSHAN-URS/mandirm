@@ -23,6 +23,7 @@ import '../widgets/global_search_dialog.dart';
 import '../widgets/real_qr_scanner_sheet.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../../common/widgets/app_image.dart';
+import '../../astrologers/widgets/ai_jyotish_modal.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -105,6 +106,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openAiJyotishModal([String? initialQuestion]) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => AiJyotishModal(
+        initialQuestion: initialQuestion,
+        onConsultationFinished: () {
+          _openConsultations();
+        },
+      ),
+    );
+  }
 
   void _openQrScanner() {
     showModalBottomSheet(
@@ -265,6 +279,48 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+              floatingActionButton: _currentTabIndex == 0
+                  ? FloatingActionButton.extended(
+                      onPressed: () => _openAiJyotishModal(),
+                      elevation: 5,
+                      backgroundColor: const Color(0xFF7A0C16),
+                      foregroundColor: const Color(0xFFFFF3CD),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                        side: const BorderSide(color: Color(0xFFFFD54F), width: 1.5),
+                      ),
+                      icon: const Text('🔮', style: TextStyle(fontSize: 18)),
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            LocaleService().isHindi ? 'AI ज्योतिषी' : 'AI Jyotish',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFFFF3CD),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF59E0B),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '24/7',
+                              style: GoogleFonts.poppins(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : null,
               bottomNavigationBar: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -839,7 +895,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Title
                   Text(
                     AppStrings.t('pooja_booking_title'),
-                    style: TextStyle(fontFamily: 'Headway', 
+                    style: const TextStyle(fontFamily: 'Headway', 
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -1039,7 +1095,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Title
                   Text(
                     AppStrings.t('talk_astrologer_title'),
-                    style: TextStyle(fontFamily: 'Headway', 
+                    style: const TextStyle(fontFamily: 'Headway', 
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -1064,52 +1120,86 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 14),
 
-                  // 4 Speciality Quick Chips
+                  // 4 Speciality Quick Chips with Direct AI Jyotish triggers
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                      _buildPujaCardChip(isHindi ? 'कुंडली' : 'Kundli', () {
-                        setState(() => _currentTabIndex = 2);
+                      _buildPujaCardChip(isHindi ? '🔮 कुंडली दोष' : '🔮 Kundli Doshas', () {
+                        _openAiJyotishModal(isHindi ? '🔮 मेरी कुंडली के मुख्य ग्रह दोष और उपाय' : '🔮 What are the primary doshas in my Kundli?');
                       }),
-                      _buildPujaCardChip(isHindi ? 'करियर' : 'Career', () {
-                        setState(() => _currentTabIndex = 2);
+                      _buildPujaCardChip(isHindi ? '💼 करियर व नौकरी' : '💼 Career & Job', () {
+                        _openAiJyotishModal(isHindi ? '💼 नौकरी और करियर में तरक्की कब होगी?' : '💼 When will my career & job prospects improve?');
                       }),
-                      _buildPujaCardChip(isHindi ? 'विवाह' : 'Marriage', () {
-                        setState(() => _currentTabIndex = 2);
+                      _buildPujaCardChip(isHindi ? '❤️ विवाह योग' : '❤️ Marriage Yoga', () {
+                        _openAiJyotishModal(isHindi ? '❤️ विवाह योग और मांगलिक दोष निवारण' : '❤️ Marriage prospects and Manglik dosha remedies');
                       }),
-                      _buildPujaCardChip(isHindi ? 'वास्तु' : 'Vastu', () {
-                        setState(() => _currentTabIndex = 2);
+                      _buildPujaCardChip(isHindi ? '🪐 शनि शांति' : '🪐 Shani Remedies', () {
+                        _openAiJyotishModal(isHindi ? '🪐 शनि साढ़े साती के वैदिक उपाय व मंत्र' : '🪐 Shani Sade Sati remedies and pacification');
                       }),
                     ],
                   ),
 
                   const SizedBox(height: 14),
 
-                  // CTA Button
-                  SizedBox(
-                    height: 38,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() => _currentTabIndex = 2);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF59E0B),
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                  // Dual CTA Buttons: AI Jyotish Free & Talk to Live Astrologer
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: SizedBox(
+                          height: 40,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _openAiJyotishModal(),
+                            icon: const Text('🔮', style: TextStyle(fontSize: 15)),
+                            label: Text(
+                              isHindi ? 'एआई ज्योतिषी (FREE) ✨' : 'AI Jyotish (FREE) ✨',
+                              style: GoogleFonts.poppins(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFF59E0B),
+                              foregroundColor: const Color(0xFF2A0808),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              elevation: 2,
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        elevation: 2,
                       ),
-                      child: Text(
-                        AppStrings.t('talk_now'),
-                        style: GoogleFonts.poppins(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 4,
+                        child: SizedBox(
+                          height: 40,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() => _currentTabIndex = 2);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Color(0xFFFFD54F), width: 1.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            child: Text(
+                              AppStrings.t('talk_now'),
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),

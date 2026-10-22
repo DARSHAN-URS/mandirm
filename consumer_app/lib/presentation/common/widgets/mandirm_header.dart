@@ -205,16 +205,14 @@ class MandirmHeader extends StatelessWidget implements PreferredSizeWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Mandirm Flame Diya Logo Only
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(shape: BoxShape.circle),
+                      // Authentic Mandirm Brand Logo
+                      SizedBox(
+                        height: 38,
                         child: Image.asset(
                           AppConstants.flameLogoAsset,
                           fit: BoxFit.contain,
                           errorBuilder: (_, __, ___) => const Icon(
-                            Icons.local_fire_department_rounded,
+                            Icons.temple_hindu_rounded,
                             color: Color(0xFFD64D18),
                             size: 28,
                           ),

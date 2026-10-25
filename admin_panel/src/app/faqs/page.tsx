@@ -166,21 +166,21 @@ function FAQModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-xl">🙏</div>
+            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-xl shrink-0">🙏</div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">{faq?.id ? 'Edit FAQ' : 'Add New FAQ'}</h2>
-              <p className="text-sm text-gray-500">Fill in the details for this FAQ</p>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900">{faq?.id ? 'Edit FAQ' : 'Add New FAQ'}</h2>
+              <p className="text-xs sm:text-sm text-gray-500">Fill in the details for this FAQ</p>
             </div>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5">
           {/* Service Type */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Service Type *</label>
@@ -435,7 +435,7 @@ export default function FAQsPage() {
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed top-5 right-5 z-[100] px-5 py-3 rounded-xl shadow-xl text-sm font-semibold transition-all ${
+          className={`fixed top-5 right-5 z-[100] px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold transition-all ${
             toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
           }`}
         >
@@ -443,47 +443,47 @@ export default function FAQsPage() {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-2 sm:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <span className="text-3xl">🙏</span> FAQ Management
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2.5 sm:gap-3">
+              <span className="text-2xl sm:text-3xl">🙏</span> FAQ Management
             </h1>
-            <p className="text-gray-500 mt-1">Manage FAQs for Puja, Chadhawa & General enquiries</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Manage FAQs for Puja, Chadhawa & General enquiries</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <button
               onClick={handleSeed}
               disabled={seedLoading}
-              className="px-4 py-2.5 border border-orange-300 bg-orange-50 text-orange-700 rounded-xl text-sm font-semibold hover:bg-orange-100 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="flex-1 sm:flex-none justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 border border-orange-300 bg-orange-50 text-orange-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-orange-100 transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
-              {seedLoading ? '⏳ Seeding...' : '🌱 Seed General FAQs'}
+              {seedLoading ? '⏳ Seeding...' : '🌱 Seed FAQs'}
             </button>
             <button
               onClick={() => { setEditingFaq(null); setShowModal(true); }}
-              className="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-red-700 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2"
+              className="flex-1 sm:flex-none justify-center px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-orange-600 to-red-700 text-white rounded-xl text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-1.5"
             >
-              <span className="text-lg">+</span> Add FAQ
+              <span className="text-base font-bold">+</span> Add FAQ
             </button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-7">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-5 sm:mb-7">
           {(['all', 'puja', 'chadhawa', 'general'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setFilter(t)}
-              className={`p-4 rounded-2xl border-2 transition-all text-left ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all text-left ${
                 filter === t
                   ? 'border-orange-500 bg-orange-50 shadow-sm'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
-              <div className="text-2xl font-bold text-gray-900">{counts[t]}</div>
-              <div className={`text-xs font-semibold mt-0.5 capitalize ${filter === t ? 'text-orange-700' : 'text-gray-500'}`}>
-                {t === 'all' ? 'All FAQs' : t === 'puja' ? '🪔 Puja FAQs' : t === 'chadhawa' ? '🌸 Chadhawa FAQs' : '📋 General FAQs'}
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{counts[t]}</div>
+              <div className={`text-[11px] sm:text-xs font-semibold mt-0.5 capitalize truncate ${filter === t ? 'text-orange-700' : 'text-gray-500'}`}>
+                {t === 'all' ? 'All FAQs' : t === 'puja' ? '🪔 Puja FAQs' : t === 'chadhawa' ? '🌸 Chadhawa' : '📋 General'}
               </div>
             </button>
           ))}

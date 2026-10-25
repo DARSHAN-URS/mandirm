@@ -328,11 +328,11 @@ class ApiService {
           }
         }
 
-        final walletBal = (astro?['wallet_balance'] as num?)?.toDouble() ?? 32400.0;
+        final walletBal = (astro?['wallet_balance'] as num?)?.toDouble() ?? 0.0;
         return {
           'wallet_balance': walletBal,
-          'total_earned': totalEarned > 0 ? totalEarned : walletBal * 0.75,
-          'completed_consultations': completed > 0 ? completed : 28,
+          'total_earned': totalEarned,
+          'completed_consultations': completed,
         };
       } catch (err) {
         debugPrint('[ApiService] Supabase getAstrologerEarnings notice: $err');
@@ -363,7 +363,7 @@ class ApiService {
             .select('wallet_balance')
             .eq('id', astrologerId)
             .maybeSingle();
-        final currentBalance = (astro?['wallet_balance'] as num?)?.toDouble() ?? 32400.0;
+        final currentBalance = (astro?['wallet_balance'] as num?)?.toDouble() ?? 0.0;
         final newBalance = (currentBalance - amount).clamp(0.0, double.infinity);
         await _supabase!
             .from('astrologers')

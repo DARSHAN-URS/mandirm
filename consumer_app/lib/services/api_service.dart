@@ -430,8 +430,11 @@ class ApiService {
       'astrologer_id': astrologerId,
       'astrologer_name': astrologerName,
       'user_id': userId ?? (_supabase?.auth.currentUser?.id ?? 'usr_${DateTime.now().millisecondsSinceEpoch % 10000}'),
-      'user_name': userName ?? 'Devotee',
-      'user_phone': userPhone ?? '+91 98765 43210',
+      'user_name': userName ??
+          (_supabase?.auth.currentUser?.userMetadata?['full_name'] as String?) ??
+          (_supabase?.auth.currentUser?.userMetadata?['name'] as String?) ??
+          'Devotee',
+      'user_phone': userPhone ?? _supabase?.auth.currentUser?.phone ?? '',
       'type': type,
       'status': 'requested',
       'problem_topic': problemTopic ?? 'General Vedic Guidance',
@@ -889,4 +892,151 @@ class ApiService {
   String getChaDhawaCertificateUrl(String referenceId) {
     return '${AppConstants.backendUrl}/certificates/chadhawa/$referenceId';
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // WALLET & RAZORPAY INTEGRATION (1 INR = 1 Wallet Rupee)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /// Create Razorpay order for wallet recharge (1 INR = 1 Wallet Rupee)
+  Future<Map<String, dynamic>?> createWalletRechargeOrder(double amount) async {
+    try {
+      final response = await _dio.post(
+        '/payments/wallet/recharge-order',
+        data: {'amount': amount},
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] createWalletRechargeOrder error: $e');
+    }
+    return null;
+  }
+
+  /// Verify Razorpay payment signature and credit wallet balance
+  Future<Map<String, dynamic>?> verifyWalletRechargePayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    required double amount,
+    String? referenceId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/payments/verify',
+        data: {
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+          'reference_type': 'wallet_recharge',
+          'reference_id': referenceId ?? 'wrecharge_${DateTime.now().millisecondsSinceEpoch}',
+          'amount': amount,
+        },
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] verifyWalletRechargePayment error: $e');
+    }
+    return null;
+  }
+
+  /// Get live wallet balance & transaction history
+  Future<Map<String, dynamic>?> getWalletOverview() async {
+    try {
+      final response = await _dio.get('/payments/wallet');
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] getWalletOverview error: $e');
+    }
+    return null;
+  }
+
+  /// Deduct amount from wallet balance (1 Wallet Rupee = 1 INR)
+  Future<Map<String, dynamic>?> deductWalletBalance({
+    required double amount,
+    required String referenceType,
+    required String referenceId,
+    String? description,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/payments/wallet/deduct',
+        data: {
+          'amount': amount,
+          'reference_type': referenceType,
+          'reference_id': referenceId,
+          'description': description ?? 'Sacred Wallet Payment',
+        },
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] deductWalletBalance error: $e');
+    }
+    return null;
+  }
+
+  /// Create general Razorpay payment order for Pujas, Chadhawa, Shop, or Consultations
+  Future<Map<String, dynamic>?> createPaymentOrder({
+    required double amount,
+    required String referenceType,
+    required String referenceId,
+    String? devoteeName,
+    String? description,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/payments/create-order',
+        data: {
+          'amount': amount,
+          'reference_type': referenceType,
+          'reference_id': referenceId,
+          'devotee_name': devoteeName ?? 'Devotee',
+          'description': description ?? 'Mandirm Sacred Offering',
+        },
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] createPaymentOrder error: $e');
+    }
+    return null;
+  }
+
+  /// Verify general Razorpay payment
+  Future<Map<String, dynamic>?> verifyPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    required String referenceType,
+    required String referenceId,
+    required double amount,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/payments/verify',
+        data: {
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+          'reference_type': referenceType,
+          'reference_id': referenceId,
+          'amount': amount,
+        },
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] verifyPayment error: $e');
+    }
+    return null;
+  }
 }
+

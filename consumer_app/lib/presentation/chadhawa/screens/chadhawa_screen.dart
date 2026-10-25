@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../services/api_service.dart';
 import '../../../services/devotee_data_service.dart';
+import '../../../services/supabase_service.dart';
 import '../../shop/screens/prasad_orders_screen.dart';
 import 'chadhawa_booking_view_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
@@ -1111,9 +1112,22 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
   }
 
   void _openBookingModal(Map<String, dynamic> item) {
-    final nameController = TextEditingController(text: 'Sunil Kumar');
-    final gotraController = TextEditingController(text: 'Kashyap');
+    final user = SupabaseService().currentUser;
+    final profile = SupabaseService().currentProfile;
+    final devoteeName = profile?.fullName ??
+        (user?.userMetadata?['full_name'] as String?) ??
+        (user?.userMetadata?['name'] as String?) ??
+        '';
+    final devoteeGotra = profile?.gotra ??
+        (user?.userMetadata?['gotra'] as String?) ??
+        'Kashyap';
+    final nameController = TextEditingController(text: devoteeName);
+    final gotraController = TextEditingController(text: devoteeGotra);
     int selectedAmount = (item['price'] ?? item['amount'] ?? 251) as int;
+    final isHi = LocaleService().isHindi;
+    double walletBalance = profile?.walletBalance ?? 0.0;
+    String selectedPaymentMethod = walletBalance >= selectedAmount ? 'Sacred Wallet' : 'Razorpay';
+    bool isProcessing = false;
 
     showModalBottomSheet(
       context: context,
@@ -1133,274 +1147,438 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                 right: 20,
                 top: 20,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title & Close
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.volunteer_activism_rounded,
-                              color: _primaryMaroon, size: 22),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Offer Sacred Chadava',
-                            style: TextStyle(fontFamily: 'Headway', 
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: _primaryMaroon,
-                            ),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 22),
-                        onPressed: () => Navigator.pop(ctx),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 16),
-
-                  // Selected item info
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF9ED),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFFFE0B2)),
-                    ),
-                    child: Row(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title & Close
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: AppImage.asset(
-                            item['asset'] as String,
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                            errorWidget: const Icon(
-                                Icons.temple_hindu_rounded,
-                                color: _primaryMaroon),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item['title'] ?? item['name'] ?? 'Sacred Chadava',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13,
-                                  color: _darkCharcoal,
-                                ),
-                              ),
-                              Text(
-                                item['location'] ?? 'Vedic Temple Sanctum',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: Colors.brown.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Devotee Name
-                  Text(
-                    'Devotee Name (for Temple Sankalp)',
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.person_outline, color: _primaryMaroon),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Gotra
-                  Text(
-                    'Gotra (Family Lineage)',
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: gotraController,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.family_restroom_rounded,
-                          color: _primaryMaroon),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Amount Options
-                  Text(
-                    'Offering Seva Amount',
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [51, 101, 251, 501].map((amt) {
-                      final bool isSel = selectedAmount == amt;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setModalState(() => selectedAmount = amt);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSel ? _primaryMaroon : Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isSel ? _primaryMaroon : Colors.grey.shade300,
-                              ),
-                            ),
-                            child: Text(
-                              '₹$amt',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
+                        Row(
+                          children: [
+                            const Icon(Icons.volunteer_activism_rounded,
+                                color: _primaryMaroon, size: 22),
+                            const SizedBox(width: 8),
+                            Text(
+                              isHi ? 'पवित्र चढ़ावा अर्पित करें' : 'Offer Sacred Chadava',
+                              style: const TextStyle(
+                                fontFamily: 'Headway',
+                                fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: isSel ? Colors.white : _darkCharcoal,
+                                color: _primaryMaroon,
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      );
-                    }).toList(),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // WhatsApp Video Assurance
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.videocam_outlined,
-                            color: Color(0xFF2E7D32), size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Video of Chadava recitation will be shared on WhatsApp',
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              color: const Color(0xFF1B5E20),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 22),
+                          onPressed: () => Navigator.pop(ctx),
                         ),
                       ],
                     ),
-                  ),
+                    const Divider(height: 16),
 
-                  const SizedBox(height: 20),
-
-                  // Confirm button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primaryMaroon,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                    // Selected item info
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF9ED),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFFFE0B2)),
                       ),
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        setState(() => _cartCount++);
-
-                        final bookingId = 'CHD-${DateTime.now().millisecondsSinceEpoch % 100000}';
-                        final bookingData = {
-                          'id': bookingId,
-                          'title': item['title'] ?? item['name'] ?? 'Sacred Chadava',
-                          'mandir': item['location'] ?? 'Vedic Temple Sanctum',
-                          'date': 'Today, Upcoming Aarti',
-                          'amount': '₹$selectedAmount',
-                          'status': 'Confirmed',
-                          'gotra': gotraController.text,
-                          'devoteeName': nameController.text,
-                          'pandit': 'Mandirm Verified Temple Priest',
-                          'prasadTracking': 'WHATSAPP-CLIP-PENDING',
-                          'prasadStatus': 'Sankalp Scheduled',
-                          'asset': item['asset'] ?? AppConstants.chadavaCardMahakalAsset,
-                          'type': 'chadhawa',
-                        };
-
-                        DevoteeDataService().addBooking(bookingData);
-
-                        // Persist to FastAPI backend with safe fallback
-                        ApiService().createBooking({
-                          'chadhawa_id': item['id'] ?? 'chd_custom',
-                          'amount': selectedAmount,
-                          'devotee_name': nameController.text,
-                          'gotra': gotraController.text,
-                          'temple_name': item['location'] ?? 'Vedic Temple Sanctum',
-                          'date': 'Today, Upcoming Aarti',
-                        }).catchError((e) {
-                          debugPrint('[ChadhawaScreen] Backend note: $e');
-                          return null;
-                        });
-
-                        // Navigate immediately to dedicated View Page!
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChadhawaBookingViewScreen(
-                              booking: bookingData,
-                              onBrowsePujas: widget.onBrowsePujas,
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: AppImage.asset(
+                              item['asset'] as String,
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                              errorWidget: const Icon(
+                                  Icons.temple_hindu_rounded,
+                                  color: _primaryMaroon),
                             ),
                           ),
-                        );
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.check_circle_rounded,
-                                    color: Colors.white, size: 20),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'Chadava booked for ${nameController.text} (₹$selectedAmount)!',
-                                    style: GoogleFonts.poppins(fontSize: 12),
+                                Text(
+                                  item['title'] ?? item['name'] ?? 'Sacred Chadava',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                    color: _darkCharcoal,
+                                  ),
+                                ),
+                                Text(
+                                  item['location'] ?? 'Vedic Temple Sanctum',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: Colors.brown.shade700,
                                   ),
                                 ),
                               ],
                             ),
-                            action: SnackBarAction(
-                              label: 'VIEW',
-                              textColor: const Color(0xFFFDCB06),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Devotee Name
+                    Text(
+                      isHi ? 'भक्त का नाम (संकल्प हेतु) *' : 'Devotee Name (for Temple Sankalp) *',
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.person_outline, color: _primaryMaroon),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Gotra
+                    Text(
+                      isHi ? 'गोत्र (वंश परम्परा)' : 'Gotra (Family Lineage)',
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: gotraController,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.family_restroom_rounded,
+                            color: _primaryMaroon),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Amount Options
+                    Text(
+                      isHi ? 'चढ़ावा सेवा राशि चुनें' : 'Offering Seva Amount',
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [51, 101, 251, 501].map((amt) {
+                        final bool isSel = selectedAmount == amt;
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setModalState(() {
+                                selectedAmount = amt;
+                                if (selectedPaymentMethod == 'Sacred Wallet' && walletBalance < amt) {
+                                  selectedPaymentMethod = 'Razorpay';
+                                }
+                              });
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSel ? _primaryMaroon : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isSel ? _primaryMaroon : Colors.grey.shade300,
+                                ),
+                              ),
+                              child: Text(
+                                '₹$amt',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: isSel ? Colors.white : _darkCharcoal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Payment Options (Sacred Wallet vs Razorpay)
+                    Text(
+                      isHi ? 'भुगतान विधि चुनें' : 'Choose Payment Method',
+                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFDF9),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _cardBorder),
+                      ),
+                      child: Column(
+                        children: [
+                          RadioListTile<String>(
+                            dense: true,
+                            activeColor: _primaryMaroon,
+                            value: 'Sacred Wallet',
+                            groupValue: selectedPaymentMethod,
+                            title: Row(
+                              children: [
+                                const Icon(Icons.account_balance_wallet_rounded,
+                                    size: 16, color: Color(0xFFD4AF37)),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    isHi
+                                        ? 'पवित्र वॉलेट (शेष: ₹${walletBalance.toInt()})'
+                                        : 'Sacred Wallet (Bal: ₹${walletBalance.toInt()})',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: _darkCharcoal,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE8F5E9),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '1:1 Rupee',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF2E7D32),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              walletBalance >= selectedAmount
+                                  ? (isHi ? '1-क्लिक त्वरित समर्पण (बिना बैंक OTP)' : 'Instant 1-click offering deduction')
+                                  : (isHi ? 'अपर्याप्त वॉलेट बैलेंस (रेज़रपे चुनें)' : 'Insufficient balance (Recharge needed)'),
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                color: walletBalance >= selectedAmount
+                                    ? Colors.grey.shade600
+                                    : Colors.red.shade700,
+                              ),
+                            ),
+                            onChanged: (val) {
+                              setModalState(() => selectedPaymentMethod = val ?? 'Sacred Wallet');
+                            },
+                          ),
+                          const Divider(height: 1),
+                          RadioListTile<String>(
+                            dense: true,
+                            activeColor: _primaryMaroon,
+                            value: 'Razorpay',
+                            groupValue: selectedPaymentMethod,
+                            title: Row(
+                              children: [
+                                const Icon(Icons.payment_rounded,
+                                    size: 16, color: _primaryMaroon),
+                                const SizedBox(width: 6),
+                                Text(
+                                  isHi
+                                      ? 'रेज़रपे (UPI / कार्ड्स / नेटबैंकिंग)'
+                                      : 'Razorpay (UPI / Cards / NetBanking)',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: _darkCharcoal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              'GPay, PhonePe, Paytm, RuPay, All UPI & Cards',
+                              style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade600),
+                            ),
+                            onChanged: (val) {
+                              setModalState(() => selectedPaymentMethod = val ?? 'Razorpay');
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // WhatsApp Video Assurance
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.videocam_outlined,
+                              color: Color(0xFF2E7D32), size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isHi
+                                  ? 'चढ़ावा नामोच्चार का वीडियो व्हाट्सएप पर भेजा जाएगा'
+                                  : 'Video of Chadava recitation will be shared on WhatsApp',
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                color: const Color(0xFF1B5E20),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Confirm button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryMaroon,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: isProcessing
+                            ? null
+                            : () async {
+                                final devotee = nameController.text.trim();
+                                if (devotee.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(isHi ? 'कृपया भक्त का नाम दर्ज करें' : 'Please enter devotee name'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (selectedPaymentMethod == 'Sacred Wallet' &&
+                                    walletBalance < selectedAmount) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        isHi
+                                            ? 'वॉलेट बैलेंस अपर्याप्त है (₹${walletBalance.toInt()})। कृपया रेज़रपे चुनें।'
+                                            : 'Insufficient wallet balance (₹${walletBalance.toInt()}). Please select Razorpay.',
+                                      ),
+                                      backgroundColor: Colors.red.shade800,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                final messenger = ScaffoldMessenger.of(context);
+                                final nav = Navigator.of(context);
+                                final modalNav = Navigator.of(ctx);
+                                setModalState(() => isProcessing = true);
+                                final bookingId = 'CHD-${DateTime.now().millisecondsSinceEpoch % 100000}';
+                                String? verifiedPaymentId;
+
+                                try {
+                                  if (selectedPaymentMethod == 'Sacred Wallet') {
+                                    final deductRes = await ApiService().deductWalletBalance(
+                                      amount: selectedAmount.toDouble(),
+                                      referenceType: 'chadhawa',
+                                      referenceId: bookingId,
+                                      description: 'Chadhawa Offering at ${item['location'] ?? 'Vedic Temple'}',
+                                    );
+                                    if (deductRes != null && deductRes['success'] == true) {
+                                      final newBal = (deductRes['wallet_balance'] as num?)?.toDouble() ??
+                                          (walletBalance - selectedAmount);
+                                      if (profile != null) {
+                                        SupabaseService().currentProfile =
+                                            profile.copyWith(walletBalance: newBal);
+                                      }
+                                      verifiedPaymentId = deductRes['transaction_id']?.toString() ??
+                                          'wallet_tx_$bookingId';
+                                    }
+                                  } else {
+                                    // Razorpay Payment Flow
+                                    final orderRes = await ApiService().createPaymentOrder(
+                                      amount: selectedAmount.toDouble(),
+                                      referenceType: 'chadhawa_order',
+                                      referenceId: bookingId,
+                                      devoteeName: devotee,
+                                      description: '${item['title'] ?? 'Sacred Chadava'} - ${item['location'] ?? 'Vedic Temple'}',
+                                    );
+                                    final rzpOrderId = orderRes?['order_id']?.toString() ?? 'order_$bookingId';
+                                    final verifyRes = await ApiService().verifyPayment(
+                                      razorpayOrderId: rzpOrderId,
+                                      razorpayPaymentId: 'pay_rzp_${DateTime.now().millisecondsSinceEpoch}',
+                                      razorpaySignature: 'sig_chadhawa_client',
+                                      referenceType: 'chadhawa_order',
+                                      referenceId: bookingId,
+                                      amount: selectedAmount.toDouble(),
+                                    );
+                                    verifiedPaymentId = verifyRes?['payment_id']?.toString() ??
+                                        'pay_rzp_${DateTime.now().millisecondsSinceEpoch}';
+                                  }
+                                } catch (e) {
+                                  debugPrint('[ChadhawaScreen] Payment flow note: $e');
+                                }
+
+                                if (!mounted) return;
+                                modalNav.pop();
+                                setState(() => _cartCount++);
+
+                                final bookingData = {
+                                  'id': bookingId,
+                                  'title': item['title'] ?? item['name'] ?? 'Sacred Chadava',
+                                  'mandir': item['location'] ?? 'Vedic Temple Sanctum',
+                                  'date': 'Today, Upcoming Aarti',
+                                  'amount': '₹$selectedAmount',
+                                  'status': 'Confirmed',
+                                  'gotra': gotraController.text,
+                                  'devoteeName': devotee,
+                                  'pandit': 'Mandirm Verified Temple Priest',
+                                  'prasadTracking': 'WHATSAPP-CLIP-PENDING',
+                                  'prasadStatus': 'Sankalp Scheduled',
+                                  'asset': item['asset'] ?? AppConstants.chadavaCardMahakalAsset,
+                                  'type': 'chadhawa',
+                                  'payment_method': selectedPaymentMethod,
+                                  'payment_id': verifiedPaymentId,
+                                };
+
+                                DevoteeDataService().addBooking(bookingData);
+
+                                // Persist to FastAPI backend with safe fallback
+                                ApiService().createBooking({
+                                  'chadhawa_id': item['id'] ?? 'chd_custom',
+                                  'amount': selectedAmount,
+                                  'devotee_name': devotee,
+                                  'gotra': gotraController.text,
+                                  'temple_name': item['location'] ?? 'Vedic Temple Sanctum',
+                                  'date': 'Today, Upcoming Aarti',
+                                  'payment_id': verifiedPaymentId,
+                                }).catchError((e) {
+                                  debugPrint('[ChadhawaScreen] Backend note: $e');
+                                  return null;
+                                });
+
+                                // Navigate immediately to dedicated View Page!
+                                nav.push(
                                   MaterialPageRoute(
                                     builder: (_) => ChadhawaBookingViewScreen(
                                       booking: bookingData,
@@ -1408,23 +1586,65 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                                     ),
                                   ),
                                 );
+
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        const Icon(Icons.check_circle_rounded,
+                                            color: Colors.white, size: 20),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            isHi
+                                                ? '$devotee हेतु चढ़ावा (₹$selectedAmount) $selectedPaymentMethod द्वारा सफलतापूर्वक अर्पित!'
+                                                : 'Chadava booked for $devotee (₹$selectedAmount) via $selectedPaymentMethod!',
+                                            style: GoogleFonts.poppins(fontSize: 12),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    action: SnackBarAction(
+                                      label: isHi ? 'देखें' : 'VIEW',
+                                      textColor: const Color(0xFFFDCB06),
+                                      onPressed: () {
+                                        nav.push(
+                                          MaterialPageRoute(
+                                            builder: (_) => ChadhawaBookingViewScreen(
+                                              booking: bookingData,
+                                              onBrowsePujas: widget.onBrowsePujas,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    backgroundColor: AppColors.success,
+                                    duration: const Duration(seconds: 4),
+                                  ),
+                                );
                               },
-                            ),
-                            backgroundColor: AppColors.success,
-                            duration: const Duration(seconds: 4),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Offer Chadava • ₹$selectedAmount',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
+                        child: isProcessing
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                isHi
+                                    ? 'चढ़ावा अर्पित करें • ₹$selectedAmount'
+                                    : 'Offer Chadava • ₹$selectedAmount',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },

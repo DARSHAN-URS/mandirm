@@ -145,16 +145,16 @@ export default function BookingsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
             <span>📜</span> Devotee Puja Bookings & Sacred Sankalps
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             Real-time Supabase records • Audit Gotras, assign Vedic priests, and supervise execution
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           <button
             onClick={fetchBookings}
             disabled={loading}
@@ -163,14 +163,14 @@ export default function BookingsPage() {
             <span>{loading ? '⏳' : '🔄'}</span>
             <span>Refresh</span>
           </button>
-          <span className="px-3 py-1.5 rounded-xl bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200">
-            {bookings.length} Total Bookings
+          <span className="px-3 py-1.5 rounded-xl bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200 whitespace-nowrap">
+            {bookings.length} Bookings
           </span>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-sm">
         <div className="relative w-full sm:w-80">
           <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
             🔍
@@ -180,17 +180,17 @@ export default function BookingsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search devotee, Gotra, puja, or ID..."
-            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
+            className="w-full pl-8 pr-3 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
 
         {/* Status Filter */}
-        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {['all', 'confirmed', 'in progress', 'completed'].map((st) => (
             <button
               key={st}
               onClick={() => setFilterStatus(st)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 ${
+              className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 ${
                 filterStatus === st
                   ? 'bg-mandir-maroon text-amber-200'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -200,6 +200,16 @@ export default function BookingsPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Mobile Swipe Hint */}
+      <div className="lg:hidden flex items-center justify-between px-1 text-[11px] text-gray-400">
+        <span>👈 Swipe horizontally to view full booking details 👉</span>
+        {selectedBooking && (
+          <a href="#booking-inspector" className="text-amber-800 font-semibold underline">
+            Jump to Details ↓
+          </a>
+        )}
       </div>
 
       {/* Bookings Table & Inspector */}
@@ -220,7 +230,7 @@ export default function BookingsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[650px]">
                 <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                   <tr>
                     <th className="py-3 px-4">Booking ID</th>
@@ -236,7 +246,12 @@ export default function BookingsPage() {
                   {filtered.map((b) => (
                     <tr
                       key={b.id}
-                      onClick={() => setSelectedBooking(b)}
+                      onClick={() => {
+                        setSelectedBooking(b);
+                        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                          document.getElementById('booking-inspector')?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
                       className={`hover:bg-amber-50/40 cursor-pointer transition-colors ${
                         selectedBooking?.id === b.id ? 'bg-amber-50/70' : ''
                       }`}
@@ -279,6 +294,9 @@ export default function BookingsPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedBooking(b);
+                            if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                              document.getElementById('booking-inspector')?.scrollIntoView({ behavior: 'smooth' });
+                            }
                           }}
                           className="px-2.5 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-[11px]"
                         >
@@ -294,19 +312,32 @@ export default function BookingsPage() {
         </div>
 
         {/* Booking Inspector / Priest Assignment */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
+        <div id="booking-inspector" className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm space-y-4 scroll-mt-20">
           <h2 className="text-sm font-bold font-cinzel text-gray-900 border-b border-gray-100 pb-2 flex items-center justify-between">
-            <span>Sankalp Inspector</span>
-            {selectedBooking && (
-              <span className="font-mono text-xs font-normal text-amber-700">
-                {selectedBooking.id}
-              </span>
-            )}
+            <span className="flex items-center gap-1.5">
+              <span>🔍</span> Sankalp Inspector
+            </span>
+            <div className="flex items-center gap-2">
+              {selectedBooking && (
+                <span className="font-mono text-xs font-normal text-amber-700">
+                  {selectedBooking.id}
+                </span>
+              )}
+              {selectedBooking && (
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="lg:hidden text-gray-400 hover:text-gray-600 text-xs px-1.5 py-0.5 rounded"
+                  title="Close Inspector"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </h2>
 
           {!selectedBooking ? (
-            <div className="py-20 text-center text-gray-400 text-xs">
-              <span>Select any booking from the left list to review Gotra details & assign priests.</span>
+            <div className="py-12 sm:py-20 text-center text-gray-400 text-xs">
+              <span>Select any booking from the table to review Gotra details & assign priests.</span>
             </div>
           ) : (
             <div className="space-y-4 text-xs">

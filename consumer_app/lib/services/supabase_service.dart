@@ -31,6 +31,7 @@ class SupabaseService {
   }
 
   UserProfile? get currentProfile => _currentProfile;
+  set currentProfile(UserProfile? profile) => _currentProfile = profile;
 
   /// Whether an authenticated session exists (Supabase, backend JWT, or local profile)
   bool get isAuthenticated =>

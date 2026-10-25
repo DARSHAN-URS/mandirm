@@ -47,7 +47,8 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       });
     }
 
-    final astroId = current?.id ?? 'astro_1';
+    final astroId = current?.id ?? AuthService().currentAstrologerId;
+    if (astroId.isEmpty) return;
 
     try {
       final p = await ApiService().getAstrologerProfile(astroId);
@@ -63,10 +64,10 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
         setState(() {
           _earnings = EarningsSummary(
             todayEarnings: (earningsData['total_earned'] as num?)?.toDouble() ?? 0.0,
-            todayMinutes: 45,
+            todayMinutes: (earningsData['today_minutes'] as num?)?.toInt() ?? 0,
             todayConsultations: (earningsData['completed_consultations'] as num?)?.toInt() ?? 0,
             walletBalance: (earningsData['wallet_balance'] as num?)?.toDouble() ?? 0.0,
-            rating: _profile?.rating ?? 4.95,
+            rating: _profile?.rating ?? 5.0,
           );
         });
       }
@@ -99,7 +100,8 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
 
   void _onStatusChanged(String newStatus) async {
     setState(() => _astrologerStatus = newStatus);
-    final astroId = _profile?.id ?? 'astro_1';
+    final astroId = _profile?.id ?? AuthService().currentAstrologerId;
+    if (astroId.isEmpty) return;
     final ok = await ApiService().updateAstrologerAvailability(
       astroId,
       isOnline: newStatus != 'offline',

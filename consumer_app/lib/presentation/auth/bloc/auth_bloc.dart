@@ -190,7 +190,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
-    emit(const AuthError('Incorrect or expired code. Please try again or test with 123456.'));
+    emit(const AuthError('Incorrect or expired verification code. Please check and try again.'));
   }
 
   Future<void> _onVerifyEmailOtp(
@@ -271,20 +271,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
-    emit(const AuthError('Incorrect or expired code. Please try again or test with 123456.'));
+    emit(const AuthError('Incorrect or expired verification code. Please check and try again.'));
   }
 
   String _cleanErrorMessage(dynamic error) {
     final str = error.toString();
     if (str.contains('Error sending magic link email') ||
         str.contains('unexpected_failure')) {
-      return 'Email limit reached on Supabase free tier (max 3/hr without custom SMTP). Please sign in with Google or use test OTP 123456.';
+      return 'Email delivery limit reached. Please sign in with Google or try again in a few minutes.';
     }
     if (str.contains('rate_limit') || str.contains('over_email_send_rate_limit')) {
       return 'Email rate limit reached. Please use Google Sign In or wait a few minutes.';
     }
     if (str.contains('Invalid OTP') || str.contains('otp_expired')) {
-      return 'Incorrect or expired code. Please try again or test with 123456.';
+      return 'Incorrect or expired verification code. Please check and try again.';
     }
     return str
         .replaceAll('AuthRetryableFetchException(message: ', '')

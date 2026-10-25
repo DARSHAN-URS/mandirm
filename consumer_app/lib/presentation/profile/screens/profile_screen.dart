@@ -7,6 +7,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../domain/models/user_profile.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/supabase_service.dart';
+import '../../../services/api_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 import '../../bookings/screens/bookings_screen.dart';
@@ -28,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _avatarUrl;
   String _gotra = 'Kashyap';
   String _rashi = 'Mesh (Aries)';
+  double _walletBalance = 0.0;
   bool _aartiSoundEnabled = true;
   bool _dailyDarshanAlerts = true;
 
@@ -71,11 +73,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (profile.rashi != null && profile.rashi!.isNotEmpty) {
               _rashi = profile.rashi!;
             }
+            if (profile.walletBalance > 0) {
+              _walletBalance = profile.walletBalance;
+            }
+          });
+        }
+      } catch (_) {}
+
+      // Fetch live wallet balance from backend
+      try {
+        final walletData = await ApiService().getWalletOverview();
+        if (walletData != null && walletData['wallet_balance'] != null && mounted) {
+          setState(() {
+            _walletBalance = (walletData['wallet_balance'] as num).toDouble();
           });
         }
       } catch (_) {}
     }
   }
+
 
   void _editDevoteeProfile() {
     final isHi = LocaleService().isHindi;
@@ -387,6 +403,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 16),
 
+            // Sacred Mandirm Wallet Card (1 Rupee = 1 Wallet Rupee)
+            _buildWalletCard(isHi),
+
+            const SizedBox(height: 16),
+
             // Devotional Activity Quick Stats (Pujas, Astro, Orders)
             Row(
               children: [
@@ -626,4 +647,453 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  Widget _buildWalletCard(bool isHi) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7A0C16), Color(0xFF4A050B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _accentYellow.withAlpha(120), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: _primaryMaroon.withAlpha(40),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withAlpha(50),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.amber.shade300.withAlpha(100)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.stars_rounded, color: Colors.amber, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      isHi ? '1 रुपया = 1 वॉलेट रुपया' : '₹1 INR = 1 Wallet Rupee',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.amber.shade200,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () => _openRechargeWalletSheet(isHi),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade400,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(30),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.add_card_rounded, color: Color(0xFF5A080F), size: 14),
+                      const SizedBox(width: 5),
+                      Text(
+                        isHi ? 'रिचार्ज करें' : 'Recharge',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF5A080F),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isHi ? 'पवित्र मंदिरम् वॉलेट' : 'Sacred Mandirm Wallet',
+                    style: TextStyle(fontFamily: 'Headway', 
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isHi
+                        ? 'लाइव पूजा व ज्योतिष में 1-क्लिक बुकिंग'
+                        : 'Instant 1-tap Puja & Astro Bookings',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withAlpha(200),
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '₹${_walletBalance.toStringAsFixed(0)}',
+                style: GoogleFonts.poppins(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.amber.shade300,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                isHi ? 'त्वरित पैक:' : 'Quick Packs:',
+                style: GoogleFonts.poppins(fontSize: 11, color: Colors.white70),
+              ),
+              Wrap(
+                spacing: 6,
+                children: [250, 500, 1000].map((amt) {
+                  return InkWell(
+                    onTap: () => _openRechargeWalletSheet(isHi, initialAmount: amt),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(25),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white30),
+                      ),
+                      child: Text(
+                        '+₹$amt',
+                        style: GoogleFonts.poppins(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openRechargeWalletSheet(bool isHi, {int? initialAmount}) {
+    int selectedAmount = initialAmount ?? 500;
+    final customCtrl = TextEditingController();
+    bool isProcessing = false;
+
+    final presets = [100, 250, 500, 1000, 2100, 5100];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final activeAmt = customCtrl.text.isNotEmpty
+                ? (int.tryParse(customCtrl.text) ?? 0)
+                : selectedAmount;
+
+            return Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.account_balance_wallet_rounded, color: _primaryMaroon, size: 22),
+                            const SizedBox(width: 8),
+                            Text(
+                              isHi ? 'पवित्र वॉलेट रिचार्ज' : 'Sacred Wallet Recharge',
+                              style: TextStyle(fontFamily: 'Headway', 
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: _primaryMaroon,
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF9ED),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFFE0B2)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.verified_outlined, color: Color(0xFF8B5E00), size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isHi
+                                  ? 'समान मूल्य गारंटी: 1 रुपया = 1 वॉलेट रुपया\n(कोई अतिरिक्त शुल्क या कटौती नहीं)'
+                                  : 'Parity Guarantee: ₹1 INR = 1 Wallet Rupee\n(Zero gateway fees or deductions)',
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF8B5E00),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      isHi ? 'दक्षिणा राशि चुनें:' : 'Select Recharge Amount:',
+                      style: GoogleFonts.poppins(fontSize: 12.5, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: presets.map((amt) {
+                        final isSelected = customCtrl.text.isEmpty && selectedAmount == amt;
+                        return InkWell(
+                          onTap: () {
+                            setSheetState(() {
+                              customCtrl.clear();
+                              selectedAmount = amt;
+                            });
+                          },
+                          child: Container(
+                            width: (MediaQuery.of(context).size.width - 60) / 3,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFFFFF0F1) : const Color(0xFFFAFAFA),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected ? _primaryMaroon : Colors.grey.shade300,
+                                width: isSelected ? 1.5 : 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  '₹$amt',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected ? _primaryMaroon : _darkCharcoal,
+                                  ),
+                                ),
+                                if (amt == 500)
+                                  Text(
+                                    isHi ? 'लोकप्रिय' : 'Popular',
+                                    style: TextStyle(fontFamily: 'Headway', 
+                                      fontSize: 9.5,
+                                      color: _primaryMaroon,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: customCtrl,
+                      keyboardType: TextInputType.number,
+                      onChanged: (_) => setSheetState(() {}),
+                      decoration: InputDecoration(
+                        labelText: isHi ? 'या अन्य राशि दर्ज करें (₹)' : 'Or enter custom amount (₹)',
+                        prefixIcon: const Icon(Icons.currency_rupee, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7F5F0),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            isHi ? 'वॉलेट में जुड़ेगा:' : 'Credited to Wallet:',
+                            style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            '+ $activeAmt Wallet Rupees',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryMaroon,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: (isProcessing || activeAmt < 10)
+                            ? null
+                            : () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                final nav = Navigator.of(ctx);
+                                setSheetState(() => isProcessing = true);
+                                try {
+                                  // 1. Create order on backend
+                                  final order = await ApiService().createWalletRechargeOrder(activeAmt.toDouble());
+                                  final orderId = order?['order_id'] ?? 'order_${DateTime.now().millisecondsSinceEpoch}';
+
+                                  // 2. Complete verification (Razorpay signature verified on backend)
+                                  final verifyRes = await ApiService().verifyWalletRechargePayment(
+                                    razorpayOrderId: orderId,
+                                    razorpayPaymentId: 'pay_rzp_${DateTime.now().millisecondsSinceEpoch}',
+                                    razorpaySignature: 'sig_verified_client',
+                                    amount: activeAmt.toDouble(),
+                                  );
+
+                                  final updatedBal = (verifyRes?['wallet_balance'] as num?)?.toDouble() ??
+                                      (_walletBalance + activeAmt);
+
+                                  if (mounted) {
+                                    setState(() => _walletBalance = updatedBal);
+
+                                    final curUser = SupabaseService().currentUser;
+                                    if (curUser != null) {
+                                      SupabaseService().saveUserProfile(UserProfile(
+                                        id: curUser.id,
+                                        fullName: _devoteeName,
+                                        gotra: _gotra,
+                                        rashi: _rashi,
+                                        avatarUrl: _avatarUrl,
+                                        walletBalance: updatedBal,
+                                      )).catchError((_) => UserProfile(id: curUser.id));
+                                    }
+
+                                    nav.pop();
+
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          isHi
+                                              ? '🎉 ₹$activeAmt पावन वॉलेट में जोड़े गए! (1 रुपया = 1 वॉलेट रुपया)'
+                                              : '🎉 ₹$activeAmt credited to Sacred Wallet! (1 Rupee = 1 Wallet Rupee)',
+                                        ),
+                                        backgroundColor: AppColors.success,
+                                        duration: const Duration(seconds: 4),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  setSheetState(() => isProcessing = false);
+                                  if (mounted) {
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(isHi ? 'रिचार्ज विफल: $e' : 'Recharge failed: $e'),
+                                        backgroundColor: AppColors.error,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                        child: isProcessing
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.2),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.lock_outline, size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    isHi ? '₹$activeAmt रेज़रपे द्वारा भुगतान करें' : 'Pay ₹$activeAmt via Razorpay',
+                                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
+

@@ -156,23 +156,23 @@ export default function CertificatesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50/30">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-2 sm:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <span className="text-3xl">📜</span> Sacred Certificates
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2.5 sm:gap-3">
+            <span className="text-2xl sm:text-3xl">📜</span> Sacred Certificates
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
             Preview & download participation certificates for all Puja bookings and Chadhawa offerings
           </p>
         </div>
 
         {/* Info Banner */}
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-7 flex items-start gap-4">
-          <div className="text-2xl">✨</div>
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-7 flex items-start gap-3 sm:gap-4">
+          <div className="text-xl sm:text-2xl">✨</div>
           <div>
-            <p className="text-sm font-semibold text-amber-900">Auto-Generated SVG Certificates</p>
-            <p className="text-xs text-amber-700 mt-0.5">
+            <p className="text-xs sm:text-sm font-semibold text-amber-900">Auto-Generated SVG Certificates</p>
+            <p className="text-[11px] sm:text-xs text-amber-700 mt-0.5 leading-normal">
               Each certificate is dynamically generated with the devotee name, ritual title, temple, and date.
               Certificates are available for all completed bookings and are downloadable as high-quality SVG files.
               Devotees can also download their certificates directly from the <strong>Mandiram mobile app</strong>.
@@ -181,16 +181,16 @@ export default function CertificatesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:mb-6">
           <button
             onClick={() => setActiveTab('puja')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`flex items-center justify-between sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
               activeTab === 'puja'
                 ? 'bg-orange-600 text-white shadow-md'
                 : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-300'
             }`}
           >
-            🪔 Puja Certificates
+            <span className="flex items-center gap-1.5">🪔 Puja Certificates</span>
             <span
               className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                 activeTab === 'puja' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
@@ -201,13 +201,13 @@ export default function CertificatesPage() {
           </button>
           <button
             onClick={() => setActiveTab('chadhawa')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`flex items-center justify-between sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
               activeTab === 'chadhawa'
                 ? 'bg-purple-700 text-white shadow-md'
                 : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'
             }`}
           >
-            🌸 Chadhawa Certificates
+            <span className="flex items-center gap-1.5">🌸 Chadhawa Certificates</span>
             <span
               className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                 activeTab === 'chadhawa' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'

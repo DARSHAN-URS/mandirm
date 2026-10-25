@@ -1,8 +1,6 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import AdminSidebar from '@/components/layout/AdminSidebar';
-import AdminHeader from '@/components/layout/AdminHeader';
-import AdminAuthGuard from '@/components/auth/AdminAuthGuard';
+import AdminLayoutShell from '@/components/layout/AdminLayoutShell';
 
 export const metadata: Metadata = {
   title: 'Mandirm — Unified Admin & Operations Console',
@@ -12,6 +10,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -19,22 +23,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 flex min-h-screen text-gray-900 font-sans antialiased">
-        <AdminAuthGuard>
-          <div className="flex w-full min-h-screen">
-            {/* Persistent Side Navigation */}
-            <AdminSidebar />
-
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0">
-              <AdminHeader />
-              <main className="flex-1 p-6 overflow-y-auto">
-                {children}
-              </main>
-            </div>
-          </div>
-        </AdminAuthGuard>
+      <body className="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
+        <AdminLayoutShell>{children}</AdminLayoutShell>
       </body>
     </html>
   );
 }
+

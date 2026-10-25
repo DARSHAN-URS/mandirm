@@ -28,7 +28,8 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
   }
 
   void _loadEarnings() async {
-    final astroId = AuthService().currentProfile?.id ?? 'astro_1';
+    final astroId = AuthService().currentAstrologerId;
+    if (astroId.isEmpty) return;
     try {
       final res = await ApiService().getAstrologerEarnings(astroId);
       if (res != null && mounted) {
@@ -62,14 +63,36 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
   }
 
   void _requestWithdrawal() {
+    if (_walletBalance <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No funds available for withdrawal yet.', style: GoogleFonts.poppins()),
+          backgroundColor: AppColors.statusOffline,
+        ),
+      );
+      return;
+    }
+
+    final currentPhone = AuthService().currentProfile?.phone ?? '';
+    final defaultUpi = currentPhone.isNotEmpty
+        ? '${currentPhone.replaceAll('+', '').replaceAll(' ', '')}@upi'
+        : '';
+    final destinationController = TextEditingController(text: defaultUpi);
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: const Color(0xFFFFFDF8),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +106,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Withdraw to Bank Account',
+              'Withdraw Earnings',
               style: TextStyle(fontFamily: 'Headway', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 6),
@@ -92,28 +115,22 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
               style: GoogleFonts.poppins(fontSize: 13, color: AppColors.primaryMaroon, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 18),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.lightBorder),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.account_balance, color: AppColors.primaryMaroon),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('HDFC Bank •••• 8912', style: GoogleFonts.poppins(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                        Text('IFSC: HDFC0001244 • Verified Acharya Account', style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 11)),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.check_circle, color: AppColors.statusOnline, size: 20),
-                ],
+            Text(
+              'Payout Destination (UPI ID or Bank Account)',
+              style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: destinationController,
+              decoration: InputDecoration(
+                hintText: 'e.g. mobile@upi or Bank Account Number',
+                prefixIcon: const Icon(Icons.account_balance_wallet, color: AppColors.primaryMaroon),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.lightBorder)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.lightBorder)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primaryMaroon)),
               ),
             ),
             const SizedBox(height: 24),
@@ -127,21 +144,35 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () async {
+                  final destination = destinationController.text.trim();
+                  if (destination.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Please enter a valid UPI ID or Bank Account', style: GoogleFonts.poppins()),
+                        backgroundColor: AppColors.statusOffline,
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.pop(ctx);
                   final requestedAmount = _walletBalance;
-                  final astroId = AuthService().currentProfile?.id ?? 'astro_1';
+                  final astroId = AuthService().currentAstrologerId;
+                  if (astroId.isEmpty) return;
+
                   try {
+                    final isUpi = destination.contains('@');
                     final res = await ApiService().requestAstrologerPayout(
                       astroId,
                       amount: requestedAmount,
-                      bankAccount: 'HDFC0001244',
+                      upiId: isUpi ? destination : null,
+                      bankAccount: !isUpi ? destination : null,
                     );
                     if (!mounted) return;
                     setState(() {
                       _walletBalance = (res?['new_wallet_balance'] as num?)?.toDouble() ?? 0.0;
                       _payoutTransactions.insert(0, {
                         'id': 'TXN-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
-                        'desc': 'Transfer to HDFC Bank •••• 8912',
+                        'desc': isUpi ? 'Transfer to UPI $destination' : 'Transfer to Bank $destination',
                         'amount': '₹${requestedAmount.toStringAsFixed(0)}',
                         'date': 'Today, Just now',
                         'is_success': true,
@@ -149,7 +180,7 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Payout request of ₹${requestedAmount.toStringAsFixed(0)} processed on Mandirm server! Funds will settle in 2-4 hours.'),
+                        content: Text('Payout request of ₹${requestedAmount.toStringAsFixed(0)} processed on Mandirm server! Funds will settle shortly.'),
                         backgroundColor: AppColors.statusOnline,
                       ),
                     );

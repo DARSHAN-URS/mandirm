@@ -164,20 +164,20 @@ export default function AstrologersPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
             <span>🧘‍♂️</span> Verified Astrologers & Acharyas
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             Live Supabase database • Regulate per-minute Dakshina rates, online presence, and KYC credentials
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={fetchAstrologers}
             disabled={loading}
-            className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="flex-1 sm:flex-none justify-center px-3 py-2 sm:py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>{loading ? '⏳' : '🔄'}</span>
             <span>Refresh</span>
@@ -200,7 +200,7 @@ export default function AstrologersPage() {
               });
               setShowModal(true);
             }}
-            className="px-3.5 py-1.5 bg-mandir-maroon hover:bg-mandir-maroon-dark text-amber-200 font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
+            className="flex-1 sm:flex-none justify-center px-3.5 py-2 sm:py-1.5 bg-mandir-maroon hover:bg-mandir-maroon-dark text-amber-200 font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
           >
             <span>+</span> Register Astrologer
           </button>
@@ -208,7 +208,7 @@ export default function AstrologersPage() {
       </div>
 
       {/* Search Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between gap-3 shadow-sm">
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-sm">
         <div className="relative w-full sm:w-80">
           <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
             🔍
@@ -218,10 +218,10 @@ export default function AstrologersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, specialty, or title..."
-            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
+            className="w-full pl-8 pr-3 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
-        <div className="text-xs font-bold text-indigo-900 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100">
+        <div className="text-xs font-bold text-indigo-900 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 w-fit">
           {astrologers.filter((a) => a.is_online).length} Currently Online
         </div>
       </div>
@@ -233,7 +233,7 @@ export default function AstrologersPage() {
           <span>Loading live astrologer catalog from database...</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400 text-xs">
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 sm:p-12 text-center text-gray-400 text-xs">
           <span className="text-4xl block mb-2">🧘‍♂️</span>
           <p className="font-semibold text-gray-700">No astrologers found in database</p>
           <p className="mt-1 text-[11px]">
@@ -241,7 +241,7 @@ export default function AstrologersPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {filtered.map((a) => (
             <div
               key={a.id}
@@ -332,8 +332,8 @@ export default function AstrologersPage() {
 
       {/* Edit/Create Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h2 className="text-base font-bold font-cinzel text-gray-900">
                 {editingAstro ? 'Edit Astrologer Details' : 'Register New Astrologer'}

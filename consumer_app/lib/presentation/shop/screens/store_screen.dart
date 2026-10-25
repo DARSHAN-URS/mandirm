@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/l10n/locale_service.dart';
 import '../../../services/api_service.dart';
 import '../../../services/devotee_data_service.dart';
+import '../../../services/supabase_service.dart';
 import 'prasad_orders_screen.dart';
 import 'product_detail_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
@@ -560,9 +561,7 @@ class _StoreScreenState extends State<StoreScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final addressController = TextEditingController(
-          text: 'Flat 402, Shanti Vihar, Mumbai, Maharashtra 400050',
-        );
+        final addressController = TextEditingController();
         final int grandTotal = items.fold<int>(
           0,
           (sum, item) =>
@@ -670,8 +669,21 @@ class _StoreScreenState extends State<StoreScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () {
-                    Navigator.pop(ctx);
                     final addr = addressController.text.trim();
+                    if (addr.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please enter delivery address')),
+                      );
+                      return;
+                    }
+                    Navigator.pop(ctx);
+                    final user = SupabaseService().currentUser;
+                    final profile = SupabaseService().currentProfile;
+                    final devoteeName = profile?.fullName ??
+                        (user?.userMetadata?['full_name'] as String?) ??
+                        (user?.userMetadata?['name'] as String?) ??
+                        'Devotee';
+                    final devoteeGotra = profile?.gotra ?? 'Devotee Gotra';
 
                     for (final product in items) {
                       final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch % 1000000}';
@@ -700,8 +712,8 @@ class _StoreScreenState extends State<StoreScreen> {
                         'date': 'Today, Auspicious Muhurat',
                         'amount': '₹${(itemPrice * qty).toInt()}',
                         'status': 'Confirmed',
-                        'gotra': 'Devotee Gotra',
-                        'devoteeName': 'Sunil Kumar',
+                        'gotra': devoteeGotra,
+                        'devoteeName': devoteeName,
                         'pandit': 'Mandirm Store Sanctum',
                         'prasadTracking': trackingNo,
                         'prasadStatus': 'Processing Consecration',

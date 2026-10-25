@@ -23,6 +23,8 @@ class AuthService {
   SupabaseClient get supabaseClient => _supabaseClient ?? Supabase.instance.client;
   AstrologerProfile? get currentProfile => _currentProfile;
   bool get isAuthenticated => _isAuthenticated;
+  String get currentAstrologerId =>
+      _currentProfile?.id ?? _supabaseClient?.auth.currentUser?.id ?? '';
 
   /// Stream of Supabase auth state changes
   Stream<AuthState> get authStateChanges {
@@ -310,9 +312,14 @@ class AuthService {
     } else if (userPayload != null) {
       profile = AstrologerProfile.fromJson(userPayload);
     } else {
+      final uid = Supabase.instance.client.auth.currentUser?.id ??
+          'astro_${DateTime.now().millisecondsSinceEpoch}';
+      final defaultName = (cleanEmail != null && cleanEmail.isNotEmpty)
+          ? cleanEmail.split('@').first
+          : ((formattedPhone != null && formattedPhone.isNotEmpty) ? 'Acharya ($formattedPhone)' : 'Acharya');
       profile = AstrologerProfile(
-        id: 'astro_1',
-        name: 'Acharya Ramanuj Shastri',
+        id: uid,
+        name: defaultName,
         phone: formattedPhone,
         email: cleanEmail,
       );

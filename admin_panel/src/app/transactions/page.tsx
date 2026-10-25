@@ -83,18 +83,18 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
             <span>💳</span> Financial Transactions & Dakshina Ledger
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             Live database ledger • Razorpay gateway settlements, devotee dakshina receipts, and sacred offerings
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           <button
             onClick={fetchTransactions}
             disabled={loading}
@@ -103,10 +103,15 @@ export default function TransactionsPage() {
             <span>{loading ? '⏳' : '🔄'}</span>
             <span>Refresh</span>
           </button>
-          <div className="text-xs font-bold bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-xl border border-emerald-200">
-            Total Settled: ₹ {totalSettled.toLocaleString('en-IN')}
+          <div className="text-xs font-bold bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-xl border border-emerald-200 whitespace-nowrap">
+            Settled: ₹ {totalSettled.toLocaleString('en-IN')}
           </div>
         </div>
+      </div>
+
+      {/* Mobile Swipe Hint */}
+      <div className="lg:hidden text-[11px] text-gray-400 px-1">
+        👈 Swipe horizontally to view full payment references & gateway IDs 👉
       </div>
 
       {/* Transactions Table */}
@@ -126,7 +131,7 @@ export default function TransactionsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[720px]">
               <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                 <tr>
                   <th className="py-3 px-4">Transaction ID</th>

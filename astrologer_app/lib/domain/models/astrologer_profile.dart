@@ -49,17 +49,17 @@ class AstrologerProfile {
 
   factory AstrologerProfile.fromJson(Map<String, dynamic> json) {
     return AstrologerProfile(
-      id: (json['id'] ?? json['sub'] ?? 'astro_1').toString(),
-      name: (json['name'] ?? json['full_name'] ?? 'Acharya Ramanuj Shastri').toString(),
+      id: (json['id'] ?? json['sub'] ?? '').toString(),
+      name: (json['name'] ?? json['full_name'] ?? 'Acharya').toString(),
       email: json['email']?.toString(),
       phone: json['phone']?.toString(),
       role: (json['role'] ?? 'astrologer').toString(),
       avatarUrl: json['avatar_url']?.toString(),
-      title: json['title']?.toString() ?? 'Senior Vedic Astrologer & Kundli Expert',
+      title: json['title']?.toString() ?? 'Vedic Astrologer',
       bio: json['bio']?.toString(),
       experienceYears: json['experience_years'] is num
           ? (json['experience_years'] as num).toInt()
-          : int.tryParse(json['experience_years']?.toString() ?? '15') ?? 15,
+          : int.tryParse(json['experience_years']?.toString() ?? '5') ?? 5,
       perMinuteChatRate: (json['per_minute_chat_rate'] is num)
           ? (json['per_minute_chat_rate'] as num).toDouble()
           : 25.0,
@@ -69,9 +69,9 @@ class AstrologerProfile {
       perMinuteVideoRate: (json['per_minute_video_rate'] is num)
           ? (json['per_minute_video_rate'] as num).toDouble()
           : 45.0,
-      specialities: json['specialities']?.toString() ?? 'Vedic Astrology, Kundli Matching',
-      languages: json['languages']?.toString() ?? 'Hindi, English, Sanskrit',
-      rating: (json['rating'] is num) ? (json['rating'] as num).toDouble() : 4.95,
+      specialities: json['specialities']?.toString() ?? 'Vedic Astrology',
+      languages: json['languages']?.toString() ?? 'Hindi, English',
+      rating: (json['rating'] is num) ? (json['rating'] as num).toDouble() : 5.0,
       consultationsCount: json['consultations_count'] is num
           ? (json['consultations_count'] as num).toInt()
           : int.tryParse(json['consultations_count']?.toString() ?? '0') ?? 0,
@@ -81,7 +81,7 @@ class AstrologerProfile {
       walletBalance: (json['wallet_balance'] is num)
           ? (json['wallet_balance'] as num).toDouble()
           : double.tryParse(json['wallet_balance']?.toString() ?? '0.0') ?? 0.0,
-      workingHours: json['working_hours']?.toString() ?? '08:00 AM - 10:00 PM',
+      workingHours: json['working_hours']?.toString() ?? '09:00 AM - 09:00 PM',
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,

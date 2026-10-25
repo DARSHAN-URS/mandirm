@@ -12,13 +12,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+        <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
           <span>⚙️</span> Platform Settings & Trust & Safety Configuration
         </h1>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 mt-0.5">
           Manage API gateways, payment keys, Agora RTC credentials, Trust & Safety officer contacts, and legal compliance
         </p>
       </div>
@@ -142,7 +142,7 @@ export default function SettingsPage() {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="px-6 py-2.5 bg-mandir-maroon hover:bg-mandir-maroon-dark text-white rounded-xl text-xs font-bold shadow-md transition-all"
+            className="w-full sm:w-auto px-6 py-2.5 bg-mandir-maroon hover:bg-mandir-maroon-dark text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
           >
             Save All Configurations
           </button>

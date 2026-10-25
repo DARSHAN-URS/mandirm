@@ -56,11 +56,13 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
   }
 
   void _openEditProfile() async {
+    final authProfile = AuthService().currentProfile;
     final current = _profile ??
+        authProfile ??
         AstrologerProfile(
-          id: AuthService().currentProfile?.id ?? 'astro_1',
-          name: 'Acharya Ramanuj Shastri',
-          title: 'Senior Vedic Astrologer & Kundli Expert',
+          id: authProfile?.id ?? AuthService().currentAstrologerId,
+          name: authProfile?.name ?? 'Acharya',
+          title: authProfile?.title ?? 'Vedic Astrologer',
           perMinuteVideoRate: _videoRate,
           perMinuteCallRate: _voiceRate,
           perMinuteChatRate: _chatRate,
@@ -85,7 +87,11 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
 
   void _saveRates() async {
     setState(() => _isSavingRates = true);
-    final astroId = _profile?.id ?? 'astro_1';
+    final astroId = _profile?.id ?? AuthService().currentAstrologerId;
+    if (astroId.isEmpty) {
+      setState(() => _isSavingRates = false);
+      return;
+    }
     final ok = await ApiService().updateAstrologerProfile(
       astroId,
       {

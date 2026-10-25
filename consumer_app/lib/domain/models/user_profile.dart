@@ -10,6 +10,7 @@ class UserProfile {
   final DateTime? birthDate;
   final String? birthPlace;
   final DateTime? createdAt;
+  final double walletBalance;
 
   const UserProfile({
     required this.id,
@@ -23,6 +24,7 @@ class UserProfile {
     this.birthDate,
     this.birthPlace,
     this.createdAt,
+    this.walletBalance = 0.0,
   });
 
   bool get isProfileComplete => fullName != null && fullName!.trim().isNotEmpty;
@@ -44,6 +46,7 @@ class UserProfile {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
+      walletBalance: (json['wallet_balance'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -59,6 +62,7 @@ class UserProfile {
       if (nakshatra != null) 'nakshatra': nakshatra,
       if (birthDate != null) 'birth_date': birthDate!.toIso8601String(),
       if (birthPlace != null) 'birth_place': birthPlace,
+      'wallet_balance': walletBalance,
     };
   }
 
@@ -73,6 +77,7 @@ class UserProfile {
     String? nakshatra,
     DateTime? birthDate,
     String? birthPlace,
+    double? walletBalance,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -86,6 +91,8 @@ class UserProfile {
       birthDate: birthDate ?? this.birthDate,
       birthPlace: birthPlace ?? this.birthPlace,
       createdAt: createdAt,
+      walletBalance: walletBalance ?? this.walletBalance,
     );
   }
 }
+

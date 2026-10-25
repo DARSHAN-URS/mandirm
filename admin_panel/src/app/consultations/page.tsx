@@ -102,19 +102,17 @@ export default function ConsultationsPage() {
           <span>✓</span>
           <span>{toast}</span>
         </div>
-      )}
-
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      )}      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
             <span>💬</span> Live Consultations & Chat Supervision Hub
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             Live Supabase database • Supervise Vedic consultations, session durations, and Agora RTC call channels
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           <button
             onClick={fetchConsultations}
             disabled={loading}
@@ -123,14 +121,14 @@ export default function ConsultationsPage() {
             <span>{loading ? '⏳' : '🔄'}</span>
             <span>Refresh</span>
           </button>
-          <span className="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-200">
+          <span className="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-200 whitespace-nowrap">
             {consultations.filter((c) => c.status === 'active').length} Active Live
           </span>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-sm">
         <div className="relative w-full sm:w-80">
           <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
             🔍
@@ -140,17 +138,17 @@ export default function ConsultationsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search devotee, astrologer, or ID..."
-            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
+            className="w-full pl-8 pr-3 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
 
         {/* Tab Filters */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {(['all', 'active', 'completed'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors ${
+              className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 ${
                 activeTab === tab
                   ? 'bg-mandir-maroon text-amber-200'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -160,6 +158,16 @@ export default function ConsultationsPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Mobile Swipe Hint */}
+      <div className="lg:hidden flex items-center justify-between px-1 text-[11px] text-gray-400">
+        <span>👈 Swipe horizontally to view full sessions 👉</span>
+        {selectedConsultation && (
+          <a href="#consultation-inspector" className="text-amber-800 font-semibold underline">
+            Jump to Details ↓
+          </a>
+        )}
       </div>
 
       {/* Consultations Table & Detail Panel */}
@@ -180,7 +188,7 @@ export default function ConsultationsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[650px]">
                 <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                   <tr>
                     <th className="py-3 px-4">Session ID</th>
@@ -196,7 +204,12 @@ export default function ConsultationsPage() {
                   {filtered.map((c) => (
                     <tr
                       key={c.id}
-                      onClick={() => setSelectedConsultation(c)}
+                      onClick={() => {
+                        setSelectedConsultation(c);
+                        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                          document.getElementById('consultation-inspector')?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
                       className={`hover:bg-emerald-50/30 cursor-pointer transition-colors ${
                         selectedConsultation?.id === c.id ? 'bg-emerald-50/60' : ''
                       }`}
@@ -220,7 +233,7 @@ export default function ConsultationsPage() {
                           className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${
                             c.status === 'active'
                               ? 'bg-emerald-100 text-emerald-800 animate-pulse'
-                              : 'bg-gray-100 text-gray-600'
+                              : 'bg-gray-100 text-gray-700'
                           }`}
                         >
                           {c.status}
@@ -235,13 +248,22 @@ export default function ConsultationsPage() {
         </div>
 
         {/* Inspector */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
-          <h2 className="text-sm font-bold font-cinzel text-gray-900 border-b border-gray-100 pb-2">
-            Session Details & Controls
+        <div id="consultation-inspector" className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm space-y-4 scroll-mt-20">
+          <h2 className="text-sm font-bold font-cinzel text-gray-900 border-b border-gray-100 pb-2 flex items-center justify-between">
+            <span>Session Details & Controls</span>
+            {selectedConsultation && (
+              <button
+                onClick={() => setSelectedConsultation(null)}
+                className="lg:hidden text-gray-400 hover:text-gray-600 text-xs px-1.5 py-0.5 rounded"
+                title="Close Inspector"
+              >
+                ✕
+              </button>
+            )}
           </h2>
 
           {!selectedConsultation ? (
-            <div className="py-20 text-center text-gray-400 text-xs">
+            <div className="py-12 sm:py-20 text-center text-gray-400 text-xs">
               <span>Select any consultation to inspect live Agora channel and session data.</span>
             </div>
           ) : (
@@ -259,7 +281,7 @@ export default function ConsultationsPage() {
               </div>
 
               {selectedConsultation.call_room_id && (
-                <div className="p-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-[11px]">
+                <div className="p-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-[11px] break-all">
                   <span className="font-semibold text-indigo-900 block mb-0.5">Agora RTC Room ID:</span>
                   <code className="font-mono text-indigo-700 text-xs">{selectedConsultation.call_room_id}</code>
                 </div>
@@ -273,7 +295,7 @@ export default function ConsultationsPage() {
                     <button
                       key={st}
                       onClick={() => updateStatus(selectedConsultation.id, st)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize ${
+                      className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold capitalize ${
                         selectedConsultation.status === st
                           ? 'bg-mandir-maroon text-amber-200'
                           : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
@@ -291,3 +313,4 @@ export default function ConsultationsPage() {
     </div>
   );
 }
+

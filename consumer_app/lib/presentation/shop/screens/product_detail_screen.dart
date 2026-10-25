@@ -6,6 +6,7 @@ import '../../../core/l10n/locale_service.dart';
 import '../../../services/api_service.dart';
 import '../../../services/cart_service.dart';
 import '../../../services/devotee_data_service.dart';
+import '../../../services/supabase_service.dart';
 import 'prasad_orders_screen.dart';
 import '../widgets/cart_drawer_sheet.dart';
 import '../../common/widgets/mandirm_header.dart';
@@ -138,7 +139,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 },
                 icon: const Icon(Icons.send_rounded, size: 18),
                 label: Text(
-                  'Chat on WhatsApp (+91 98765 43210)',
+                  'Chat with Mandirm Seva on WhatsApp',
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
@@ -204,10 +205,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final addressController = TextEditingController(
-          text: 'Flat 402, Shanti Vihar, Mumbai, Maharashtra 400050',
-        );
-        final int totalAmount = 1149 * _quantity;
+        final addressController = TextEditingController();
+        final unitPrice = widget.initialProduct?['price'] is num
+            ? (widget.initialProduct?['price'] as num).toInt()
+            : int.tryParse(widget.initialProduct?['price']?.toString() ?? '999') ?? 999;
+        final int totalAmount = unitPrice * _quantity;
+        final productName = widget.initialProduct?['title'] ?? widget.initialProduct?['name'] ?? 'Sacred Item';
 
         return Container(
           decoration: const BoxDecoration(
@@ -269,7 +272,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Mahakal Pendant ($_quantity item)',
+                        Text('$productName ($_quantity item)',
                             style: GoogleFonts.poppins(fontSize: 13)),
                         Text('₹$totalAmount',
                             style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
@@ -324,33 +327,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () {
+                    final addr = addressController.text.trim();
+                    if (addr.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please enter delivery address')),
+                      );
+                      return;
+                    }
                     Navigator.pop(ctx);
                     final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch % 100000}';
                     final trackingNo = 'BLUEDART-${DateTime.now().millisecondsSinceEpoch % 9000000}';
-                    final itemTitle = widget.initialProduct?['title'] ?? 'Mahakal Trishul Nandi Pendant';
+                    final itemTitle = widget.initialProduct?['title'] ?? widget.initialProduct?['name'] ?? 'Sacred Item';
+                    final itemMandir = widget.initialProduct?['mandir'] ?? 'Mandirm Divine Store';
+
+                    final user = SupabaseService().currentUser;
+                    final profile = SupabaseService().currentProfile;
+                    final devoteeName = profile?.fullName ??
+                        (user?.userMetadata?['full_name'] as String?) ??
+                        (user?.userMetadata?['name'] as String?) ??
+                        'Devotee';
+                    final devoteeGotra = profile?.gotra ?? 'Devotee Gotra';
 
                     DevoteeDataService().addPrasadOrder({
                       'id': orderId,
                       'title': itemTitle,
-                      'mandir': widget.initialProduct?['mandir'] ?? 'Ujjain Mahakaleshwar Consecrated',
+                      'mandir': itemMandir,
                       'orderDate': 'Today, Just Now',
                       'status': 'Processing',
                       'currentStep': 0,
                       'trackingNumber': trackingNo,
                       'carrier': 'BlueDart Express',
                       'expectedDelivery': 'In 2-3 Days',
-                      'address': addressController.text.trim(),
+                      'address': addr,
                     });
 
                     DevoteeDataService().addBooking({
                       'id': orderId,
                       'title': itemTitle,
-                      'mandir': 'Ujjain Mahakaleshwar Consecrated',
+                      'mandir': itemMandir,
                       'date': 'Today, Just Now',
                       'amount': '₹$totalAmount',
                       'status': 'Confirmed',
-                      'gotra': 'Devotee Gotra',
-                      'devoteeName': 'Sunil Kumar',
+                      'gotra': devoteeGotra,
+                      'devoteeName': devoteeName,
                       'pandit': 'Mandirm Store Sanctum',
                       'prasadTracking': trackingNo,
                       'prasadStatus': 'Processing Consecration',

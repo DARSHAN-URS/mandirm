@@ -275,7 +275,7 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
                       _buildTextField(
                         controller: _nameController,
                         label: 'Acharya Full Name',
-                        hint: 'e.g. Acharya Ramanuj Shastri',
+                        hint: 'e.g. Acharya Sharma',
                         validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter your name' : null,
                       ),
                       const SizedBox(height: 12),

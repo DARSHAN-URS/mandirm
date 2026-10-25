@@ -32,7 +32,7 @@ class _CartDrawerSheetState extends State<CartDrawerSheet> {
   @override
   void initState() {
     super.initState();
-    _addressController.text = 'Flat 402, Shanti Vihar, Mumbai, Maharashtra 400050';
+    _addressController.text = '';
   }
 
   @override
@@ -55,7 +55,12 @@ class _CartDrawerSheetState extends State<CartDrawerSheet> {
     try {
       final address = _addressController.text.trim();
       final user = SupabaseService().currentUser;
-      final userName = user?.userMetadata?['full_name'] as String? ?? 'Devotee';
+      final profile = SupabaseService().currentProfile;
+      final userName = profile?.fullName ??
+          (user?.userMetadata?['full_name'] as String?) ??
+          (user?.userMetadata?['name'] as String?) ??
+          'Devotee';
+      final userGotra = profile?.gotra ?? 'Devotee Gotra';
 
       for (final item in _cart.items) {
         final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch % 1000000}';
@@ -82,7 +87,7 @@ class _CartDrawerSheetState extends State<CartDrawerSheet> {
           'date': 'Today, Auspicious Muhurat',
           'amount': '₹${(item.price * item.quantity).toInt()}',
           'status': 'Confirmed',
-          'gotra': 'Devotee Gotra',
+          'gotra': userGotra,
           'devoteeName': userName,
           'pandit': 'Mandirm Store Sanctum',
           'prasadTracking': trackingNo,

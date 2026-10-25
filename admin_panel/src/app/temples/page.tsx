@@ -221,29 +221,29 @@ export default function TemplesPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-mandir-maroon-deep via-amber-950 to-mandir-maroon p-6 rounded-2xl text-white shadow-xl border border-amber-900/30">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-mandir-maroon-deep via-amber-950 to-mandir-maroon p-4 sm:p-6 rounded-2xl text-white shadow-xl border border-amber-900/30">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xl">🛕</span>
-            <h1 className="text-2xl font-bold font-cinzel tracking-wide text-amber-200">
+            <span className="text-xl sm:text-2xl">🛕</span>
+            <h1 className="text-xl sm:text-2xl font-bold font-cinzel tracking-wide text-amber-200">
               Sacred Temples & Sanctum Feeds
             </h1>
           </div>
-          <p className="text-xs text-amber-100/80">
+          <p className="text-[11px] sm:text-xs text-amber-100/80 leading-normal">
             Add and manage holy sanctums, live darshan streams, verified deity aartis, and descriptions.
           </p>
         </div>
         <button
           onClick={openAdd}
-          className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-amber-950 font-bold rounded-xl text-xs shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95"
+          className="w-full sm:w-auto justify-center px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-amber-950 font-bold rounded-xl text-xs shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95 shrink-0"
         >
           <span className="text-base font-extrabold">+</span> Add Sacred Temple
         </button>
       </div>
 
       {/* Filter and Stats Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-        <div className="relative w-full sm:w-96">
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-sm">
+        <div className="relative w-full sm:w-80 md:w-96">
           <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">🔍</span>
           <input
             type="text"
@@ -253,13 +253,13 @@ export default function TemplesPage() {
             className="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-mandir-maroon"
           />
         </div>
-        <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
-          <span className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-gray-600">
+          <span className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-2.5 sm:px-3 py-1 rounded-full border border-emerald-200 text-[11px]">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <strong>{temples.filter((t) => t.live_darshan_url).length}</strong> Live Darshan Feeds
+            <strong>{temples.filter((t) => t.live_darshan_url).length}</strong> Live Darshan
           </span>
-          <span className="bg-amber-50 text-amber-900 px-3 py-1 rounded-full border border-amber-200">
-            Total Temples: <strong>{temples.length}</strong>
+          <span className="bg-amber-50 text-amber-900 px-2.5 sm:px-3 py-1 rounded-full border border-amber-200 text-[11px]">
+            Total: <strong>{temples.length}</strong>
           </span>
         </div>
       </div>
@@ -442,8 +442,8 @@ export default function TemplesPage() {
 
       {/* Add / Edit Temple Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 my-8">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-gray-200 my-4 sm:my-8 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🛕</span>

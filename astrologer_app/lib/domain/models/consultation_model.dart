@@ -43,12 +43,12 @@ class DevoteeConsultationRequest {
       devoteeName: json['user_name']?.toString() ?? json['devotee_name']?.toString() ?? 'Devotee',
       devoteePhoto: json['user_photo']?.toString() ??
           json['devotee_photo']?.toString() ??
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-      devoteeGotra: json['user_gotra']?.toString() ?? json['devotee_gotra']?.toString() ?? 'Kashyap',
-      devoteeRashi: json['user_rashi']?.toString() ?? json['devotee_rashi']?.toString() ?? 'Mesh (Aries)',
-      birthDob: json['birth_dob']?.toString() ?? '14 Oct 1992',
-      birthTime: json['birth_time']?.toString() ?? '06:45 AM',
-      birthPlace: json['birth_place']?.toString() ?? 'Varanasi, UP',
+          "",
+      devoteeGotra: json['user_gotra']?.toString() ?? json['devotee_gotra']?.toString() ?? 'Not specified',
+      devoteeRashi: json['user_rashi']?.toString() ?? json['devotee_rashi']?.toString() ?? 'Not specified',
+      birthDob: json['birth_dob']?.toString() ?? 'Not specified',
+      birthTime: json['birth_time']?.toString() ?? 'Not specified',
+      birthPlace: json['birth_place']?.toString() ?? 'Not specified',
       problemTopic: json['problem_topic']?.toString() ?? json['notes']?.toString() ?? 'Vedic Guidance',
       type: json['type']?.toString() ?? 'voice',
       perMinuteRate: (json['per_minute_rate'] as num?)?.toDouble() ?? 30.0,
@@ -94,13 +94,13 @@ class EarningsSummary {
     return EarningsSummary(
       todayEarnings: (json['total_earned'] as num?)?.toDouble() ??
           (json['today_earnings'] as num?)?.toDouble() ??
-          2450.0,
-      todayMinutes: (json['today_minutes'] as num?)?.toInt() ?? 82,
+          0.0,
+      todayMinutes: (json['today_minutes'] as num?)?.toInt() ?? 0,
       todayConsultations: (json['completed_consultations'] as num?)?.toInt() ??
           (json['today_consultations'] as num?)?.toInt() ??
-          6,
-      walletBalance: (json['wallet_balance'] as num?)?.toDouble() ?? 18750.0,
-      rating: (json['rating'] as num?)?.toDouble() ?? 4.92,
+          0,
+      walletBalance: (json['wallet_balance'] as num?)?.toDouble() ?? 0.0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
     );
   }
 
@@ -127,7 +127,7 @@ class PastConsultation {
   PastConsultation({
     required this.id,
     required this.devoteeName,
-    this.devoteePhoto = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
+    this.devoteePhoto = "",
     required this.type,
     required this.durationMinutes,
     required this.amount,
@@ -163,17 +163,17 @@ class PastConsultation {
       devoteeName: json['user_name']?.toString() ?? json['devotee_name']?.toString() ?? 'Devotee',
       devoteePhoto: json['user_photo']?.toString() ??
           json['devotee_photo']?.toString() ??
-          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
+          "",
       type: json['type']?.toString() ?? 'voice',
-      durationMinutes: (json['duration_minutes'] as num?)?.toInt() ?? 15,
+      durationMinutes: (json['duration_minutes'] as num?)?.toInt() ?? 0,
       amount: (json['total_amount'] as num?)?.toDouble() ??
           (json['amount'] as num?)?.toDouble() ??
-          375.0,
+          0.0,
       timeAgo: timeAgo,
       rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
       feedback: json['notes']?.toString() ??
           json['feedback']?.toString() ??
-          'Devotee consultation fulfilled with Vedic remedies.',
+          '',
     );
   }
 }
@@ -210,14 +210,14 @@ class AstrologerServiceBooking {
           'Devotee',
       devoteePhoto: json['user_photo']?.toString() ??
           json['devotee_photo']?.toString() ??
-          'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
-      time: json['booking_time']?.toString() ?? json['scheduled_at']?.toString() ?? 'Today, 04:30 PM',
+          '',
+      time: json['booking_time']?.toString() ?? json['scheduled_at']?.toString() ?? '',
       serviceType: json['service_name']?.toString() ??
           json['service_type']?.toString() ??
           json['type']?.toString() ??
-          'Kundli Matching',
-      rate: json['rate_label']?.toString() ?? '₹500 / 20 mins',
-      amount: (json['amount'] as num?)?.toDouble() ?? (json['total_amount'] as num?)?.toDouble() ?? 500.0,
+          'Astrology Consultation',
+      rate: json['rate_label']?.toString() ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? (json['total_amount'] as num?)?.toDouble() ?? 0.0,
       status: json['status']?.toString() ?? 'pending',
       notes: json['notes']?.toString(),
     );

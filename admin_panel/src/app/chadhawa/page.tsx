@@ -226,30 +226,30 @@ export default function ChadhawaPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-pink-950 via-rose-900 to-mandir-maroon p-6 rounded-2xl text-white shadow-xl border border-pink-900/30">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-pink-950 via-rose-900 to-mandir-maroon p-4 sm:p-6 rounded-2xl text-white shadow-xl border border-pink-900/30">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xl">🌸</span>
-            <h1 className="text-2xl font-bold font-cinzel tracking-wide text-rose-200">
+            <span className="text-xl sm:text-2xl">🌸</span>
+            <h1 className="text-xl sm:text-2xl font-bold font-cinzel tracking-wide text-rose-200">
               Sacred Chadhawa Offerings Console
             </h1>
           </div>
-          <p className="text-xs text-rose-100/80">
+          <p className="text-[11px] sm:text-xs text-rose-100/80 leading-normal">
             Create and maintain divine offerings that devotees can book directly at temple sanctums (Silver Arpan, Vastra, Diya, Bhog).
           </p>
         </div>
         <button
           onClick={openAdd}
-          className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-bold rounded-xl text-xs shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95"
+          className="w-full sm:w-auto justify-center px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-bold rounded-xl text-xs shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95 shrink-0"
         >
           <span className="text-base font-extrabold">+</span> Add Sacred Chadhawa Offering
         </button>
       </div>
 
       {/* Filter and Stats Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-3 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:w-96">
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 space-y-3 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="relative w-full sm:w-80 md:w-96">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">🔍</span>
             <input
               type="text"
@@ -260,17 +260,17 @@ export default function ChadhawaPage() {
             />
           </div>
           <div className="flex items-center gap-3 text-xs font-semibold text-gray-600">
-            <span className="bg-rose-50 text-rose-900 px-3 py-1 rounded-full border border-rose-200">
+            <span className="bg-rose-50 text-rose-900 px-3 py-1 rounded-full border border-rose-200 text-[11px]">
               Total Offerings: <strong>{offerings.length}</strong>
             </span>
           </div>
         </div>
 
         {/* Category Pills */}
-        <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
+        <div className="flex sm:flex-wrap items-center gap-1.5 pt-2 border-t border-gray-100 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold transition-all shrink-0 ${
               selectedCategory === 'all'
                 ? 'bg-rose-900 text-white shadow-sm'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -436,8 +436,8 @@ export default function ChadhawaPage() {
 
       {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-gray-200 my-8">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-4 sm:p-6 shadow-2xl border border-gray-200 my-4 sm:my-8 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🌸</span>

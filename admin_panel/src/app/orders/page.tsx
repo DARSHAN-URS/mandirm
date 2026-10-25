@@ -88,16 +88,16 @@ export default function OrdersPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
             <span>📦</span> Spiritual Prasad & Samagri Orders Dispatch
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             Live Supabase database • Fulfill store orders, track payments, and update courier shipments
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           <button
             onClick={fetchOrders}
             disabled={loading}
@@ -106,19 +106,19 @@ export default function OrdersPage() {
             <span>{loading ? '⏳' : '🔄'}</span>
             <span>Refresh</span>
           </button>
-          <span className="px-3 py-1.5 rounded-xl bg-blue-100 text-blue-900 text-xs font-bold border border-blue-200">
+          <span className="px-3 py-1.5 rounded-xl bg-blue-100 text-blue-900 text-xs font-bold border border-blue-200 whitespace-nowrap">
             {orders.length} Total Orders
           </span>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
         {['all', 'pending', 'processing', 'shipped', 'delivered'].map((st) => (
           <button
             key={st}
             onClick={() => setStatusFilter(st)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
+            className={`px-3 py-1.5 sm:py-1 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 ${
               statusFilter === st
                 ? 'bg-mandir-maroon text-amber-200'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -127,6 +127,11 @@ export default function OrdersPage() {
             {st}
           </button>
         ))}
+      </div>
+
+      {/* Mobile Swipe Hint */}
+      <div className="lg:hidden text-[11px] text-gray-400 px-1">
+        👈 Swipe horizontally to view customer shipping addresses & status 👉
       </div>
 
       {/* Orders Table */}
@@ -146,7 +151,7 @@ export default function OrdersPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                 <tr>
                   <th className="py-3 px-4">Order ID</th>

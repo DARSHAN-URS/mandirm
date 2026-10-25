@@ -61,10 +61,28 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
   void initState() {
     super.initState();
     final user = SupabaseService().currentUser;
-    _nameController.text = user?.userMetadata?['full_name'] ?? 'Devotee';
-    _wishController.text = 'Family health, prosperity, and spiritual peace';
-    _addressController.text =
-        'Flat 402, Shanti Vihar, Mumbai, Maharashtra 400050';
+    final profile = SupabaseService().currentProfile;
+    final devoteeName = profile?.fullName ??
+        (user?.userMetadata?['full_name'] as String?) ??
+        (user?.userMetadata?['name'] as String?) ??
+        '';
+    final devoteeGotra = profile?.gotra ??
+        (user?.userMetadata?['gotra'] as String?) ??
+        'Kashyap';
+    if (devoteeName.isNotEmpty) {
+      _nameController.text = devoteeName;
+    }
+    if (_gotras.contains(devoteeGotra)) {
+      _selectedGotra = devoteeGotra;
+    }
+    _wishController.text = '';
+    _addressController.text = '';
+
+    final walletBal = profile?.walletBalance ?? 0.0;
+    if (walletBal > 0) {
+      _paymentMethods.insert(0, 'Sacred Wallet (Balance: ₹${walletBal.toInt()})');
+      _selectedPayment = _paymentMethods.first;
+    }
   }
 
   @override
@@ -99,12 +117,35 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
 
       DevoteeDataService().addBooking(newBooking);
 
+      final profile = SupabaseService().currentProfile;
+      final amountNum = (widget.puja['numericPrice'] as num?)?.toDouble() ?? 1100.0;
+
+      // If devotee paid via Sacred Wallet, deduct balance
+      if (_selectedPayment.contains('Sacred Wallet')) {
+        final currentBal = profile?.walletBalance ?? 0.0;
+        if (currentBal >= amountNum) {
+          try {
+            await ApiService().deductWalletBalance(
+              amount: amountNum,
+              referenceType: 'puja_booking',
+              referenceId: newBookingId,
+              description: '${widget.puja['title']} Sankalp Seva',
+            );
+            if (profile != null) {
+              SupabaseService().saveUserProfile(
+                profile.copyWith(walletBalance: currentBal - amountNum),
+              );
+            }
+          } catch (_) {}
+        }
+      }
+
       // Persist to FastAPI backend with safe fallback
       try {
         await ApiService().createBooking({
           'puja_id': widget.puja['id'] ?? 'pj_custom',
           'package_id': widget.puja['package_id'] ?? 'pkg_standard',
-          'amount': widget.puja['numericPrice'] ?? 1100,
+          'amount': amountNum,
           'devotee_name': _nameController.text.trim(),
           'gotra': _selectedGotra,
           'special_wishes': _wishController.text.trim(),

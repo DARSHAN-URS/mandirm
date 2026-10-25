@@ -72,16 +72,16 @@ export default function UsersPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
             <span>👥</span> Devotees & User Registry
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             Live Supabase database • Devotee spiritual profiles, Gotras, Vedic Rashis, Nakshatra lineages, and wallets
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           <button
             onClick={fetchProfiles}
             disabled={loading}
@@ -90,14 +90,14 @@ export default function UsersPage() {
             <span>{loading ? '⏳' : '🔄'}</span>
             <span>Refresh</span>
           </button>
-          <span className="px-3 py-1.5 rounded-xl bg-purple-100 text-purple-900 text-xs font-bold border border-purple-200">
-            {profiles.length} Registered Devotees
+          <span className="px-3 py-1.5 rounded-xl bg-purple-100 text-purple-900 text-xs font-bold border border-purple-200 whitespace-nowrap">
+            {profiles.length} Devotees
           </span>
         </div>
       </div>
 
       {/* Search Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between gap-3 shadow-sm">
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 flex items-center justify-between gap-3 shadow-sm">
         <div className="relative w-full sm:w-80">
           <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
             🔍
@@ -107,9 +107,14 @@ export default function UsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, phone, email, or Gotra..."
-            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
+            className="w-full pl-8 pr-3 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
+      </div>
+
+      {/* Mobile Swipe Hint */}
+      <div className="lg:hidden text-[11px] text-gray-400 px-1">
+        👈 Swipe horizontally to view full devotee profile records & wallets 👉
       </div>
 
       {/* Profiles Table */}
@@ -129,7 +134,7 @@ export default function UsersPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                 <tr>
                   <th className="py-3 px-4">Profile ID</th>

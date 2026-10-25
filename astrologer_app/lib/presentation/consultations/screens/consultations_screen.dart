@@ -39,7 +39,8 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
 
 
   Future<void> _loadQueue() async {
-    final astroId = AuthService().currentProfile?.id ?? 'astro_1';
+    final astroId = AuthService().currentAstrologerId;
+    if (astroId.isEmpty) return;
     try {
       final cons = await ApiService().getAstrologerConsultations(astroId);
       final List<DevoteeConsultationRequest> fetchedQueue = [];

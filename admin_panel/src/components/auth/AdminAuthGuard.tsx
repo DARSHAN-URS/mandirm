@@ -141,7 +141,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
 
         {/* Lock Screen Card */}
         <div
-          className={`w-full max-w-md bg-white/[0.04] border border-amber-400/20 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl relative z-10 transition-transform ${
+          className={`w-full max-w-md bg-white/[0.04] border border-amber-400/20 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl relative z-10 transition-transform ${
             shake ? 'animate-shake' : ''
           }`}
         >

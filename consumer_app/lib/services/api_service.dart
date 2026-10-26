@@ -253,7 +253,7 @@ class ApiService {
     String? speciality,
     String? language,
     String sortBy = 'rating',
-    int limit = 50,
+    int limit = 150,
   }) async {
     // 1. Live Supabase database
     if (_supabase != null) {

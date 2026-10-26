@@ -29,6 +29,7 @@ class RazorpayService {
 
   Razorpay? _razorpay;
   Completer<RazorpayPaymentResult>? _activeCompleter;
+  double _currentAmount = 0.0;
 
   void _initRazorpay() {
     _disposeRazorpay();

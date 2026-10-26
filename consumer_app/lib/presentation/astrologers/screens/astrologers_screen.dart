@@ -87,7 +87,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
 
   Future<void> _loadAstrologers() async {
     try {
-      final dbAstros = await ApiService().getAstrologers();
+      final dbAstros = await ApiService().getAstrologers(limit: 150);
       if (dbAstros.isNotEmpty && mounted) {
         setState(() {
           _allAstrologers.clear();

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../services/cart_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/api_service.dart';
+import '../../../services/razorpay_service.dart';
 import '../../../services/supabase_service.dart';
 import '../../common/widgets/app_image.dart';
 
@@ -61,6 +62,31 @@ class _CartDrawerSheetState extends State<CartDrawerSheet> {
           (user?.userMetadata?['name'] as String?) ??
           'Devotee';
       final userGotra = profile?.gotra ?? 'Devotee Gotra';
+
+      final totalAmt = _cart.subtotal;
+      final cartOrderId = 'CART-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+
+      // Launch native Razorpay Checkout Sheet
+      final payRes = await RazorpayService().openPayment(
+        amount: totalAmt,
+        referenceType: 'shop_order',
+        referenceId: cartOrderId,
+        devoteeName: userName,
+        description: 'Mandirm Divine Store Order (${_cart.totalCount} items)',
+      );
+
+      if (!payRes.isSuccess) {
+        if (mounted) setState(() => _isSubmitting = false);
+        if (mounted && payRes.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(payRes.errorMessage!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
 
       for (final item in _cart.items) {
         final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch % 1000000}';

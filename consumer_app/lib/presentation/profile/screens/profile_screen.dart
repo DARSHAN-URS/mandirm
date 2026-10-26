@@ -8,6 +8,7 @@ import '../../../domain/models/user_profile.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/supabase_service.dart';
 import '../../../services/api_service.dart';
+import '../../../services/razorpay_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 import '../../bookings/screens/bookings_screen.dart';
@@ -1011,19 +1012,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 final nav = Navigator.of(ctx);
                                 setSheetState(() => isProcessing = true);
                                 try {
-                                  // 1. Create order on backend
-                                  final order = await ApiService().createWalletRechargeOrder(activeAmt.toDouble());
-                                  final orderId = order?['order_id'] ?? 'order_${DateTime.now().millisecondsSinceEpoch}';
-
-                                  // 2. Complete verification (Razorpay signature verified on backend)
-                                  final verifyRes = await ApiService().verifyWalletRechargePayment(
-                                    razorpayOrderId: orderId,
-                                    razorpayPaymentId: 'pay_rzp_${DateTime.now().millisecondsSinceEpoch}',
-                                    razorpaySignature: 'sig_verified_client',
+                                  // Open Native Razorpay Checkout with Railway backend order
+                                  final payResult = await RazorpayService().openPayment(
                                     amount: activeAmt.toDouble(),
+                                    referenceType: 'wallet_recharge',
+                                    referenceId: 'wrecharge_${DateTime.now().millisecondsSinceEpoch}',
+                                    description: 'Sacred Wallet Recharge (₹$activeAmt)',
+                                    devoteeName: _devoteeName,
+                                    isWalletRecharge: true,
                                   );
 
-                                  final updatedBal = (verifyRes?['wallet_balance'] as num?)?.toDouble() ??
+                                  if (!payResult.isSuccess) {
+                                    setSheetState(() => isProcessing = false);
+                                    if (mounted && payResult.errorMessage != null) {
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(payResult.errorMessage!),
+                                          backgroundColor: AppColors.error,
+                                        ),
+                                      );
+                                    }
+                                    return;
+                                  }
+
+                                  final updatedBal = payResult.updatedWalletBalance ??
                                       (_walletBalance + activeAmt);
 
                                   if (mounted) {

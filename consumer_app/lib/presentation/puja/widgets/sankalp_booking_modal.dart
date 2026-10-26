@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/l10n/locale_service.dart';
 import '../../../../services/api_service.dart';
+import '../../../../services/razorpay_service.dart';
 import '../../../../services/devotee_data_service.dart';
 import '../../../../services/supabase_service.dart';
 
@@ -100,6 +101,55 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
 
       final newBookingId =
           'MND-${DateTime.now().millisecondsSinceEpoch % 10000}';
+      final profile = SupabaseService().currentProfile;
+      final amountNum = (widget.puja['numericPrice'] as num?)?.toDouble() ?? 1100.0;
+
+      // Payment Processing: Sacred Wallet vs Native Razorpay Checkout
+      String? verifiedPaymentId;
+      if (_selectedPayment.contains('Sacred Wallet')) {
+        final currentBal = profile?.walletBalance ?? 0.0;
+        if (currentBal >= amountNum) {
+          try {
+            final deductRes = await ApiService().deductWalletBalance(
+              amount: amountNum,
+              referenceType: 'puja_booking',
+              referenceId: newBookingId,
+              description: '${widget.puja['title']} Sankalp Seva',
+            );
+            if (profile != null) {
+              SupabaseService().saveUserProfile(
+                profile.copyWith(walletBalance: currentBal - amountNum),
+              );
+            }
+            verifiedPaymentId = deductRes?['transaction_id']?.toString() ?? 'wallet_$newBookingId';
+          } catch (_) {}
+        }
+      } else {
+        // Native Razorpay Checkout sheet
+        final payRes = await RazorpayService().openPayment(
+          amount: amountNum,
+          referenceType: 'puja_booking',
+          referenceId: newBookingId,
+          devoteeName: _nameController.text.trim(),
+          description: '${widget.puja['title']} Sankalp Seva',
+        );
+
+        if (!payRes.isSuccess) {
+          setState(() => _isProcessing = false);
+          if (mounted && payRes.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(payRes.errorMessage!),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+
+        verifiedPaymentId = payRes.paymentId ?? 'pay_rzp_${DateTime.now().millisecondsSinceEpoch}';
+      }
+
       final newBooking = {
         'id': newBookingId,
         'title': widget.puja['title'],
@@ -113,32 +163,10 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
         'prasadTracking':
             'IP${DateTime.now().millisecondsSinceEpoch % 100000000}IN',
         'prasadStatus': 'In Preparation',
+        'paymentId': verifiedPaymentId,
       };
 
       DevoteeDataService().addBooking(newBooking);
-
-      final profile = SupabaseService().currentProfile;
-      final amountNum = (widget.puja['numericPrice'] as num?)?.toDouble() ?? 1100.0;
-
-      // If devotee paid via Sacred Wallet, deduct balance
-      if (_selectedPayment.contains('Sacred Wallet')) {
-        final currentBal = profile?.walletBalance ?? 0.0;
-        if (currentBal >= amountNum) {
-          try {
-            await ApiService().deductWalletBalance(
-              amount: amountNum,
-              referenceType: 'puja_booking',
-              referenceId: newBookingId,
-              description: '${widget.puja['title']} Sankalp Seva',
-            );
-            if (profile != null) {
-              SupabaseService().saveUserProfile(
-                profile.copyWith(walletBalance: currentBal - amountNum),
-              );
-            }
-          } catch (_) {}
-        }
-      }
 
       // Persist to FastAPI backend with safe fallback
       try {
@@ -152,6 +180,7 @@ class _SankalpBookingModalState extends State<SankalpBookingModal> {
           'prasad_address': _wantPrasadDelivered ? _addressController.text.trim() : null,
           'is_live_stream_requested': _joinLiveVideo,
           'scheduled_date': widget.puja['date']?.toString(),
+          'payment_id': verifiedPaymentId,
         });
       } catch (e) {
         debugPrint('[SankalpBookingModal] Backend sync note: $e');

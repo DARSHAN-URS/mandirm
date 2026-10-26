@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../services/api_service.dart';
+import '../../../services/razorpay_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/supabase_service.dart';
 import '../../shop/screens/prasad_orders_screen.dart';
@@ -1515,24 +1516,29 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                                           'wallet_tx_$bookingId';
                                     }
                                   } else {
-                                    // Razorpay Payment Flow
-                                    final orderRes = await ApiService().createPaymentOrder(
+                                    // Native Razorpay Payment Flow
+                                    final payRes = await RazorpayService().openPayment(
                                       amount: selectedAmount.toDouble(),
                                       referenceType: 'chadhawa_order',
                                       referenceId: bookingId,
                                       devoteeName: devotee,
                                       description: '${item['title'] ?? 'Sacred Chadava'} - ${item['location'] ?? 'Vedic Temple'}',
                                     );
-                                    final rzpOrderId = orderRes?['order_id']?.toString() ?? 'order_$bookingId';
-                                    final verifyRes = await ApiService().verifyPayment(
-                                      razorpayOrderId: rzpOrderId,
-                                      razorpayPaymentId: 'pay_rzp_${DateTime.now().millisecondsSinceEpoch}',
-                                      razorpaySignature: 'sig_chadhawa_client',
-                                      referenceType: 'chadhawa_order',
-                                      referenceId: bookingId,
-                                      amount: selectedAmount.toDouble(),
-                                    );
-                                    verifiedPaymentId = verifyRes?['payment_id']?.toString() ??
+
+                                    if (!payRes.isSuccess) {
+                                      setModalState(() => isSubmitting = false);
+                                      if (mounted && payRes.errorMessage != null) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(payRes.errorMessage!),
+                                            backgroundColor: AppColors.error,
+                                          ),
+                                        );
+                                      }
+                                      return;
+                                    }
+
+                                    verifiedPaymentId = payRes.paymentId ??
                                         'pay_rzp_${DateTime.now().millisecondsSinceEpoch}';
                                   }
                                 } catch (e) {

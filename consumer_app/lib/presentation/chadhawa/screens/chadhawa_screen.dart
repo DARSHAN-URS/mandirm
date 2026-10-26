@@ -1526,7 +1526,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
                                     );
 
                                     if (!payRes.isSuccess) {
-                                      setModalState(() => isSubmitting = false);
+                                      setModalState(() => isProcessing = false);
                                       if (mounted && payRes.errorMessage != null) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'auth/auth_service.dart';
+import 'api/api_service.dart';
 
 class RazorpayPaymentResult {
   final bool isSuccess;
@@ -21,7 +22,8 @@ class RazorpayPaymentResult {
   });
 }
 
-/// Razorpay Integration Service for Astrologer App
+/// Razorpay Integration Service for Astrologer App.
+/// Fetches real key_id from Railway production backend order endpoint.
 class RazorpayService {
   static final RazorpayService _instance = RazorpayService._internal();
   factory RazorpayService() => _instance;
@@ -29,7 +31,6 @@ class RazorpayService {
 
   Razorpay? _razorpay;
   Completer<RazorpayPaymentResult>? _activeCompleter;
-  double _currentAmount = 0.0;
 
   void _initRazorpay() {
     _disposeRazorpay();
@@ -46,6 +47,8 @@ class RazorpayService {
     _razorpay = null;
   }
 
+  /// Launch native Razorpay checkout sheet.
+  /// Fetches the real production key_id from Railway backend create-order endpoint.
   Future<RazorpayPaymentResult> openPayment({
     required double amount,
     required String referenceType,
@@ -55,24 +58,47 @@ class RazorpayService {
   }) async {
     _initRazorpay();
     _activeCompleter = Completer<RazorpayPaymentResult>();
-    _currentAmount = amount;
 
     try {
       final profile = AuthService().currentProfile;
       final astroName = profile?.name ?? 'Mandirm Astrologer';
       final astroPhone = profile?.phone ?? '';
 
+      // 1. Create order on Railway production backend to get real key_id + order_id
+      String orderId = 'order_${DateTime.now().millisecondsSinceEpoch}';
+      String effectiveKey = '';
+
+      try {
+        final orderRes = await ApiService().createPaymentOrder(
+          amount: amount,
+          referenceType: referenceType,
+          referenceId: referenceId,
+          description: description,
+        );
+        if (orderRes != null) {
+          final fetchedOrderId = orderRes['order_id']?.toString() ?? '';
+          final fetchedKey = (orderRes['key_id']?.toString() ?? '').trim();
+          if (fetchedOrderId.isNotEmpty) orderId = fetchedOrderId;
+          if (fetchedKey.isNotEmpty && !fetchedKey.contains('placeholder')) {
+            effectiveKey = fetchedKey;
+          }
+        }
+      } catch (apiErr) {
+        debugPrint('[RazorpayService] Backend order creation notice: $apiErr');
+      }
+
       final options = {
-        'key': 'rzp_live_placeholder', // dynamically overridden by backend order
-        'amount': (amount * 100).round(),
+        'key': effectiveKey,
+        'amount': (amount * 100).round(), // in paise
         'name': 'Mandirm Astrologer Portal',
         'description': description ?? 'Astrologer Portal Transaction',
+        if (!orderId.startsWith('order_mock')) 'order_id': orderId,
         'prefill': {
           if (astroPhone.isNotEmpty) 'contact': astroPhone,
           'name': astroName,
         },
         'theme': {
-          'color': '#7A0C16',
+          'color': '#7A0C16', // Mandirm Maroon
         },
         'modal': {
           'confirm_close': true,
@@ -92,6 +118,7 @@ class RazorpayService {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    debugPrint('[RazorpayService] Payment Success: ${response.paymentId}');
     _complete(RazorpayPaymentResult(
       isSuccess: true,
       paymentId: response.paymentId,
@@ -101,6 +128,7 @@ class RazorpayService {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
+    debugPrint('[RazorpayService] Payment Error: ${response.code} - ${response.message}');
     _complete(RazorpayPaymentResult(
       isSuccess: false,
       errorMessage: response.message ?? 'Payment was cancelled.',

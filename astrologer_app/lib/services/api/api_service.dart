@@ -700,4 +700,35 @@ class ApiService {
     } catch (_) {}
     return [];
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PAYMENT (RAZORPAY)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /// Creates a Razorpay order on the Railway production backend.
+  /// Returns: { order_id, key_id, amount, currency }
+  Future<Map<String, dynamic>?> createPaymentOrder({
+    required double amount,
+    required String referenceType,
+    required String referenceId,
+    String? description,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/payments/create-order',
+        data: {
+          'amount': amount,
+          'currency': 'INR',
+          'reference_type': referenceType,
+          'reference_id': referenceId,
+          if (description != null) 'description': description,
+        },
+      );
+      final data = response.data;
+      if (data is Map) return Map<String, dynamic>.from(data);
+    } catch (e) {
+      debugPrint('[ApiService] createPaymentOrder notice: $e');
+    }
+    return null;
+  }
 }

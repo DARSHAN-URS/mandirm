@@ -80,6 +80,21 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
   }
 
   void _openCallDialog() {
+    final isAi = _astro['isAi'] == true ||
+        _astro['is_ai'] == 1 ||
+        _astro['is_ai'] == true ||
+        _astro['id']?.toString().startsWith('astro_ai_') == true ||
+        _astro['id'] == 'ast_ai_jyotish';
+    if (isAi) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Audio and video calls are only for verified live Acharyas registered via the Astrologer App or Admin.'),
+          backgroundColor: Color(0xFF7A0C16),
+        ),
+      );
+      _openChatModal();
+      return;
+    }
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -268,52 +283,21 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
             ),
           ],
         ),
-        child: Row(
-          children: [
-            // Left Button: CHAT (Outlined Green with WhatsApp/Chat icon)
-            Expanded(
-              child: SizedBox(
-                height: 46,
-                child: OutlinedButton(
-                  onPressed: _openChatModal,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF16A34A), width: 1.8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    backgroundColor: Colors.white,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.chat_bubble_rounded,
-                          color: Color(0xFF16A34A), size: 19),
-                      const SizedBox(width: 8),
-                      Text(
-                        'CHAT',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF16A34A),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+        child: Builder(
+          builder: (context) {
+            final isAi = astro['isAi'] == true ||
+                astro['is_ai'] == 1 ||
+                astro['is_ai'] == true ||
+                astro['id']?.toString().startsWith('astro_ai_') == true ||
+                astro['id'] == 'ast_ai_jyotish';
 
-            const SizedBox(width: 14),
-
-            // Right Button: CALL (Filled Crimson with Phone icon)
-            Expanded(
-              child: SizedBox(
-                height: 46,
+            if (isAi) {
+              return SizedBox(
+                height: 48,
                 child: ElevatedButton(
-                  onPressed: _openCallDialog,
+                  onPressed: _openChatModal,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B1E1E),
+                    backgroundColor: const Color(0xFFD97706),
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -322,11 +306,10 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.phone_rounded,
-                          color: Colors.white, size: 19),
+                      const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'CALL',
+                        'START 24/7 AI CHAT',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -337,9 +320,83 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
                     ],
                   ),
                 ),
-              ),
-            ),
-          ],
+              );
+            }
+
+            return Row(
+              children: [
+                // Left Button: CHAT (Outlined Green with WhatsApp/Chat icon)
+                Expanded(
+                  child: SizedBox(
+                    height: 46,
+                    child: OutlinedButton(
+                      onPressed: _openChatModal,
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF16A34A), width: 1.8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        backgroundColor: Colors.white,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.chat_bubble_rounded,
+                              color: Color(0xFF16A34A), size: 19),
+                          const SizedBox(width: 8),
+                          Text(
+                            'CHAT',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF16A34A),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 14),
+
+                // Right Button: CALL (Filled Crimson with Phone icon)
+                Expanded(
+                  child: SizedBox(
+                    height: 46,
+                    child: ElevatedButton(
+                      onPressed: _openCallDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8B1E1E),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.phone_rounded,
+                              color: Colors.white, size: 19),
+                          const SizedBox(width: 8),
+                          Text(
+                            'CALL',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -807,7 +807,7 @@ def main():
         # Ensure columns exist in SQLite table
         cols_to_add = [
             ("gender", "TEXT DEFAULT 'male'"),
-            ("is_ai", "INTEGER DEFAULT 1"),
+            ("is_ai", "INTEGER DEFAULT 0"),
             ("ai_system_prompt", "TEXT"),
             ("ai_model", "TEXT DEFAULT 'gpt-4o'"),
             ("ai_provider", "TEXT DEFAULT 'custom'")
@@ -858,7 +858,7 @@ def main():
         "-- ============================================================================",
         "",
         "ALTER TABLE public.astrologers ADD COLUMN IF NOT EXISTS gender TEXT DEFAULT 'male';",
-        "ALTER TABLE public.astrologers ADD COLUMN IF NOT EXISTS is_ai BOOLEAN DEFAULT TRUE;",
+        "ALTER TABLE public.astrologers ADD COLUMN IF NOT EXISTS is_ai BOOLEAN DEFAULT FALSE;",
         "ALTER TABLE public.astrologers ADD COLUMN IF NOT EXISTS ai_system_prompt TEXT;",
         "ALTER TABLE public.astrologers ADD COLUMN IF NOT EXISTS ai_model TEXT DEFAULT 'gpt-4o';",
         "ALTER TABLE public.astrologers ADD COLUMN IF NOT EXISTS ai_provider TEXT DEFAULT 'custom';",

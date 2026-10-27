@@ -33,6 +33,27 @@ class _LiveConsultationCallDialogState
   @override
   void initState() {
     super.initState();
+    final isAi = widget.astrologer['isAi'] == true ||
+        widget.astrologer['is_ai'] == 1 ||
+        widget.astrologer['is_ai'] == true ||
+        widget.astrologer['id']?.toString().startsWith('astro_ai_') == true ||
+        widget.astrologer['id'] == 'ast_ai_jyotish';
+
+    if (isAi) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Audio & video calls are only for verified Acharyas registered via Astrologer App or Admin.'),
+              backgroundColor: Color(0xFF7A0C16),
+            ),
+          );
+        }
+      });
+      return;
+    }
+
     final astroId = widget.astrologer['id']?.toString() ?? 'astro_1';
     final astroName = widget.astrologer['name']?.toString() ?? 'Vedic Acharya';
     ApiService().requestConsultation(

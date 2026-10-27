@@ -162,12 +162,19 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
       topics = ['Love & Relationships', 'Career & Jobs'];
     }
 
+    final isAi = raw['is_ai'] == 1 ||
+        raw['is_ai'] == true ||
+        raw['isAi'] == true ||
+        id.startsWith('astro_ai_') ||
+        id == 'ast_ai_jyotish';
+
     return {
       'id': id,
       'name': name,
       'badge': raw['badge']?.toString() ?? 'Top Rated',
       'badgeIcon': raw['badgeIcon'] is IconData ? raw['badgeIcon'] : Icons.emoji_events_rounded,
       'isVerified': raw['isVerified'] ?? true,
+      'isAi': isAi,
       'specialties': specialties,
       'categories': categories,
       'topics': topics,
@@ -266,6 +273,16 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
   }
 
   void _startConsultation(Map<String, dynamic> astrologer, {required bool isVideo}) {
+    if (astrologer['isAi'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Audio & Video calls are available only for live Acharyas registered via the Astrologer App or Admin. Please use 24/7 AI Chat.'),
+          backgroundColor: Color(0xFF7A0C16),
+        ),
+      );
+      _openAiJyotishModal();
+      return;
+    }
     showDialog(
       context: context,
       barrierDismissible: false,

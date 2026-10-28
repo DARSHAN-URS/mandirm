@@ -9,7 +9,7 @@ class AppConstants {
   // Override via --dart-define=BACKEND_URL=https://api.mandirm.in/api/v1
   static const String backendUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'https://api.mandirm.in/api/v1',
+    defaultValue: 'https://astroapp-production-f5c7.up.railway.app/api/v1',
   );
 
   // Supabase Configuration

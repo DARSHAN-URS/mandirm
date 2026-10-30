@@ -1,9 +1,9 @@
 @echo off
-title Mandirm - Fix Netlify Build & Push All Changes
+title Mandirm - Deployment and Push
 color 0A
 
 echo ============================================================
-echo           MANDIRM DEPLOYMENT: AUTO FIX & FORCE PUSH
+echo           MANDIRM DEPLOYMENT: AUTO FIX AND FORCE PUSH
 echo ============================================================
 echo.
 
@@ -48,13 +48,13 @@ echo.
 echo [3/3] Processing Root Workspace...
 cd /d "%~dp0"
 git add push_all_changes.bat
-git commit -m "chore: update push_all_changes batch script with admin language toggle and add pandit button"
+git commit -m "chore: clean up echo syntax in push_all_changes batch script"
 git push origin main
 echo [+] Root workspace updated!
 echo.
 
 echo ============================================================
-echo   ALL REPOSITORIES PROCESSED & PUSHED TO NETLIFY SUCCESSFULLY!
+echo   ALL REPOSITORIES PROCESSED AND PUSHED TO NETLIFY!
 echo ============================================================
 echo.
 pause

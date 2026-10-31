@@ -79,6 +79,8 @@ const DEFAULT_TEMPLE_FAQS: FAQItem[] = [
 export default function TemplesPage() {
   const { isHindi } = useAdminLanguage();
   const [temples, setTemples] = useState<Temple[]>([]);
+  const [allChadhawa, setAllChadhawa] = useState<any[]>([]);
+  const [linkedChadhawaIds, setLinkedChadhawaIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState('');
@@ -87,7 +89,7 @@ export default function TemplesPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [modalTab, setModalTab] = useState<'basic' | 'heritage' | 'faqs'>('basic');
+  const [modalTab, setModalTab] = useState<'basic' | 'heritage' | 'faqs' | 'chadhawa'>('basic');
 
   // Form State with bilingual & Sri Mandir full details
   const [formData, setFormData] = useState({
@@ -118,7 +120,17 @@ export default function TemplesPage() {
 
   useEffect(() => {
     fetchTemples();
+    fetchChadhawaList();
   }, []);
+
+  const fetchChadhawaList = async () => {
+    try {
+      const { data } = await supabase.from('chadhawa_offerings').select('*').order('title');
+      if (data && data.length > 0) {
+        setAllChadhawa(data);
+      }
+    } catch (_) {}
+  };
 
   const fetchTemples = async () => {
     setIsLoading(true);
@@ -249,21 +261,51 @@ export default function TemplesPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to save temple');
 
+      const targetId = selectedTemple ? selectedTemple.id : payload.id;
+      const targetName = formData.name.trim();
+      const targetNameHi = formData.name_hi.trim() || targetName;
+
+      // Sync linked Chadhawa offerings to this temple
+      if (linkedChadhawaIds.length > 0) {
+        await supabase
+          .from('chadhawa_offerings')
+          .update({
+            temple_id: targetId,
+            temple_name: targetName,
+            temple_name_hi: targetNameHi,
+          })
+          .in('id', linkedChadhawaIds);
+      }
+
       showToast(
         selectedTemple
-          ? (isHindi ? 'मंदिर विवरण सफलतापूर्वक अपडेट हुआ!' : 'Temple updated successfully in database!')
-          : (isHindi ? 'नया पवित्र तीर्थ सफलतापूर्वक सूचीबद्ध हुआ!' : 'New sacred temple listed successfully!')
+          ? (isHindi ? 'मंदिर विवरण एवं संबद्ध चढ़ावे सफलतापूर्वक सुरक्षित हुए!' : 'Temple & linked Chadhawa saved successfully!')
+          : (isHindi ? 'नया पवित्र तीर्थ एवं चढ़ावे सफलतापूर्वक सूचीबद्ध हुए!' : 'New temple & linked Chadhawa listed successfully!')
       );
       setIsModalOpen(false);
       setSelectedTemple(null);
       fetchTemples();
+      fetchChadhawaList();
     } catch (err: any) {
       const { error: sbErr } = await supabase.from('temples').upsert(payload);
       if (!sbErr) {
+        const targetId = selectedTemple ? selectedTemple.id : payload.id;
+        if (linkedChadhawaIds.length > 0) {
+          await supabase
+            .from('chadhawa_offerings')
+            .update({
+              temple_id: targetId,
+              temple_name: formData.name.trim(),
+              temple_name_hi: formData.name_hi.trim() || undefined,
+            })
+            .in('id', linkedChadhawaIds);
+        }
+
         showToast(isHindi ? 'मंदिर डेटाबेस में सुरक्षित हो गया!' : 'Temple saved to database!');
         setIsModalOpen(false);
         setSelectedTemple(null);
         fetchTemples();
+        fetchChadhawaList();
       } else {
         setErrorMsg(err.message || sbErr.message || (isHindi ? 'त्रुटि उत्पन्न हुई' : 'Error saving temple'));
       }
@@ -289,6 +331,7 @@ export default function TemplesPage() {
 
   const openAdd = () => {
     setSelectedTemple(null);
+    setLinkedChadhawaIds([]);
     setFormData({
       name: '',
       name_hi: '',
@@ -301,16 +344,16 @@ export default function TemplesPage() {
       address: '',
       description: '',
       description_hi: '',
-      history: 'Ancient sanctum described in Puranas and Skanda Purana, celebrated across centuries of Sanatan devotion.',
-      history_hi: 'स्कंद पुराण व प्राचीन सनातन ग्रंथों में वर्णित परम पावन धाम, जो सहस्रों वर्षों से भक्तों की आस्था का केंद्र है।',
-      significance: 'Spiritual liberation, elimination of worldly sins, and fulfillment of heartfelt wishes.',
-      significance_hi: 'समस्त पापों का नाश करने वाला एवं मोक्ष प्रदाता परम पावन तीर्थ धाम।',
+      history: '',
+      history_hi: '',
+      significance: '',
+      significance_hi: '',
       image_url: '',
       live_darshan_url: '',
-      darshan_timings: '04:00 AM - 11:00 PM',
-      aarti_timings: 'Mangala: 04:00 AM | Sandhya: 07:00 PM',
+      darshan_timings: '',
+      aarti_timings: '',
       is_featured: true,
-      faqs: DEFAULT_TEMPLE_FAQS,
+      faqs: [],
     });
     setFormErrors({});
     setErrorMsg(null);
@@ -320,6 +363,11 @@ export default function TemplesPage() {
 
   const openEdit = (temple: Temple) => {
     setSelectedTemple(temple);
+    const preLinked = allChadhawa
+      .filter((c) => c.temple_id === temple.id || (c.temple_name && temple.name && c.temple_name.toLowerCase() === temple.name.toLowerCase()))
+      .map((c) => c.id);
+    setLinkedChadhawaIds(preLinked);
+
     setFormData({
       name: temple.name,
       name_hi: temple.name_hi || '',
@@ -338,10 +386,10 @@ export default function TemplesPage() {
       significance_hi: temple.significance_hi || '',
       image_url: temple.image_url,
       live_darshan_url: temple.live_darshan_url || '',
-      darshan_timings: temple.darshan_timings || '04:00 AM - 11:00 PM',
-      aarti_timings: temple.aarti_timings || 'Mangala: 04:00 AM | Sandhya: 07:00 PM',
+      darshan_timings: temple.darshan_timings || '',
+      aarti_timings: temple.aarti_timings || '',
       is_featured: temple.is_featured ?? true,
-      faqs: temple.faqs && temple.faqs.length > 0 ? temple.faqs : DEFAULT_TEMPLE_FAQS,
+      faqs: temple.faqs && temple.faqs.length > 0 ? temple.faqs : [],
     });
     setFormErrors({});
     setErrorMsg(null);
@@ -604,6 +652,23 @@ export default function TemplesPage() {
                 }`}
               >
                 3. {isHindi ? `FAQ प्रश्नोत्तरी (${formData.faqs.length})` : `FAQs (${formData.faqs.length})`}
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab('chadhawa')}
+                className={`py-2 px-4 border-b-2 transition-all flex items-center gap-1.5 ${
+                  modalTab === 'chadhawa'
+                    ? 'border-mandir-maroon text-mandir-maroon'
+                    : 'border-transparent text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                <span>4.</span>
+                <span>🌸</span>
+                <span>
+                  {isHindi
+                    ? `संबद्ध चढ़ावा (${linkedChadhawaIds.length})`
+                    : `Linked Chadhawa (${linkedChadhawaIds.length})`}
+                </span>
               </button>
             </div>
 
@@ -916,6 +981,121 @@ export default function TemplesPage() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: LINKED CHADHAWA OFFERINGS */}
+              {modalTab === 'chadhawa' && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="bg-amber-50/70 p-3 sm:p-4 rounded-2xl border border-amber-200">
+                    <h4 className="font-bold text-amber-900 text-xs flex items-center gap-1.5">
+                      <span>🌸</span>
+                      <span>
+                        {isHindi
+                          ? 'इस मंदिर से संबंधित पावन चढ़ावा अर्पण चुनें'
+                          : 'Link Sacred Chadhawa Offerings to this Temple'}
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-amber-800/90 mt-1 leading-relaxed">
+                      {isHindi
+                        ? 'यहाँ जो चढ़ावे चुने जाएंगे, वे सीधे भक्त वेबसाइट व ऐप पर इस मंदिर के पेज पर दिखाई देंगे। भक्त मंदिर विवरण देखते हुए तुरंत उसी मंदिर में चढ़ावा संकल्प बुक कर सकेंगे।'
+                        : 'Offerings checked here will be directly linked to this temple. Devotees browsing this shrine page will be able to order these sanctum offerings immediately.'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-1 pb-2 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-700">
+                      {isHindi
+                        ? `उपलब्ध चढ़ावे (${allChadhawa.length}) • इस मंदिर से संबद्ध (${linkedChadhawaIds.length})`
+                        : `Available Offerings (${allChadhawa.length}) • Linked (${linkedChadhawaIds.length})`}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setLinkedChadhawaIds(allChadhawa.map((c) => c.id))}
+                        className="text-[11px] font-bold text-mandir-maroon hover:underline"
+                      >
+                        {isHindi ? 'सभी चुनें' : 'Select All'}
+                      </button>
+                      <span className="text-gray-300">|</span>
+                      <button
+                        type="button"
+                        onClick={() => setLinkedChadhawaIds([])}
+                        className="text-[11px] font-bold text-gray-500 hover:text-gray-700"
+                      >
+                        {isHindi ? 'हटाएं' : 'Clear'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {allChadhawa.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                      {isHindi ? 'डेटाबेस में कोई चढ़ावा सेवा नहीं मिली।' : 'No Chadhawa offerings found in database.'}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
+                      {allChadhawa.map((c) => {
+                        const isLinked = linkedChadhawaIds.includes(c.id);
+                        return (
+                          <div
+                            key={c.id}
+                            onClick={() => {
+                              if (isLinked) {
+                                setLinkedChadhawaIds(linkedChadhawaIds.filter((id) => id !== c.id));
+                              } else {
+                                setLinkedChadhawaIds([...linkedChadhawaIds, c.id]);
+                              }
+                            }}
+                            className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-3 select-none ${
+                              isLinked
+                                ? 'bg-amber-50/80 border-mandir-maroon shadow-xs'
+                                : 'bg-white border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isLinked}
+                              onChange={() => {}}
+                              className="mt-1 w-4 h-4 text-mandir-maroon rounded shrink-0 pointer-events-none"
+                            />
+
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                              <img
+                                src={c.image_url || '/images/chadhawa/chadhawa_akhand_jyoti.jpg'}
+                                alt={c.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <h5 className="font-bold text-xs text-gray-900 truncate">
+                                {isHindi && c.title_hi ? c.title_hi : c.title}
+                              </h5>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] font-bold text-mandir-maroon">
+                                  ₹{c.price}
+                                </span>
+                                <span className="text-[10px] text-gray-400">
+                                  • {c.category}
+                                </span>
+                              </div>
+                              <span
+                                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md inline-block mt-1 ${
+                                  isLinked
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : 'bg-gray-100 text-gray-500'
+                                }`}
+                              >
+                                {isLinked
+                                  ? (isHindi ? '✓ इस मंदिर से संबद्ध' : '✓ Linked to this Temple')
+                                  : (isHindi ? (c.temple_name ? `संबद्ध: ${c.temple_name}` : 'असंबद्ध') : (c.temple_name ? `At: ${c.temple_name}` : 'Unassigned'))}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

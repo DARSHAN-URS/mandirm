@@ -13,7 +13,7 @@ cd /d "%~dp0consumer_website"
 git status --short
 echo [*] Staging and committing changes...
 git add .
-git commit -m "fix(build): resolve Astrologer metadata typing in extractMetadata and sanitizeAstrologer"
+git commit -m "feat: add dedicated emails (booking, store, astro, helpline) across all pages"
 echo [*] Pushing to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (
@@ -28,7 +28,7 @@ echo [2/3] Processing Admin Panel (mandirm-admin)...
 cd /d "%~dp0admin_panel"
 git status --short
 git add .
-git commit -m "feat(admin): system image upload and remove all mock/fallback data across astrologers, pujas, products, and settings"
+git commit -m "feat(admin): temple chadhawa linking, system file upload, and update chadhawa faqs"
 echo Pushing admin_panel to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (

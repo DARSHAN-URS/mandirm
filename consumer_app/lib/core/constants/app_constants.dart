@@ -127,6 +127,12 @@ class AppConstants {
   static const String chadavaCatGaneshAsset = 'assets/images/chadava_cat_ganesh.jpg';
   static const String chadavaCatOtherAsset = 'assets/images/chadava_cat_other.jpg';
 
+  // Official Support Emails
+  static const String emailHelpline = 'helpline@mandirm.in';
+  static const String emailBooking = 'booking@mandirm.in';
+  static const String emailStore = 'store@mandirm.in';
+  static const String emailAstro = 'astro@mandirm.in';
+
   // Storage Keys
   static const String keyUserToken = 'user_access_token';
   static const String keyUserProfile = 'user_profile_data';

@@ -60,10 +60,10 @@ const DEFAULT_CHADHAWA_FAQS: FAQItem[] = [
     answer_hi: "हमारे अधिकृत तीर्थ पुरोहित गर्भगृह में मुख्य विग्रह के समक्ष आपके नाम व गोत्र का उच्चारण करते हुए पावन भेंट श्रद्धापूर्वक अर्पित करते हैं।"
   },
   {
-    question: "How do I get proof of my sacred offering?",
-    question_hi: "मुझे मेरी भेंट अर्पण का क्या प्रमाण मिलेगा?",
-    answer: "A personalized video recording showing your name, Gotra recitation, and the actual offering at the temple altar will be sent directly to your registered WhatsApp number.",
-    answer_hi: "आपके नाम-गोत्र के संकल्प और गर्भगृह में अर्पण का व्यक्तिगत वीडियो सीधे आपके पंजीकृत व्हाट्सएप नंबर पर भेजा जाएगा।"
+    question: "How is the Chadhawa offering verified?",
+    question_hi: "चढ़ावा अर्पण की पुष्टि कैसे होती है?",
+    answer: "The temple priest records your family name and Gotra in the sanctum register and performs the sacred arpan before the presiding deity. You receive an official digital confirmation and consecrated Prasad is dispatched to your address.",
+    answer_hi: "अधिकृत तीर्थ पुरोहित गर्भगृह पंजिका में आपके नाम-गोत्र को दर्ज कर विग्रह के समक्ष पावन सामग्री अर्पित करते हैं। आपको आधिकारिक डिजिटल रसीद प्राप्त होती है एवं महाप्रसाद आपके पते पर भेजा जाता है।"
   },
   {
     question: "Can I offer Chadhawa on behalf of parents or family members?",
@@ -79,10 +79,17 @@ const DEFAULT_CHADHAWA_FAQS: FAQItem[] = [
   }
 ];
 
+interface TempleOption {
+  id: string;
+  name: string;
+  name_hi?: string;
+  city?: string;
+}
+
 export default function ChadhawaPage() {
   const { isHindi } = useAdminLanguage();
   const [offerings, setOfferings] = useState<ChadhawaOffering[]>([]);
-  const [templeList, setTempleList] = useState<string[]>([]);
+  const [templeList, setTempleList] = useState<TempleOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState('');
@@ -98,6 +105,7 @@ export default function ChadhawaPage() {
   const [formData, setFormData] = useState({
     title: '',
     title_hi: '',
+    temple_id: '',
     temple_name: '',
     temple_name_hi: '',
     category: 'Sacred Metals',
@@ -123,9 +131,9 @@ export default function ChadhawaPage() {
 
   const fetchTemplesList = async () => {
     try {
-      const { data } = await supabase.from('temples').select('name');
+      const { data } = await supabase.from('temples').select('id, name, name_hi, city').order('name');
       if (data && data.length > 0) {
-        setTempleList(data.map((t) => t.name));
+        setTempleList(data);
       }
     } catch (_) {}
   };
@@ -227,6 +235,7 @@ export default function ChadhawaPage() {
       ...(selectedOffering ? { id: selectedOffering.id } : { id: `chadhawa_${Date.now()}` }),
       title: formData.title.trim(),
       title_hi: formData.title_hi.trim() || undefined,
+      temple_id: formData.temple_id.trim() || undefined,
       temple_name: formData.temple_name.trim(),
       temple_name_hi: formData.temple_name_hi.trim() || undefined,
       category: formData.category.trim(),
@@ -293,23 +302,25 @@ export default function ChadhawaPage() {
 
   const openAdd = () => {
     setSelectedOffering(null);
+    const firstT = templeList[0];
     setFormData({
       title: '',
       title_hi: '',
-      temple_name: templeList[0] || 'Shree Kashi Vishwanath Temple',
-      temple_name_hi: '',
+      temple_id: firstT?.id || '',
+      temple_name: firstT?.name || '',
+      temple_name_hi: firstT?.name_hi || '',
       category: 'Sacred Metals',
       price: '',
       description: '',
       description_hi: '',
-      items_included: 'Panchamrit, Bilva Patra, Sacred Silk Chunri, Pure Silver Coin, Bhasma & Dry Fruits Prasad',
-      items_included_hi: 'पंचामृत, पावन बेलपत्र, जरी चुनरी, शुद्ध चांदी का सिक्का, अभिमंत्रित भस्म एवं पंचमेवे का भोग प्रसाद',
-      significance: 'Offering this sacred Chadhawa directly inside the Sanctum Sanctorum brings divine peace and eliminates obstacles.',
-      significance_hi: 'गर्भगृह के मुख्य विग्रह पर यह पावन चढ़ावा अर्पित करने से समस्त विघ्न-बाधाओं का शमन होता है।',
-      benefits: 'Scriptural blessings (Phalashruti): Family prosperity, removal of planetary afflictions, spiritual protection.',
-      benefits_hi: 'पारिवारिक सुख-समृद्धि, ग्रह दोष शांति, रोग-शोक निवारण एवं अनंत पुण्य की प्राप्ति।',
+      items_included: '',
+      items_included_hi: '',
+      significance: '',
+      significance_hi: '',
+      benefits: '',
+      benefits_hi: '',
       image_url: '',
-      faqs: DEFAULT_CHADHAWA_FAQS,
+      faqs: [],
     });
     setFormErrors({});
     setErrorMsg(null);
@@ -319,11 +330,13 @@ export default function ChadhawaPage() {
 
   const openEdit = (offering: ChadhawaOffering) => {
     setSelectedOffering(offering);
+    const matched = templeList.find((t) => t.id === offering.temple_id || t.name === offering.temple_name);
     setFormData({
       title: offering.title,
       title_hi: offering.title_hi || '',
-      temple_name: offering.temple_name,
-      temple_name_hi: offering.temple_name_hi || '',
+      temple_id: offering.temple_id || matched?.id || '',
+      temple_name: offering.temple_name || matched?.name || '',
+      temple_name_hi: offering.temple_name_hi || matched?.name_hi || '',
       category: offering.category || 'Sacred Metals',
       price: offering.price.toString(),
       description: offering.description || '',
@@ -335,7 +348,7 @@ export default function ChadhawaPage() {
       benefits: offering.benefits || '',
       benefits_hi: offering.benefits_hi || '',
       image_url: offering.image_url || '',
-      faqs: offering.faqs && offering.faqs.length > 0 ? offering.faqs : DEFAULT_CHADHAWA_FAQS,
+      faqs: offering.faqs && offering.faqs.length > 0 ? offering.faqs : [],
     });
     setFormErrors({});
     setErrorMsg(null);
@@ -665,23 +678,35 @@ export default function ChadhawaPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-gray-700 font-bold mb-1">
-                        {isHindi ? 'तीर्थ मंदिर *' : 'Temple Destination *'}
+                        {isHindi ? 'संबद्ध तीर्थ मंदिर *' : 'Linked Temple *'}
                       </label>
-                      <input
-                        type="text"
-                        list="temples-list"
-                        placeholder="Select or enter temple"
-                        value={formData.temple_name}
-                        onChange={(e) => setFormData({ ...formData, temple_name: e.target.value })}
-                        className={`w-full p-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-mandir-maroon ${
+                      <select
+                        value={formData.temple_id || formData.temple_name}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const t = templeList.find((x) => x.id === val || x.name === val);
+                          if (t) {
+                            setFormData({
+                              ...formData,
+                              temple_id: t.id,
+                              temple_name: t.name,
+                              temple_name_hi: t.name_hi || t.name,
+                            });
+                          } else {
+                            setFormData({ ...formData, temple_id: '', temple_name: val });
+                          }
+                        }}
+                        className={`w-full p-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-mandir-maroon text-xs ${
                           formErrors.temple_name ? 'border-red-500 bg-red-50' : 'border-gray-200'
                         }`}
-                      />
-                      <datalist id="temples-list">
+                      >
+                        <option value="">{isHindi ? '-- पावन तीर्थ मंदिर चुनें --' : '-- Select Holy Temple --'}</option>
                         {templeList.map((t) => (
-                          <option key={t} value={t} />
+                          <option key={t.id} value={t.id}>
+                            🛕 {isHindi && t.name_hi ? t.name_hi : t.name} {t.city ? `(${t.city})` : ''}
+                          </option>
                         ))}
-                      </datalist>
+                      </select>
                       {formErrors.temple_name && <p className="text-[10px] text-red-600 mt-1">{formErrors.temple_name}</p>}
                     </div>
 

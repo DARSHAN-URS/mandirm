@@ -13,6 +13,7 @@ function extractChadhawaMetadata(c: any) {
         ...meta,
         ...c,
         description: desc,
+        ...(meta.temple_id ? { temple_id: meta.temple_id } : {}),
         ...(meta.title_hi ? { title_hi: meta.title_hi } : {}),
         ...(meta.temple_name_hi ? { temple_name_hi: meta.temple_name_hi } : {}),
         ...(meta.description_hi ? { description_hi: meta.description_hi } : {}),
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
     const {
       title,
       title_hi,
+      temple_id,
       temple_name,
       temple_name_hi,
       category,
@@ -81,6 +83,7 @@ export async function POST(req: Request) {
     const id = body.id || `chadhawa_${Date.now()}`;
 
     const metadata = {
+      temple_id: temple_id?.trim() || undefined,
       title_hi: title_hi?.trim() || undefined,
       temple_name_hi: temple_name_hi?.trim() || undefined,
       description_hi: description_hi?.trim() || undefined,
@@ -98,7 +101,7 @@ export async function POST(req: Request) {
       ? `${cleanDesc}\n\n<!-- METADATA: ${JSON.stringify(metadata)} -->`
       : cleanDesc;
 
-    const basePayload = {
+    const basePayload: any = {
       id,
       title: title.trim(),
       temple_name: temple_name.trim(),
@@ -107,8 +110,9 @@ export async function POST(req: Request) {
       description: finalDescription,
       image_url: image_url.trim(),
     };
+    if (temple_id) basePayload.temple_id = temple_id.trim();
 
-    const fullPayload = {
+    const fullPayload: any = {
       ...basePayload,
       ...(title_hi ? { title_hi: title_hi.trim() } : {}),
       ...(temple_name_hi ? { temple_name_hi: temple_name_hi.trim() } : {}),
@@ -117,6 +121,10 @@ export async function POST(req: Request) {
       ...(items_included_hi ? { items_included_hi: items_included_hi.trim() } : {}),
       ...(significance ? { significance: significance.trim() } : {}),
       ...(significance_hi ? { significance_hi: significance_hi.trim() } : {}),
+      ...(benefits ? { benefits: benefits.trim() } : {}),
+      ...(benefits_hi ? { benefits_hi: benefits_hi.trim() } : {}),
+      ...(Array.isArray(faqs) ? { faqs } : {}),
+    };
       ...(benefits ? { benefits: benefits.trim() } : {}),
       ...(benefits_hi ? { benefits_hi: benefits_hi.trim() } : {}),
       ...(Array.isArray(faqs) ? { faqs } : {}),
@@ -147,6 +155,7 @@ export async function PUT(req: Request) {
     if (updates.price !== undefined) updates.price = Number(updates.price);
 
     const metadata = {
+      temple_id: updates.temple_id?.trim() || undefined,
       title_hi: updates.title_hi?.trim() || undefined,
       temple_name_hi: updates.temple_name_hi?.trim() || undefined,
       description_hi: updates.description_hi?.trim() || undefined,

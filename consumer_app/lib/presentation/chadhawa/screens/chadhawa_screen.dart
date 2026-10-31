@@ -1059,8 +1059,8 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
               const SizedBox(height: 12),
               _buildTrustItem(
                 Icons.video_camera_back_outlined,
-                isHi ? 'व्हाट्सएप पर वीडियो साक्ष्य' : 'WhatsApp Video Proof',
-                isHi ? 'अर्पण का व्यक्तिगत 30-सेकंड वीडियो व्हाट्सएप पर सीधे आपके नंबर पर प्रेषित किया जाता है।' : 'Personalized video proof delivered straight to your WhatsApp after Aarti.',
+                isHi ? 'अभिमंत्रित महाप्रसाद एवं रसीद' : 'Consecrated Prasad & Receipt',
+                isHi ? 'अर्पण उपरांत मंदिर भस्म, रक्षा सूत्र व सूखा प्रसाद सुरक्षित आपके पते पर प्रेषित किया जाता है।' : 'Sanctified temple prasad, bhasma & raksha sutra safely dispatched to your doorstep.',
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -1866,7 +1866,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
           ),
           _buildTrustBadgeItem(
             Icons.video_camera_back_outlined,
-            isHi ? 'तुरंत वीडियो एवं\nफोटो साक्ष्य' : 'Instant Photos/\nVideos of Offerings',
+            isHi ? 'अभिमंत्रित महाप्रसाद\nव पावन रक्षा सूत्र' : 'Sanctified Prasad\n& Raksha Sutra',
             onTap: () => _openTrustInfoSheet(2),
           ),
         ],

@@ -533,11 +533,11 @@ class ChadhawaBookingViewScreen extends StatelessWidget {
           _buildStepItem(
             isCompleted: false,
             isCurrent: false,
-            title: isHi ? 'व्हाट्सएप पर वीडियो दर्शन' : 'WhatsApp Video Clip Proof',
+            title: isHi ? 'प्रसाद प्रेषण एवं डिजिटल रसीद' : 'Prasad Dispatch & Digital Receipt',
             subtitle: isHi
-                ? 'आपके नाम के उच्चारण का 30-सेकंड वीडियो व्हाट्सएप पर प्राप्त होगा।'
-                : 'Personalized recitation video delivered to your WhatsApp.',
-            time: isHi ? '2-4 घंटे में' : 'Within 2-4 hrs',
+                ? 'अभिमंत्रित महाप्रसाद, रक्षा सूत्र व रसीद आपके पते पर प्रेषित की जाती है।'
+                : 'Sanctified Prasad, Raksha Sutra & digital receipt dispatched to your address.',
+            time: isHi ? '24-48 घंटे में' : 'Within 24-48 hrs',
             isLast: true,
           ),
         ],
@@ -654,7 +654,7 @@ class ChadhawaBookingViewScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isHi ? 'व्हाट्सएप वीडियो दर्शन की गारंटी' : 'Guaranteed WhatsApp Video Proof',
+                  isHi ? 'पावन गर्भगृह संकल्प एवं महाप्रसाद गारंटी' : 'Sanctified Sanctum Offering & Prasad Guarantee',
                   style: GoogleFonts.poppins(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
@@ -664,8 +664,8 @@ class ChadhawaBookingViewScreen extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   isHi
-                      ? 'आरती के बाद पुजारी जी द्वारा आपके नाम-गोत्र के साथ चढ़ावा अर्पित करने का वीडियो आपके फोन पर भेजा जाएगा।'
-                      : 'A personalized clip of the priest offering your chadava with your Gotra will be sent to your WhatsApp.',
+                      ? 'अधिकृत मुख्य पुजारी जी द्वारा आपके नाम-गोत्र से गर्भगृह में पावन सामग्री समर्पित की जाती है।'
+                      : 'Authorized temple priests consecrate and offer sacred items with your Gotra directly before the sanctum altar.',
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     color: const Color(0xFF2E7D32),

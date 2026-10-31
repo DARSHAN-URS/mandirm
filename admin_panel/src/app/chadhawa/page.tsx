@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAdminLanguage } from '@/context/AdminLanguageContext';
 import { autoTranslateText } from '@/lib/autoTranslate';
+import SystemImageUpload from '@/components/common/SystemImageUpload';
 
 interface FAQItem {
   question: string;
@@ -719,35 +720,16 @@ export default function ChadhawaPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-gray-700 font-bold mb-1">
-                      {isHindi ? 'फोटो URL *' : 'Offering Image URL *'}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="https://... or select preset below"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      className={`w-full p-2.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-mandir-maroon ${
-                        formErrors.image_url ? 'border-red-500 bg-red-50' : 'border-gray-200'
-                      }`}
-                    />
-                    {formErrors.image_url && <p className="text-[10px] text-red-600 mt-1">{formErrors.image_url}</p>}
-
-                    <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                      <span className="text-[10px] text-gray-500 font-semibold">{isHindi ? 'त्वरित फोटो चुनें:' : 'Presets:'}</span>
-                      {CHADAWA_PRESETS.map((p) => (
-                        <button
-                          key={p.url}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, image_url: p.url })}
-                          className="text-[10px] px-2 py-0.5 bg-gray-100 hover:bg-gray-200 rounded-md border border-gray-200"
-                        >
-                          {p.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <SystemImageUpload
+                    value={formData.image_url}
+                    onChange={(url) => setFormData({ ...formData, image_url: url })}
+                    label="Chadhawa Offering Photo (Upload from System)"
+                    labelHi="चढ़ावा अर्पण फोटो (सिस्टम से अपलोड करें)"
+                    presets={CHADAWA_PRESETS}
+                    required
+                    error={formErrors.image_url}
+                    folder="chadhawa"
+                  />
                 </div>
               )}
 

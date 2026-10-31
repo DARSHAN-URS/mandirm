@@ -28,7 +28,7 @@ echo [2/3] Processing Admin Panel (mandirm-admin)...
 cd /d "%~dp0admin_panel"
 git status --short
 git add .
-git commit -m "feat: add Sri Mandir details editor, FAQ manager, auto-fill Hindi button, and bilingual content persistence"
+git commit -m "feat(admin): enable direct system image upload from device with auto-compression and Supabase storage"
 echo Pushing admin_panel to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (

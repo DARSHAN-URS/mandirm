@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { useAdminLanguage } from '@/context/AdminLanguageContext';
+import SystemImageUpload from '@/components/common/SystemImageUpload';
 
 interface Astrologer {
   id: string;
@@ -515,51 +516,16 @@ function AstrologersPageContent() {
             </div>
 
             <form onSubmit={handleSave} className="space-y-4 text-xs">
-              {/* Photo Preview & Custom Image URL */}
-              <div className="bg-amber-50/60 p-3 sm:p-4 rounded-2xl border border-amber-200/80 space-y-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={formData.avatar_url || '/images/astrologers/astro_1.jpg'}
-                    alt="Preview"
-                    className="w-14 h-14 rounded-2xl object-cover object-top border-2 border-amber-400 shadow-sm shrink-0"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/astrologers/astro_1.jpg';
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <label className="block text-gray-700 font-bold mb-1">
-                      {isHindi ? 'पंडित जी की फोटो URL / प्रीसेट चुनें:' : 'Pandit Photo URL / Choose Preset:'}
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.avatar_url}
-                      onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                      placeholder="https://... or /images/astrologers/astro_1.jpg"
-                      className="w-full p-2 border border-amber-300 rounded-xl bg-white text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Instant Presets */}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-[10px] font-semibold text-gray-500">
-                    {isHindi ? 'त्वरित फोटो प्रीसेट:' : 'Quick Photo Presets:'}
-                  </span>
-                  {ASTRO_IMAGE_PRESETS.map((p, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, avatar_url: p.url })}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
-                        formData.avatar_url === p.url
-                          ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
-                          : 'bg-white text-gray-700 border-gray-200 hover:bg-amber-100'
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
+              {/* Photo Upload from System */}
+              <div className="bg-amber-50/60 p-3 sm:p-4 rounded-2xl border border-amber-200/80">
+                <SystemImageUpload
+                  value={formData.avatar_url}
+                  onChange={(url) => setFormData({ ...formData, avatar_url: url })}
+                  label="Pandit / Astrologer Photo (Upload from System)"
+                  labelHi="पंडित जी की फोटो (सिस्टम से अपलोड करें)"
+                  presets={ASTRO_IMAGE_PRESETS}
+                  folder="astrologers"
+                />
               </div>
 
               {/* Name & Title */}

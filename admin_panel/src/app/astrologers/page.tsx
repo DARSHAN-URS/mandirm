@@ -73,20 +73,17 @@ const getAstrologerImage = (astro: Astrologer) => {
 };
 
 const parseBio = (bio?: string) => {
-  if (!bio) return { city: 'हरिद्वार, उत्तराखण्ड', temple: 'हर की पौड़ी तीर्थ प्रकोष्ठ', veda: 'ऋग्वेद परंपरा', about: '' };
+  if (!bio) return { city: '', temple: '', veda: '', about: '' };
   try {
     const parsed = JSON.parse(bio);
-    let city = 'हरिद्वार, उत्तराखण्ड';
-    let temple = 'हर की पौड़ी तीर्थ प्रकोष्ठ';
-    let veda = 'ऋग्वेद परंपरा';
-    let about = '';
-    if (parsed.city) city = parsed.city;
-    if (parsed.temple) temple = parsed.temple;
-    if (parsed.veda) veda = parsed.veda;
-    if (parsed.about) about = parsed.about;
-    return { city, temple, veda, about };
+    return {
+      city: parsed.city || '',
+      temple: parsed.temple || '',
+      veda: parsed.veda || '',
+      about: parsed.about || '',
+    };
   } catch {
-    return { city: 'हरिद्वार, उत्तराखण्ड', temple: 'हर की पौड़ी तीर्थ प्रकोष्ठ', veda: 'ऋग्वेद परंपरा', about: bio };
+    return { city: '', temple: '', veda: '', about: bio };
   }
 };
 
@@ -102,20 +99,20 @@ function AstrologersPageContent() {
 
   const defaultForm = {
     name: '',
-    title: isHindi ? 'वैदिक ज्योतिष एवं कर्मकाण्ड मर्मज्ञ' : 'Vedic Astrologer & Karmakand Scholar',
-    avatar_url: '/images/astrologers/astro_1.jpg',
-    city: isHindi ? 'हरिद्वार, उत्तराखण्ड' : 'Haridwar, Uttarakhand',
-    temple_affiliation: isHindi ? 'हर की पौड़ी तीर्थ प्रकोष्ठ' : 'Har Ki Pauri Sanctum Cell',
-    veda_branch: isHindi ? 'ऋग्वेद परंपरा' : 'Rigveda Tradition',
+    title: '',
+    avatar_url: '',
+    city: '',
+    temple_affiliation: '',
+    veda_branch: '',
     bio: '',
-    specialities: isHindi ? 'गृह प्रवेश, सत्यनारायण कथा, रुद्राभिषेक, वास्तु शांति' : 'Griha Pravesh, Satyanarayan Katha, Rudrabhishek, Vastu Shanti',
+    specialities: '',
     languages: isHindi ? 'हिन्दी, संस्कृत, English' : 'Hindi, Sanskrit, English',
-    experience_years: 12,
-    per_minute_chat_rate: 25,
-    per_minute_call_rate: 35,
-    phone: '+91 98765 43210',
-    rating: 4.95,
-    consultations_count: 500,
+    experience_years: 5,
+    per_minute_chat_rate: 20,
+    per_minute_call_rate: 30,
+    phone: '',
+    rating: 5.0,
+    consultations_count: 0,
     is_online: true,
   };
 
@@ -400,39 +397,45 @@ function AstrologersPageContent() {
                       <div className="flex items-center justify-between gap-1">
                         <h3 className="font-bold text-gray-900 text-sm truncate">{astro.name}</h3>
                         <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
-                          ★ {astro.rating || 4.9}
+                          ★ {astro.rating ? Number(astro.rating).toFixed(1) : '5.0'}
                         </span>
                       </div>
                       <p className="text-[11px] text-amber-900/80 font-medium truncate mt-0.5">
                         {astro.title}
                       </p>
-                      <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-1 truncate">
-                        <span>📍</span>
-                        <span className="truncate">{city}</span>
-                      </div>
+                      {city && (
+                        <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-1 truncate">
+                          <span>📍</span>
+                          <span className="truncate">{city}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Badges / Temple & Veda */}
                   <div className="mt-3.5 pt-3 border-t border-gray-50 space-y-1.5 text-[11px]">
-                    <div className="flex items-center justify-between text-gray-600">
-                      <span className="text-gray-400">{isHindi ? 'तीर्थ प्रकोष्ठ:' : 'Sanctum:'}</span>
-                      <span className="font-semibold text-gray-800 truncate max-w-[170px]">{temple}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-gray-600">
-                      <span className="text-gray-400">{isHindi ? 'वेद शाखा:' : 'Veda Branch:'}</span>
-                      <span className="font-semibold text-amber-800">{veda}</span>
-                    </div>
+                    {temple && (
+                      <div className="flex items-center justify-between text-gray-600">
+                        <span className="text-gray-400">{isHindi ? 'तीर्थ प्रकोष्ठ:' : 'Sanctum:'}</span>
+                        <span className="font-semibold text-gray-800 truncate max-w-[170px]">{temple}</span>
+                      </div>
+                    )}
+                    {veda && (
+                      <div className="flex items-center justify-between text-gray-600">
+                        <span className="text-gray-400">{isHindi ? 'वेद शाखा:' : 'Veda Branch:'}</span>
+                        <span className="font-semibold text-amber-800">{veda}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between text-gray-600">
                       <span className="text-gray-400">{isHindi ? 'अनुभव:' : 'Experience:'}</span>
                       <span className="font-semibold text-gray-800">
-                        {astro.experience_years || 10} {isHindi ? 'वर्ष' : 'Yrs'}
+                        {astro.experience_years ?? 0} {isHindi ? 'वर्ष' : 'Yrs'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-gray-600">
                       <span className="text-gray-400">{isHindi ? 'परामर्श दक्षिणा:' : 'Dakshina Rate:'}</span>
                       <span className="font-bold text-mandir-maroon">
-                        ₹{astro.per_minute_chat_rate || 20}/min (₹{(astro.per_minute_chat_rate || 20) * 60}/hr)
+                        ₹{astro.per_minute_chat_rate || 0}/min
                       </span>
                     </div>
                   </div>

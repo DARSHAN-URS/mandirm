@@ -108,8 +108,8 @@ export default function TemplesPage() {
     significance_hi: '',
     image_url: '',
     live_darshan_url: '',
-    darshan_timings: '04:00 AM - 11:00 PM',
-    aarti_timings: 'Mangala: 04:00 AM | Sandhya: 07:00 PM',
+    darshan_timings: '',
+    aarti_timings: '',
     is_featured: true,
     faqs: [] as FAQItem[],
   });

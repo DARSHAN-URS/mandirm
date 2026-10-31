@@ -86,7 +86,8 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue="rzp_live_MandirmDevotionalKey"
+                placeholder={isHindi ? 'पर्यावरण चर NEXT_PUBLIC_RAZORPAY_KEY_ID से सुरक्षित' : 'Configured via NEXT_PUBLIC_RAZORPAY_KEY_ID'}
+                defaultValue={process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || ''}
                 className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
               />
             </div>
@@ -96,7 +97,8 @@ export default function SettingsPage() {
               </label>
               <input
                 type="password"
-                defaultValue="••••••••••••••••••••••••"
+                placeholder="••••••••••••••••"
+                defaultValue=""
                 className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
               />
             </div>
@@ -120,7 +122,8 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue="48316c4714e843f5b991599318bba4ff"
+                placeholder={isHindi ? 'पर्यावरण चर NEXT_PUBLIC_AGORA_APP_ID' : 'Configured via NEXT_PUBLIC_AGORA_APP_ID'}
+                defaultValue={process.env.NEXT_PUBLIC_AGORA_APP_ID || ''}
                 className="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono"
               />
             </div>
@@ -130,7 +133,7 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue={isHindi ? '86400 सेकंड (24 घंटे)' : '86400 seconds (24 Hours)'}
+                defaultValue="86400"
                 className="w-full p-2 border border-gray-300 rounded-lg text-xs"
               />
             </div>

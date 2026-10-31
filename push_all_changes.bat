@@ -28,7 +28,7 @@ echo [2/3] Processing Admin Panel (mandirm-admin)...
 cd /d "%~dp0admin_panel"
 git status --short
 git add .
-git commit -m "feat(admin): enable direct system image upload from device with auto-compression and Supabase storage"
+git commit -m "feat(admin): system image upload and remove all mock/fallback data across astrologers, pujas, products, and settings"
 echo Pushing admin_panel to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (

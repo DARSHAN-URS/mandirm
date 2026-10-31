@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
 interface Order {
   id: string;
@@ -12,11 +13,12 @@ interface Order {
   total_amount: number;
   payment_id?: string;
   payment_status?: string;
-  order_status: string; // Pending, Processing, Shipped, Delivered, Cancelled
+  order_status: string;
   created_at: string;
 }
 
 export default function OrdersPage() {
+  const { isHindi } = useAdminLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -46,6 +48,7 @@ export default function OrdersPage() {
       }
     } catch (err) {
       console.error(err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -61,7 +64,11 @@ export default function OrdersPage() {
       if (error) {
         showToast(`Failed: ${error.message}`);
       } else {
-        showToast(`Order ${id} marked as ${st}`);
+        showToast(
+          isHindi
+            ? `ऑर्डर स्थिति "${st}" में अपडेट हुई`
+            : `Order ${id} marked as ${st}`
+        );
         setOrders(
           orders.map((o) => (o.id === id ? { ...o, order_status: st } : o))
         );
@@ -91,10 +98,12 @@ export default function OrdersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
-            <span>📦</span> Spiritual Prasad & Samagri Orders Dispatch
+            <span>📦</span> {isHindi ? 'प्रसाद एवं सामग्री ऑर्डर वितरण' : 'Spiritual Prasad & Samagri Orders Dispatch'}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Live Supabase database • Fulfill store orders, track payments, and update courier shipments
+            {isHindi
+              ? 'सुपाबेस डेटाबेस • स्टोर ऑर्डर पूर्ति, भुगतान ट्रैकिंग एवं कूरियर वितरण प्रबंधन'
+              : 'Live Supabase database • Fulfill store orders, track payments, and update courier shipments'}
           </p>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
@@ -104,34 +113,35 @@ export default function OrdersPage() {
             className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>{loading ? '⏳' : '🔄'}</span>
-            <span>Refresh</span>
+            <span>{isHindi ? 'रिफ्रेश' : 'Refresh'}</span>
           </button>
           <span className="px-3 py-1.5 rounded-xl bg-blue-100 text-blue-900 text-xs font-bold border border-blue-200 whitespace-nowrap">
-            {orders.length} Total Orders
+            {orders.length} {isHindi ? 'कुल ऑर्डर' : 'Total Orders'}
           </span>
         </div>
       </div>
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-        {['all', 'pending', 'processing', 'shipped', 'delivered'].map((st) => (
+        {[
+          { key: 'all', labelEn: 'All', labelHi: 'सभी' },
+          { key: 'pending', labelEn: 'Pending', labelHi: 'लंबित' },
+          { key: 'processing', labelEn: 'Processing', labelHi: 'प्रक्रियाधीन' },
+          { key: 'shipped', labelEn: 'Shipped', labelHi: 'प्रेषित' },
+          { key: 'delivered', labelEn: 'Delivered', labelHi: 'वितरित' },
+        ].map((st) => (
           <button
-            key={st}
-            onClick={() => setStatusFilter(st)}
+            key={st.key}
+            onClick={() => setStatusFilter(st.key)}
             className={`px-3 py-1.5 sm:py-1 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 ${
-              statusFilter === st
+              statusFilter === st.key
                 ? 'bg-mandir-maroon text-amber-200'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >
-            {st}
+            {isHindi ? st.labelHi : st.labelEn}
           </button>
         ))}
-      </div>
-
-      {/* Mobile Swipe Hint */}
-      <div className="lg:hidden text-[11px] text-gray-400 px-1">
-        👈 Swipe horizontally to view customer shipping addresses & status 👉
       </div>
 
       {/* Orders Table */}
@@ -139,14 +149,18 @@ export default function OrdersPage() {
         {loading ? (
           <div className="py-20 text-center text-gray-400 text-xs">
             <span className="text-3xl block mb-2 animate-spin">⏳</span>
-            <span>Loading live store orders from database...</span>
+            <span>{isHindi ? 'डेटाबेस से ऑर्डर लोड हो रहे हैं...' : 'Loading live store orders from database...'}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-20 text-center text-gray-400 text-xs">
             <span className="text-4xl block mb-2">📦</span>
-            <p className="font-semibold text-gray-700">No orders recorded in database yet</p>
+            <p className="font-semibold text-gray-700">
+              {isHindi ? 'डेटाबेस में कोई ऑर्डर दर्ज नहीं है' : 'No orders recorded in database yet'}
+            </p>
             <p className="mt-1 text-[11px]">
-              Orders placed by devotees on the store will arrive here in real time.
+              {isHindi
+                ? 'भक्तों द्वारा स्टोर पर दिए गए ऑर्डर यहाँ वास्तविक समय में दिखाई देंगे।'
+                : 'Orders placed by devotees on the store will arrive here in real time.'}
             </p>
           </div>
         ) : (
@@ -154,13 +168,13 @@ export default function OrdersPage() {
             <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                 <tr>
-                  <th className="py-3 px-4">Order ID</th>
-                  <th className="py-3 px-4">Devotee Name</th>
-                  <th className="py-3 px-4">Shipping Destination</th>
-                  <th className="py-3 px-4">Amount</th>
-                  <th className="py-3 px-4">Payment</th>
-                  <th className="py-3 px-4">Fulfillment Status</th>
-                  <th className="py-3 px-4 text-right">Update Status</th>
+                  <th className="py-3 px-4">{isHindi ? 'ऑर्डर ID' : 'Order ID'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'भक्त का नाम' : 'Devotee Name'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'डिलीवरी पता' : 'Shipping Destination'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'राशि' : 'Amount'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'भुगतान' : 'Payment'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'पूर्ति स्थिति' : 'Fulfillment Status'}</th>
+                  <th className="py-3 px-4 text-right">{isHindi ? 'स्थिति बदलें' : 'Update Status'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -176,14 +190,14 @@ export default function OrdersPage() {
                       )}
                     </td>
                     <td className="py-3 px-4 text-gray-600 max-w-xs truncate">
-                      {o.shipping_address || 'Not specified'}
+                      {o.shipping_address || (isHindi ? 'पता दर्ज नहीं' : 'Not specified')}
                     </td>
                     <td className="py-3 px-4 font-bold font-cinzel text-gray-900">
                       ₹ {Number(o.total_amount || 0).toLocaleString('en-IN')}
                     </td>
                     <td className="py-3 px-4">
                       <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-semibold">
-                        {o.payment_status || 'Verified'}
+                        {o.payment_status || (isHindi ? 'सत्यापित' : 'Verified')}
                       </span>
                     </td>
                     <td className="py-3 px-4">
@@ -196,7 +210,7 @@ export default function OrdersPage() {
                             : 'bg-amber-100 text-amber-800'
                         }`}
                       >
-                        {o.order_status || 'Processing'}
+                        {o.order_status || (isHindi ? 'प्रक्रियाधीन' : 'Processing')}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right">
@@ -205,10 +219,10 @@ export default function OrdersPage() {
                         onChange={(e) => updateStatus(o.id, e.target.value)}
                         className="p-1 rounded border border-gray-200 text-xs font-semibold bg-white"
                       >
-                        <option value="Processing">Processing</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
+                        <option value="Processing">{isHindi ? 'प्रक्रियाधीन' : 'Processing'}</option>
+                        <option value="Shipped">{isHindi ? 'प्रेषित (Shipped)' : 'Shipped'}</option>
+                        <option value="Delivered">{isHindi ? 'वितरित (Delivered)' : 'Delivered'}</option>
+                        <option value="Cancelled">{isHindi ? 'रद्द' : 'Cancelled'}</option>
                       </select>
                     </td>
                   </tr>

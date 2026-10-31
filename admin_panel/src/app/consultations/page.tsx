@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
 interface Consultation {
   id: string;
@@ -25,6 +26,7 @@ interface Consultation {
 }
 
 export default function ConsultationsPage() {
+  const { isHindi } = useAdminLanguage();
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'completed'>('all');
@@ -56,6 +58,7 @@ export default function ConsultationsPage() {
       }
     } catch (err) {
       console.error(err);
+      setConsultations([]);
     } finally {
       setLoading(false);
     }
@@ -71,7 +74,11 @@ export default function ConsultationsPage() {
       if (error) {
         showToast(`Failed: ${error.message}`);
       } else {
-        showToast(`Session status updated to ${newStatus}`);
+        showToast(
+          isHindi
+            ? `परामर्श स्थिति "${newStatus}" में अपडेट हुई`
+            : `Session status updated to ${newStatus}`
+        );
         setConsultations(
           consultations.map((c) => (c.id === id ? { ...c, status: newStatus } : c))
         );
@@ -102,14 +109,18 @@ export default function ConsultationsPage() {
           <span>✓</span>
           <span>{toast}</span>
         </div>
-      )}      {/* Header */}
+      )}
+
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
-            <span>💬</span> Live Consultations & Chat Supervision Hub
+            <span>💬</span> {isHindi ? 'लाइव परामर्श एवं संवाद निगरानी हब' : 'Live Consultations & Chat Supervision Hub'}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Live Supabase database • Supervise Vedic consultations, session durations, and Agora RTC call channels
+            {isHindi
+              ? 'सुपाबेस डेटाबेस • वैदिक परामर्श, सत्र अवधि एवं एगोरा (Agora RTC) कॉल चैनल की सीधी निगरानी'
+              : 'Live Supabase database • Supervise Vedic consultations, session durations, and Agora RTC call channels'}
           </p>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
@@ -119,10 +130,10 @@ export default function ConsultationsPage() {
             className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>{loading ? '⏳' : '🔄'}</span>
-            <span>Refresh</span>
+            <span>{isHindi ? 'रिफ्रेश' : 'Refresh'}</span>
           </button>
           <span className="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-200 whitespace-nowrap">
-            {consultations.filter((c) => c.status === 'active').length} Active Live
+            {consultations.filter((c) => c.status === 'active').length} {isHindi ? 'सत्र सक्रिय' : 'Active Live'}
           </span>
         </div>
       </div>
@@ -137,37 +148,31 @@ export default function ConsultationsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search devotee, astrologer, or ID..."
+            placeholder={isHindi ? 'भक्त, ज्योतिषी या ID से खोजें...' : 'Search devotee, astrologer, or ID...'}
             className="w-full pl-8 pr-3 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
 
         {/* Tab Filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          {(['all', 'active', 'completed'] as const).map((tab) => (
+          {[
+            { key: 'all', labelEn: 'All', labelHi: 'सभी सत्र' },
+            { key: 'active', labelEn: 'Active', labelHi: 'सक्रिय' },
+            { key: 'completed', labelEn: 'Completed', labelHi: 'पूर्ण' },
+          ].map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
               className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 ${
-                activeTab === tab
+                activeTab === tab.key
                   ? 'bg-mandir-maroon text-amber-200'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {tab}
+              {isHindi ? tab.labelHi : tab.labelEn}
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Mobile Swipe Hint */}
-      <div className="lg:hidden flex items-center justify-between px-1 text-[11px] text-gray-400">
-        <span>👈 Swipe horizontally to view full sessions 👉</span>
-        {selectedConsultation && (
-          <a href="#consultation-inspector" className="text-amber-800 font-semibold underline">
-            Jump to Details ↓
-          </a>
-        )}
       </div>
 
       {/* Consultations Table & Detail Panel */}
@@ -176,14 +181,18 @@ export default function ConsultationsPage() {
           {loading ? (
             <div className="py-20 text-center text-gray-400 text-xs">
               <span className="text-3xl block mb-2 animate-spin">⏳</span>
-              <span>Loading live consultation sessions...</span>
+              <span>{isHindi ? 'परामर्श सत्र लोड हो रहे हैं...' : 'Loading live consultation sessions...'}</span>
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-20 text-center text-gray-400 text-xs">
               <span className="text-4xl block mb-2">💬</span>
-              <p className="font-semibold text-gray-700">No consultation sessions found</p>
+              <p className="font-semibold text-gray-700">
+                {isHindi ? 'कोई परामर्श सत्र नहीं मिला' : 'No consultation sessions found'}
+              </p>
               <p className="mt-1 text-[11px]">
-                Sessions started by devotees on the app or website will show here in real time.
+                {isHindi
+                  ? 'भक्तों द्वारा प्रारंभ किए गए परामर्श यहाँ वास्तविक समय में दिखाई देंगे।'
+                  : 'Sessions started by devotees on the app or website will show here in real time.'}
               </p>
             </div>
           ) : (
@@ -191,13 +200,13 @@ export default function ConsultationsPage() {
               <table className="w-full text-left text-xs min-w-[650px]">
                 <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                   <tr>
-                    <th className="py-3 px-4">Session ID</th>
-                    <th className="py-3 px-4">Devotee</th>
-                    <th className="py-3 px-4">Astrologer</th>
-                    <th className="py-3 px-4">Type</th>
-                    <th className="py-3 px-4">Duration</th>
-                    <th className="py-3 px-4">Amount</th>
-                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">{isHindi ? 'सत्र ID' : 'Session ID'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'भक्त का नाम' : 'Devotee'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'पंडित / ज्योतिषी' : 'Astrologer'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'माध्यम' : 'Type'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'अवधि' : 'Duration'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'दक्षिणा' : 'Amount'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'स्थिति' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -218,13 +227,15 @@ export default function ConsultationsPage() {
                         {c.id}
                       </td>
                       <td className="py-3 px-4 font-semibold text-gray-900">
-                        {c.user_name || 'Devotee'}
+                        {c.user_name || (isHindi ? 'भक्त' : 'Devotee')}
                       </td>
                       <td className="py-3 px-4 text-gray-800">{c.astrologer_name}</td>
                       <td className="py-3 px-4 uppercase text-[10px] font-bold text-gray-500">
-                        {c.type}
+                        {c.type === 'chat' ? (isHindi ? '💬 चैट' : 'Chat') : (isHindi ? '📞 कॉल' : 'Voice')}
                       </td>
-                      <td className="py-3 px-4 font-mono">{c.duration_minutes || 0} min</td>
+                      <td className="py-3 px-4 font-mono">
+                        {c.duration_minutes || 0} {isHindi ? 'मिनट' : 'min'}
+                      </td>
                       <td className="py-3 px-4 font-bold font-cinzel text-gray-900">
                         ₹ {Number(c.total_amount || 0).toLocaleString('en-IN')}
                       </td>
@@ -236,7 +247,7 @@ export default function ConsultationsPage() {
                               : 'bg-gray-100 text-gray-700'
                           }`}
                         >
-                          {c.status}
+                          {c.status || (isHindi ? 'पूर्ण' : 'Completed')}
                         </span>
                       </td>
                     </tr>
@@ -250,7 +261,7 @@ export default function ConsultationsPage() {
         {/* Inspector */}
         <div id="consultation-inspector" className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm space-y-4 scroll-mt-20">
           <h2 className="text-sm font-bold font-cinzel text-gray-900 border-b border-gray-100 pb-2 flex items-center justify-between">
-            <span>Session Details & Controls</span>
+            <span>{isHindi ? 'परामर्श सत्र विवरण एवं नियंत्रण' : 'Session Details & Controls'}</span>
             {selectedConsultation && (
               <button
                 onClick={() => setSelectedConsultation(null)}
@@ -264,44 +275,52 @@ export default function ConsultationsPage() {
 
           {!selectedConsultation ? (
             <div className="py-12 sm:py-20 text-center text-gray-400 text-xs">
-              <span>Select any consultation to inspect live Agora channel and session data.</span>
+              <span>{isHindi ? 'विवरण देखने के लिए किसी सत्र पर क्लिक करें।' : 'Select any consultation to inspect live Agora channel and session data.'}</span>
             </div>
           ) : (
             <div className="space-y-4 text-xs">
               <div className="p-3 bg-gray-50 rounded-xl space-y-1">
                 <div className="font-bold text-gray-900">{selectedConsultation.user_name}</div>
                 <div className="text-gray-500 text-[11px]">
-                  Consulting with <strong>{selectedConsultation.astrologer_name}</strong>
+                  {isHindi ? 'पंडित:' : 'Consulting with'} <strong>{selectedConsultation.astrologer_name}</strong>
                 </div>
                 {selectedConsultation.problem_topic && (
                   <div className="pt-2 text-[11px] text-gray-700 border-t border-gray-200">
-                    Topic: {selectedConsultation.problem_topic}
+                    {isHindi ? 'विषय:' : 'Topic:'} {selectedConsultation.problem_topic}
                   </div>
                 )}
               </div>
 
               {selectedConsultation.call_room_id && (
                 <div className="p-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-[11px] break-all">
-                  <span className="font-semibold text-indigo-900 block mb-0.5">Agora RTC Room ID:</span>
+                  <span className="font-semibold text-indigo-900 block mb-0.5">
+                    {isHindi ? 'एगोरा RTC कक्ष ID:' : 'Agora RTC Room ID:'}
+                  </span>
                   <code className="font-mono text-indigo-700 text-xs">{selectedConsultation.call_room_id}</code>
                 </div>
               )}
 
               {/* Status Update */}
               <div>
-                <label className="block text-gray-500 font-semibold mb-1.5">Manage Session</label>
+                <label className="block text-gray-500 font-semibold mb-1.5">
+                  {isHindi ? 'सत्र स्थिति बदलें' : 'Manage Session'}
+                </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {['active', 'completed', 'cancelled'].map((st) => (
+                  {[
+                    { key: 'active', labelEn: 'Active', labelHi: 'सक्रिय' },
+                    { key: 'completed', labelEn: 'Completed', labelHi: 'पूर्ण' },
+                    { key: 'cancelled', labelEn: 'Cancelled', labelHi: 'रद्द' },
+                  ].map((st) => (
                     <button
-                      key={st}
-                      onClick={() => updateStatus(selectedConsultation.id, st)}
+                      key={st.key}
+                      onClick={() => updateStatus(selectedConsultation.id, st.key)}
                       className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold capitalize ${
-                        selectedConsultation.status === st
+                        selectedConsultation.status === st.key
                           ? 'bg-mandir-maroon text-amber-200'
                           : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                       }`}
                     >
-                      {st}
+                      {isHindi ? st.labelHi : st.labelEn}
                     </button>
                   ))}
                 </div>
@@ -313,4 +332,3 @@ export default function ConsultationsPage() {
     </div>
   );
 }
-

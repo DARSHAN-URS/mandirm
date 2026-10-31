@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
 interface Profile {
   id: string;
@@ -17,6 +18,7 @@ interface Profile {
 }
 
 export default function UsersPage() {
+  const { isHindi } = useAdminLanguage();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -46,6 +48,7 @@ export default function UsersPage() {
       }
     } catch (err) {
       console.error(err);
+      setProfiles([]);
     } finally {
       setLoading(false);
     }
@@ -75,10 +78,12 @@ export default function UsersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
-            <span>👥</span> Devotees & User Registry
+            <span>👥</span> {isHindi ? 'भक्त एवं उपयोगकर्ता पंजिका' : 'Devotees & User Registry'}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Live Supabase database • Devotee spiritual profiles, Gotras, Vedic Rashis, Nakshatra lineages, and wallets
+            {isHindi
+              ? 'सुपाबेस डेटाबेस • भक्त आध्यात्मिक प्रोफाइल, गोत्र, वैदिक राशियां, नक्षत्र वंश एवं वॉलेट बैलेंस'
+              : 'Live Supabase database • Devotee spiritual profiles, Gotras, Vedic Rashis, Nakshatra lineages, and wallets'}
           </p>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
@@ -88,10 +93,10 @@ export default function UsersPage() {
             className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>{loading ? '⏳' : '🔄'}</span>
-            <span>Refresh</span>
+            <span>{isHindi ? 'रिफ्रेश' : 'Refresh'}</span>
           </button>
           <span className="px-3 py-1.5 rounded-xl bg-purple-100 text-purple-900 text-xs font-bold border border-purple-200 whitespace-nowrap">
-            {profiles.length} Devotees
+            {profiles.length} {isHindi ? 'पंजीकृत भक्त' : 'Devotees'}
           </span>
         </div>
       </div>
@@ -106,15 +111,10 @@ export default function UsersPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, phone, email, or Gotra..."
+            placeholder={isHindi ? 'नाम, फ़ोन, ईमेल या गोत्र से खोजें...' : 'Search by name, phone, email, or Gotra...'}
             className="w-full pl-8 pr-3 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
-      </div>
-
-      {/* Mobile Swipe Hint */}
-      <div className="lg:hidden text-[11px] text-gray-400 px-1">
-        👈 Swipe horizontally to view full devotee profile records & wallets 👉
       </div>
 
       {/* Profiles Table */}
@@ -122,14 +122,18 @@ export default function UsersPage() {
         {loading ? (
           <div className="py-20 text-center text-gray-400 text-xs">
             <span className="text-3xl block mb-2 animate-spin">⏳</span>
-            <span>Loading real devotee registry from database...</span>
+            <span>{isHindi ? 'डेटाबेस से भक्त पंजिका लोड हो रही है...' : 'Loading real devotee registry from database...'}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-20 text-center text-gray-400 text-xs">
             <span className="text-4xl block mb-2">👥</span>
-            <p className="font-semibold text-gray-700">No devotee profiles recorded yet</p>
+            <p className="font-semibold text-gray-700">
+              {isHindi ? 'डेटाबेस में कोई भक्त प्रोफाइल दर्ज नहीं है' : 'No devotee profiles recorded yet'}
+            </p>
             <p className="mt-1 text-[11px]">
-              Users who sign up via phone OTP or Google login in the mobile app or website will automatically appear here.
+              {isHindi
+                ? 'वेबसाइट या ऐप पर साइन-अप करने वाले भक्त यहाँ स्वतः प्रदर्शित होंगे।'
+                : 'Users who sign up in the mobile app or website will automatically appear here.'}
             </p>
           </div>
         ) : (
@@ -137,13 +141,13 @@ export default function UsersPage() {
             <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
                 <tr>
-                  <th className="py-3 px-4">Profile ID</th>
-                  <th className="py-3 px-4">Devotee Name</th>
-                  <th className="py-3 px-4">Phone / Email</th>
-                  <th className="py-3 px-4">Gotra & Rashi</th>
-                  <th className="py-3 px-4">Role</th>
-                  <th className="py-3 px-4">Wallet Balance</th>
-                  <th className="py-3 px-4 text-right">Joined</th>
+                  <th className="py-3 px-4">{isHindi ? 'प्रोफाइल ID' : 'Profile ID'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'भक्त का नाम' : 'Devotee Name'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'फ़ोन / ईमेल' : 'Phone / Email'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'गोत्र एवं राशि' : 'Gotra & Rashi'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'भूमिका' : 'Role'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'वॉलेट शेष' : 'Wallet Balance'}</th>
+                  <th className="py-3 px-4 text-right">{isHindi ? 'शामिल हुए' : 'Joined'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -153,7 +157,7 @@ export default function UsersPage() {
                       {p.id}
                     </td>
                     <td className="py-3 px-4 font-semibold text-gray-900">
-                      {p.full_name || 'Devotee'}
+                      {p.full_name || (isHindi ? 'भक्त' : 'Devotee')}
                     </td>
                     <td className="py-3 px-4">
                       <span className="block font-mono text-[11px] text-gray-800">
@@ -166,13 +170,15 @@ export default function UsersPage() {
                     <td className="py-3 px-4 text-gray-600">
                       {p.gotra ? (
                         <span className="font-semibold text-amber-900 font-mono">
-                          Gotra: {p.gotra}
+                          {isHindi ? 'गोत्र:' : 'Gotra:'} {p.gotra}
                         </span>
                       ) : (
                         '—'
                       )}
                       {p.rashi && (
-                        <span className="text-[10px] text-gray-500 block">Rashi: {p.rashi}</span>
+                        <span className="text-[10px] text-gray-500 block">
+                          {isHindi ? 'राशि:' : 'Rashi:'} {p.rashi}
+                        </span>
                       )}
                     </td>
                     <td className="py-3 px-4">
@@ -192,7 +198,7 @@ export default function UsersPage() {
                       ₹ {Number(p.wallet_balance || 0).toLocaleString('en-IN')}
                     </td>
                     <td className="py-3 px-4 text-right text-gray-400 font-mono text-[10px]">
-                      {p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}
+                      {p.created_at ? new Date(p.created_at).toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN') : '—'}
                     </td>
                   </tr>
                 ))}

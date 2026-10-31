@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
 interface LedgerItem {
   id: string;
@@ -16,6 +17,7 @@ interface LedgerItem {
 }
 
 export default function TransactionsPage() {
+  const { isHindi } = useAdminLanguage();
   const [items, setItems] = useState<LedgerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalSettled, setTotalSettled] = useState(0);
@@ -27,7 +29,7 @@ export default function TransactionsPage() {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      // Fetch bookings, orders, and chadhawas that represent settled transactions
+      // Direct database ledger query
       const [bookingsRes, ordersRes] = await Promise.all([
         supabase.from('bookings').select('id, user_name, sankalp_name, amount, payment_id, status, created_at'),
         supabase.from('orders').select('id, user_name, total_amount, payment_id, payment_status, created_at'),
@@ -41,8 +43,8 @@ export default function TransactionsPage() {
         total += amt;
         records.push({
           id: `TXN-BK-${b.id.slice(-6)}`,
-          user_name: b.sankalp_name || b.user_name || 'Devotee',
-          reference_type: 'Puja Booking',
+          user_name: b.sankalp_name || b.user_name || (isHindi ? 'भक्त' : 'Devotee'),
+          reference_type: isHindi ? 'पूजा बुकिंग' : 'Puja Booking',
           reference_id: b.id,
           amount: amt,
           payment_gateway: 'Razorpay UPI',
@@ -57,8 +59,8 @@ export default function TransactionsPage() {
         total += amt;
         records.push({
           id: `TXN-ORD-${o.id.slice(-6)}`,
-          user_name: o.user_name || 'Devotee',
-          reference_type: 'Spiritual Store',
+          user_name: o.user_name || (isHindi ? 'भक्त' : 'Devotee'),
+          reference_type: isHindi ? 'आध्यात्मिक स्टोर' : 'Spiritual Store',
           reference_id: o.id,
           amount: amt,
           payment_gateway: 'Razorpay Gateway',
@@ -77,6 +79,7 @@ export default function TransactionsPage() {
       setTotalSettled(total);
     } catch (err) {
       console.error(err);
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -88,10 +91,12 @@ export default function TransactionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
-            <span>💳</span> Financial Transactions & Dakshina Ledger
+            <span>💳</span> {isHindi ? 'वित्तीय लेनदेन एवं दक्षिणा लेजर' : 'Financial Transactions & Dakshina Ledger'}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Live database ledger • Razorpay gateway settlements, devotee dakshina receipts, and sacred offerings
+            {isHindi
+              ? 'लाइव डेटाबेस लेजर • रेज़रपे गेटवे सेटलमेंट, भक्त दक्षिणा रसीदें और पवित्र अर्पण'
+              : 'Live database ledger • Razorpay gateway settlements, devotee dakshina receipts, and sacred offerings'}
           </p>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
@@ -101,84 +106,69 @@ export default function TransactionsPage() {
             className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>{loading ? '⏳' : '🔄'}</span>
-            <span>Refresh</span>
+            <span>{isHindi ? 'रिफ्रेश' : 'Refresh'}</span>
           </button>
           <div className="text-xs font-bold bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-xl border border-emerald-200 whitespace-nowrap">
-            Settled: ₹ {totalSettled.toLocaleString('en-IN')}
+            {isHindi ? 'कुल समायोजित दक्षिणा:' : 'Settled:'} ₹ {totalSettled.toLocaleString('en-IN')}
           </div>
         </div>
-      </div>
-
-      {/* Mobile Swipe Hint */}
-      <div className="lg:hidden text-[11px] text-gray-400 px-1">
-        👈 Swipe horizontally to view full payment references & gateway IDs 👉
       </div>
 
       {/* Transactions Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="py-20 text-center text-gray-400 text-xs">
-            <span className="text-3xl block mb-2 animate-spin">⏳</span>
-            <span>Loading live financial transactions from database...</span>
+            {isHindi ? 'डेटाबेस से लेनदेन लोड हो रहा है...' : 'Loading transactions from database...'}
           </div>
         ) : items.length === 0 ? (
           <div className="py-20 text-center text-gray-400 text-xs">
-            <span className="text-4xl block mb-2">💳</span>
-            <p className="font-semibold text-gray-700">No payment transactions recorded yet</p>
-            <p className="mt-1 text-[11px]">
-              When devotees complete Puja Dakshina or store orders, settlement logs will display here automatically.
-            </p>
+            {isHindi ? 'डेटाबेस में कोई लेनदेन दर्ज नहीं है।' : 'No transactions found in database.'}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs min-w-[720px]">
-              <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
+            <table className="w-full text-left text-xs text-gray-600">
+              <thead className="bg-gray-50/75 border-b border-gray-100 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Transaction ID</th>
-                  <th className="py-3 px-4">Devotee</th>
-                  <th className="py-3 px-4">Service Category</th>
-                  <th className="py-3 px-4">Reference ID</th>
-                  <th className="py-3 px-4">Gateway & Payment ID</th>
-                  <th className="py-3 px-4">Amount Settled</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Timestamp</th>
+                  <th className="py-3 px-4">{isHindi ? 'लेनदेन ID' : 'Transaction ID'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'भक्त का नाम' : 'Devotee / User'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'प्रकार' : 'Reference Type'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'दक्षिणा राशि' : 'Amount'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'भुगतान विधि' : 'Gateway ID'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'स्थिति' : 'Status'}</th>
+                  <th className="py-3 px-4">{isHindi ? 'दिनांक' : 'Date'}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-gray-700">
-                {items.map((t) => (
-                  <tr key={t.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-semibold text-gray-900">
-                      {t.id}
+              <tbody className="divide-y divide-gray-100">
+                {items.map((row) => (
+                  <tr key={row.id} className="hover:bg-amber-50/20 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-bold text-gray-900 whitespace-nowrap">
+                      {row.id}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-gray-900">
-                      {t.user_name}
+                    <td className="py-3.5 px-4 font-semibold text-gray-800 whitespace-nowrap">
+                      {row.user_name}
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-semibold border border-amber-200">
-                        {t.reference_type}
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[11px] font-medium">
+                        {row.reference_type}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-mono text-gray-500 text-[11px]">
-                      {t.reference_id}
+                    <td className="py-3.5 px-4 font-bold text-emerald-600 whitespace-nowrap">
+                      ₹ {row.amount.toLocaleString('en-IN')}
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="text-gray-900 font-medium block">
-                        {t.payment_gateway}
-                      </span>
-                      <span className="text-gray-400 font-mono text-[10px]">
-                        {t.payment_id}
-                      </span>
+                    <td className="py-3.5 px-4 font-mono text-[11px] text-gray-500 whitespace-nowrap">
+                      {row.payment_id}
                     </td>
-                    <td className="py-3 px-4 font-bold font-cinzel text-gray-900">
-                      ₹ {t.amount.toLocaleString('en-IN')}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold">
-                        ✓ {t.status}
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        {isHindi ? 'सफल' : 'Settled'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right text-gray-400 font-mono text-[10px]">
-                      {t.created_at ? new Date(t.created_at).toLocaleString() : '—'}
+                    <td className="py-3.5 px-4 text-gray-400 text-[11px] whitespace-nowrap">
+                      {new Date(row.created_at).toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
                     </td>
                   </tr>
                 ))}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
 interface Booking {
   id: string;
@@ -26,6 +27,7 @@ interface Booking {
 }
 
 export default function BookingsPage() {
+  const { isHindi } = useAdminLanguage();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -58,6 +60,7 @@ export default function BookingsPage() {
       }
     } catch (err) {
       console.error(err);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -85,7 +88,11 @@ export default function BookingsPage() {
       if (error) {
         showToast(`Failed: ${error.message}`);
       } else {
-        showToast(`Booking ${id} status updated to ${newStatus}`);
+        showToast(
+          isHindi
+            ? `बुकिंग स्थिति "${newStatus}" में अपडेट हुई`
+            : `Booking ${id} status updated to ${newStatus}`
+        );
         setBookings(
           bookings.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
         );
@@ -112,7 +119,11 @@ export default function BookingsPage() {
       if (error) {
         showToast(`Failed: ${error.message}`);
       } else {
-        showToast(`Assigned ${priestName} to booking ${id}`);
+        showToast(
+          isHindi
+            ? `पंडित ${priestName} सफलतापूर्वक नियुक्त हुए`
+            : `Assigned ${priestName} to booking`
+        );
         setBookings(
           bookings.map((b) =>
             b.id === id
@@ -148,10 +159,12 @@ export default function BookingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
-            <span>📜</span> Devotee Puja Bookings & Sacred Sankalps
+            <span>📜</span> {isHindi ? 'भक्त पूजा बुकिंग एवं पवित्र संकल्प' : 'Devotee Puja Bookings & Sacred Sankalps'}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Real-time Supabase records • Audit Gotras, assign Vedic priests, and supervise execution
+            {isHindi
+              ? 'सुपाबेस डेटाबेस से सीधी लाइव कतार • गोत्र सत्यापन, वैदिक पंडित आवंटन एवं अनुष्ठान निगरानी'
+              : 'Real-time Supabase records • Audit Gotras, assign Vedic priests, and supervise execution'}
           </p>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
@@ -161,10 +174,10 @@ export default function BookingsPage() {
             className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             <span>{loading ? '⏳' : '🔄'}</span>
-            <span>Refresh</span>
+            <span>{isHindi ? 'रिफ्रेश' : 'Refresh'}</span>
           </button>
           <span className="px-3 py-1.5 rounded-xl bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200 whitespace-nowrap">
-            {bookings.length} Bookings
+            {bookings.length} {isHindi ? 'बुकिंग दर्ज' : 'Bookings'}
           </span>
         </div>
       </div>
@@ -179,37 +192,32 @@ export default function BookingsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search devotee, Gotra, puja, or ID..."
+            placeholder={isHindi ? 'भक्त का नाम, गोत्र, पूजा या ID से खोजें...' : 'Search devotee, Gotra, puja, or ID...'}
             className="w-full pl-8 pr-3 py-2 sm:py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
           />
         </div>
 
         {/* Status Filter */}
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          {['all', 'confirmed', 'in progress', 'completed'].map((st) => (
+          {[
+            { key: 'all', labelEn: 'All', labelHi: 'सभी' },
+            { key: 'confirmed', labelEn: 'Confirmed', labelHi: 'स्वीकृत' },
+            { key: 'in progress', labelEn: 'In Progress', labelHi: 'प्रगति पर' },
+            { key: 'completed', labelEn: 'Completed', labelHi: 'पूर्ण' },
+          ].map((st) => (
             <button
-              key={st}
-              onClick={() => setFilterStatus(st)}
+              key={st.key}
+              onClick={() => setFilterStatus(st.key)}
               className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 ${
-                filterStatus === st
+                filterStatus === st.key
                   ? 'bg-mandir-maroon text-amber-200'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {st}
+              {isHindi ? st.labelHi : st.labelEn}
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Mobile Swipe Hint */}
-      <div className="lg:hidden flex items-center justify-between px-1 text-[11px] text-gray-400">
-        <span>👈 Swipe horizontally to view full booking details 👉</span>
-        {selectedBooking && (
-          <a href="#booking-inspector" className="text-amber-800 font-semibold underline">
-            Jump to Details ↓
-          </a>
-        )}
       </div>
 
       {/* Bookings Table & Inspector */}
@@ -218,89 +226,77 @@ export default function BookingsPage() {
           {loading ? (
             <div className="py-20 text-center text-gray-400 text-xs">
               <span className="text-3xl block mb-2 animate-spin">⏳</span>
-              <span>Loading live bookings from database...</span>
+              {isHindi ? 'डेटाबेस से बुकिंग लोड हो रही है...' : 'Loading bookings from database...'}
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-20 text-center text-gray-400 text-xs">
-              <span className="text-4xl block mb-2">📜</span>
-              <p className="font-semibold text-gray-600">No bookings found</p>
-              <p className="mt-1 text-[11px]">
-                Bookings made on the consumer website or mobile app will appear here in real time.
-              </p>
+              <span className="text-3xl block mb-2">📜</span>
+              {isHindi ? 'कोई बुकिंग नहीं मिली।' : 'No bookings found.'}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[650px]">
-                <thead className="bg-gray-50 text-gray-400 font-semibold uppercase text-[10px] tracking-wider border-b border-gray-100">
+              <table className="w-full text-left text-xs text-gray-600">
+                <thead className="bg-gray-50/75 border-b border-gray-100 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Booking ID</th>
-                    <th className="py-3 px-4">Devotee / Sankalp</th>
-                    <th className="py-3 px-4">Puja Service</th>
-                    <th className="py-3 px-4">Temple</th>
-                    <th className="py-3 px-4">Dakshina</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                    <th className="py-3 px-4">{isHindi ? 'बुकिंग ID' : 'Booking ID'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'भक्त / संकल्प' : 'Devotee / Sankalp'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'पूजा अनुष्ठान' : 'Puja Ceremony'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'दक्षिणा' : 'Amount'}</th>
+                    <th className="py-3 px-4">{isHindi ? 'स्थिति' : 'Status'}</th>
+                    <th className="py-3 px-4 text-right">{isHindi ? 'क्रिया' : 'Action'}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 text-gray-700">
+                <tbody className="divide-y divide-gray-100">
                   {filtered.map((b) => (
                     <tr
                       key={b.id}
-                      onClick={() => {
-                        setSelectedBooking(b);
-                        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-                          document.getElementById('booking-inspector')?.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }}
-                      className={`hover:bg-amber-50/40 cursor-pointer transition-colors ${
-                        selectedBooking?.id === b.id ? 'bg-amber-50/70' : ''
+                      onClick={() => setSelectedBooking(b)}
+                      className={`hover:bg-amber-50/20 cursor-pointer transition-colors ${
+                        selectedBooking?.id === b.id ? 'bg-amber-50/50' : ''
                       }`}
                     >
-                      <td className="py-3 px-4 font-mono font-semibold text-gray-900">
-                        {b.id}
+                      <td className="py-3.5 px-4 font-mono font-bold text-gray-900 whitespace-nowrap">
+                        {b.id.slice(-8).toUpperCase()}
                       </td>
-                      <td className="py-3 px-4">
-                        <span className="font-semibold text-gray-900 block">
-                          {b.sankalp_name || b.user_name || 'Devotee'}
-                        </span>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="font-semibold text-gray-900">
+                          {b.sankalp_name || b.user_name || (isHindi ? 'अनाम भक्त' : 'Devotee')}
+                        </div>
                         {b.sankalp_gotra && (
-                          <span className="text-[10px] text-gray-500 font-mono">
-                            Gotra: {b.sankalp_gotra}
-                          </span>
+                          <div className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded w-fit mt-0.5">
+                            {isHindi ? 'गोत्र:' : 'Gotra:'} {b.sankalp_gotra}
+                          </div>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-medium text-gray-800">
-                        {b.puja_title}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="font-medium text-gray-800">{b.puja_title}</div>
+                        <div className="text-[11px] text-gray-400">{b.temple_name}</div>
                       </td>
-                      <td className="py-3 px-4 text-gray-600">{b.temple_name}</td>
-                      <td className="py-3 px-4 font-bold font-cinzel text-gray-900">
+                      <td className="py-3.5 px-4 font-bold text-mandir-maroon whitespace-nowrap">
                         ₹ {Number(b.amount || 0).toLocaleString('en-IN')}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${
-                            b.status === 'Completed' || b.status === 'completed'
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            b.status?.toLowerCase() === 'completed'
                               ? 'bg-emerald-100 text-emerald-800'
-                              : b.status === 'In Progress' || b.status === 'in progress'
+                              : b.status?.toLowerCase() === 'in progress'
                               ? 'bg-blue-100 text-blue-800'
                               : 'bg-amber-100 text-amber-800'
                           }`}
                         >
-                          {b.status || 'Confirmed'}
+                          {b.status || (isHindi ? 'स्वीकृत' : 'Confirmed')}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedBooking(b);
-                            if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-                              document.getElementById('booking-inspector')?.scrollIntoView({ behavior: 'smooth' });
-                            }
                           }}
-                          className="px-2.5 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-[11px]"
+                          className="px-2.5 py-1 bg-gray-100 hover:bg-amber-100 text-gray-700 hover:text-amber-900 rounded-lg text-xs font-semibold transition-colors"
                         >
-                          Audit →
+                          {isHindi ? 'विवरण' : 'Inspect'}
                         </button>
                       </td>
                     </tr>
@@ -311,99 +307,94 @@ export default function BookingsPage() {
           )}
         </div>
 
-        {/* Booking Inspector / Priest Assignment */}
-        <div id="booking-inspector" className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm space-y-4 scroll-mt-20">
-          <h2 className="text-sm font-bold font-cinzel text-gray-900 border-b border-gray-100 pb-2 flex items-center justify-between">
-            <span className="flex items-center gap-1.5">
-              <span>🔍</span> Sankalp Inspector
-            </span>
-            <div className="flex items-center gap-2">
-              {selectedBooking && (
-                <span className="font-mono text-xs font-normal text-amber-700">
-                  {selectedBooking.id}
-                </span>
-              )}
-              {selectedBooking && (
-                <button
-                  onClick={() => setSelectedBooking(null)}
-                  className="lg:hidden text-gray-400 hover:text-gray-600 text-xs px-1.5 py-0.5 rounded"
-                  title="Close Inspector"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+        {/* Selected Booking Inspector */}
+        <div id="booking-inspector" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+          <h2 className="text-sm font-bold font-cinzel text-gray-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+            <span>🔍</span> {isHindi ? 'संकल्प एवं अनुष्ठान विवरण' : 'Sankalp & Ritual Inspector'}
           </h2>
 
-          {!selectedBooking ? (
-            <div className="py-12 sm:py-20 text-center text-gray-400 text-xs">
-              <span>Select any booking from the table to review Gotra details & assign priests.</span>
-            </div>
-          ) : (
+          {selectedBooking ? (
             <div className="space-y-4 text-xs">
-              <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-200/50 space-y-1">
-                <div className="font-bold text-gray-900 text-sm">
-                  {selectedBooking.sankalp_name || selectedBooking.user_name || 'Devotee'}
+              <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-200/60 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{isHindi ? 'यजमान नाम:' : 'Yajman Name:'}</span>
+                  <span className="font-bold text-gray-900">
+                    {selectedBooking.sankalp_name || selectedBooking.user_name || (isHindi ? 'अनाम भक्त' : 'Devotee')}
+                  </span>
                 </div>
-                <div className="text-gray-600 text-[11px]">
-                  <strong>Gotra:</strong> {selectedBooking.sankalp_gotra || 'Not specified'} |{' '}
-                  <strong>Rashi:</strong> {selectedBooking.sankalp_rashi || 'General'}
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{isHindi ? 'वैदिक गोत्र:' : 'Gotra:'}</span>
+                  <span className="font-bold text-amber-900">{selectedBooking.sankalp_gotra || '—'}</span>
                 </div>
-                {selectedBooking.sankalp_wishes && (
-                  <div className="pt-2 text-[11px] text-gray-700 italic border-t border-amber-200/40">
-                    &ldquo;{selectedBooking.sankalp_wishes}&rdquo;
-                  </div>
-                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{isHindi ? 'राशि:' : 'Rashi:'}</span>
+                  <span className="font-semibold text-gray-700">{selectedBooking.sankalp_rashi || '—'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{isHindi ? 'फ़ोन नंबर:' : 'Phone:'}</span>
+                  <span className="font-semibold text-gray-700">{selectedBooking.user_phone || '—'}</span>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-gray-500 font-semibold mb-1">Ritual Service</label>
-                <div className="font-semibold text-gray-900">{selectedBooking.puja_title}</div>
-                <div className="text-gray-500 text-[11px]">{selectedBooking.temple_name}</div>
-              </div>
-
-              {/* Status Update */}
-              <div>
-                <label className="block text-gray-500 font-semibold mb-1.5">Update Operational Status</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {['Confirmed', 'In Progress', 'Completed'].map((st) => (
-                    <button
-                      key={st}
-                      onClick={() => updateStatus(selectedBooking.id, st)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                        selectedBooking.status === st
-                          ? 'bg-mandir-maroon text-amber-200'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                      }`}
-                    >
-                      {st}
-                    </button>
-                  ))}
+              {selectedBooking.sankalp_wishes && (
+                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                  <span className="font-bold text-gray-700 block mb-1">
+                    {isHindi ? 'भक्त की विशेष प्रार्थना / मनोकामना:' : 'Devotee Wishes & Intentions:'}
+                  </span>
+                  <p className="text-gray-600 italic">"{selectedBooking.sankalp_wishes}"</p>
                 </div>
-              </div>
+              )}
 
               {/* Priest Assignment */}
-              <div className="pt-2 border-t border-gray-100">
-                <label className="block text-gray-500 font-semibold mb-1">Assigned Vedic Priest</label>
-                <div className="text-gray-800 font-medium mb-2">
-                  {selectedBooking.priest_assigned || 'None assigned yet'}
-                </div>
+              <div className="space-y-2 pt-2 border-t border-gray-100">
+                <label className="block text-gray-700 font-bold">
+                  {isHindi ? 'वैदिक पंडित नियुक्त करें:' : 'Assign Vedic Priest:'}
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={priestInput}
                     onChange={(e) => setPriestInput(e.target.value)}
-                    placeholder="Enter Pandit Name..."
-                    className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-xs"
+                    placeholder={selectedBooking.priest_assigned || (isHindi ? 'पं. शास्त्री जी...' : 'Pt. Shastri...')}
+                    className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-mandir-maroon"
                   />
                   <button
                     onClick={() => assignPriest(selectedBooking.id, priestInput)}
-                    className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-mandir-maroon font-bold rounded-lg text-xs"
+                    className="px-3 py-2 bg-mandir-maroon text-white font-bold rounded-xl text-xs hover:bg-mandir-maroon-dark transition-all"
                   >
-                    Assign
+                    {isHindi ? 'सौंपें' : 'Assign'}
                   </button>
                 </div>
               </div>
+
+              {/* Status Update Actions */}
+              <div className="pt-2 border-t border-gray-100 space-y-2">
+                <span className="font-bold text-gray-700 block">{isHindi ? 'अनुष्ठान स्थिति बदलें:' : 'Update Status:'}</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => updateStatus(selectedBooking.id, 'Confirmed')}
+                    className="p-2 text-[11px] font-bold rounded-xl border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                  >
+                    {isHindi ? 'स्वीकृत' : 'Confirmed'}
+                  </button>
+                  <button
+                    onClick={() => updateStatus(selectedBooking.id, 'In Progress')}
+                    className="p-2 text-[11px] font-bold rounded-xl border border-blue-300 bg-blue-50 text-blue-900 hover:bg-blue-100"
+                  >
+                    {isHindi ? 'प्रगति पर' : 'In Progress'}
+                  </button>
+                  <button
+                    onClick={() => updateStatus(selectedBooking.id, 'Completed')}
+                    className="p-2 text-[11px] font-bold rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100"
+                  >
+                    {isHindi ? 'पूर्ण' : 'Completed'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="py-12 text-center text-gray-400 text-xs">
+              {isHindi ? 'विवरण देखने के लिए तालिका से किसी बुकिंग पर क्लिक करें।' : 'Select any booking from the left list to inspect details.'}
             </div>
           )}
         </div>

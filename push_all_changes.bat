@@ -10,16 +10,10 @@ echo.
 :: 1. CONSUMER WEBSITE
 echo [1/3] Processing Consumer Website (mandirmweb)...
 cd /d "%~dp0consumer_website"
-
-:: Restore page.tsx to clean state and run regex automated cleaner
-echo [*] Reverting corrupted edits and applying clean fix to page.tsx...
-git checkout src/app/page.tsx
-node fix_page.js
-
+git status --short
 echo [*] Staging and committing changes...
 git add .
-git commit -m "fix: resolve Netlify build by removing dead live darshan modal and typing errors"
-
+git commit -m "feat: make all temple, astrologer, chadhawa, and store cards navigate to rich detailed pages on tap"
 echo [*] Pushing to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (
@@ -34,7 +28,7 @@ echo [2/3] Processing Admin Panel (mandirm-admin)...
 cd /d "%~dp0admin_panel"
 git status --short
 git add .
-git commit -m "feat: add Add Pandit button in header banner, remove mock fallbacks, add EN/HI toggle with full bilingual transformation"
+git commit -m "feat: add Sri Mandir details editor, FAQ manager, auto-fill Hindi button, and bilingual content persistence"
 echo Pushing admin_panel to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (
@@ -47,8 +41,8 @@ echo.
 :: 3. ROOT REPOSITORY
 echo [3/3] Processing Root Workspace...
 cd /d "%~dp0"
-git add push_all_changes.bat
-git commit -m "chore: clean up echo syntax in push_all_changes batch script"
+git add .
+git commit -m "feat: add migration 002 for details & FAQs, update batch deployment script"
 git push origin main
 echo [+] Root workspace updated!
 echo.

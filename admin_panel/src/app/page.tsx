@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
 interface Booking {
   id: string;
@@ -28,6 +29,7 @@ interface Consultation {
 }
 
 export default function AdminDashboardPage() {
+  const { isHindi } = useAdminLanguage();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     grossVolume: 0,
@@ -53,7 +55,7 @@ export default function AdminDashboardPage() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // 1. Parallel queries to Supabase real tables
+      // Direct production queries to Supabase tables
       const [
         templesRes,
         pujasRes,
@@ -85,7 +87,7 @@ export default function AdminDashboardPage() {
       const orders = ordersRes.data || [];
       const devoteesCount = profilesRes.count ?? profilesRes.data?.length ?? 0;
 
-      // Calculate real gross revenue from completed/confirmed bookings and orders
+      // Real gross revenue from settled bookings, orders and consultations
       const bookingSum = bookings.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
       const orderSum = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
       const consSum = consultations.reduce((sum, c) => sum + (Number(c.total_amount) || 0), 0);
@@ -116,85 +118,87 @@ export default function AdminDashboardPage() {
 
   const metrics = [
     {
-      title: 'Gross Devotional Volume',
+      title: isHindi ? 'कुल दक्षिणा एवं व्यापार' : 'Gross Devotional Volume',
       value: `₹ ${stats.grossVolume.toLocaleString('en-IN')}`,
-      change: 'Live Database',
+      change: isHindi ? 'लाइव डेटाबेस' : 'Live Database',
       icon: '🪙',
       color: 'from-amber-500 to-amber-600',
-      sub: 'Puja, Store & Consultations',
+      sub: isHindi ? 'पूजा, स्टोर एवं परामर्श' : 'Puja, Store & Consultations',
+      href: '/transactions',
     },
     {
-      title: 'Sacred Temples',
-      value: `${stats.templesCount} Listed`,
-      change: `${stats.liveStreamsCount} Live Feeds`,
+      title: isHindi ? 'पवित्र तीर्थ व मंदिर' : 'Sacred Temples',
+      value: `${stats.templesCount} ${isHindi ? 'सूचीबद्ध' : 'Listed'}`,
+      change: `${stats.liveStreamsCount} ${isHindi ? 'लाइव दर्शन' : 'Live Feeds'}`,
       icon: '🛕',
       color: 'from-orange-500 to-orange-600',
-      sub: 'Sanctums & Darshan',
+      sub: isHindi ? 'गर्भगृह एवं दर्शन' : 'Sanctums & Darshan',
       href: '/temples',
     },
     {
-      title: 'Puja Services',
-      value: `${stats.pujasCount} Active`,
-      change: 'Vedic Ceremonies',
+      title: isHindi ? 'पूजा अनुष्ठान सेवाएँ' : 'Puja Services',
+      value: `${stats.pujasCount} ${isHindi ? 'सक्रिय' : 'Active'}`,
+      change: isHindi ? 'वैदिक अनुष्ठान' : 'Vedic Ceremonies',
       icon: '🪔',
       color: 'from-red-600 to-red-700',
-      sub: 'Sanctum Rituals Catalog',
+      sub: isHindi ? 'मंदिर अनुष्ठान सूची' : 'Sanctum Rituals Catalog',
       href: '/puja-services',
     },
     {
-      title: 'Devotee Bookings',
-      value: `${stats.bookingsCount} Recorded`,
-      change: 'Live Queue',
+      title: isHindi ? 'भक्त बुकिंग एवं संकल्प' : 'Devotee Bookings',
+      value: `${stats.bookingsCount} ${isHindi ? 'दर्ज' : 'Recorded'}`,
+      change: isHindi ? 'लाइव कतार' : 'Live Queue',
       icon: '📜',
       color: 'from-purple-600 to-purple-700',
-      sub: 'Sankalps & Intentions',
+      sub: isHindi ? 'संकल्प एवं आशीर्वाद' : 'Sankalps & Intentions',
       href: '/bookings',
     },
     {
-      title: 'Chadhawa Items',
-      value: `${stats.chadhawaCount} Offerings`,
-      change: 'Sanctum Delivery',
+      title: isHindi ? 'चढ़ावा एवं विशेष अर्पण' : 'Chadhawa Offerings',
+      value: `${stats.chadhawaCount} ${isHindi ? 'उपलब्ध' : 'Cataloged'}`,
+      change: isHindi ? 'भोग एवं शृंगार' : 'Direct Sanctum Offerings',
       icon: '🌸',
-      color: 'from-pink-500 to-rose-600',
-      sub: 'Silver Chhatra, Diya & Vastra',
+      color: 'from-pink-600 to-pink-700',
+      sub: isHindi ? 'प्रसाद एवं दीप दान' : 'Temple Prasadam & Deep Daan',
       href: '/chadhawa',
     },
     {
-      title: 'Vedic Astrologers',
-      value: `${stats.astrologersCount} Verified`,
-      change: `${stats.onlineAstrologersCount} Online Now`,
+      title: isHindi ? 'पंडित एवं ज्योतिषी' : 'Verified Astrologers',
+      value: `${stats.astrologersCount} ${isHindi ? 'पंजीकृत' : 'Registered'}`,
+      change: `${stats.onlineAstrologersCount} ${isHindi ? 'अभी ऑनलाइन' : 'Now Online'}`,
       icon: '🧘‍♂️',
       color: 'from-indigo-600 to-indigo-700',
-      sub: 'Verified Acharyas & Jyotish',
+      sub: isHindi ? 'कुंडली एवं वैदिक संवाद' : 'Live Chat & Audio Calling',
       href: '/astrologers',
     },
     {
-      title: 'Live Consultations',
-      value: `${stats.consultationsCount} Total`,
-      change: 'RTC / Chat',
+      title: isHindi ? 'परामर्श सत्र' : 'Devotee Consultations',
+      value: `${stats.consultationsCount} ${isHindi ? 'सत्र' : 'Sessions'}`,
+      change: isHindi ? 'सुरक्षित संचार' : 'Private Audio/Chat',
       icon: '💬',
-      color: 'from-emerald-600 to-teal-700',
-      sub: 'Agora Call & Safety Shield',
+      color: 'from-blue-600 to-blue-700',
+      sub: isHindi ? 'ज्योतिष परामर्श' : 'Astrological Counseling',
       href: '/consultations',
     },
     {
-      title: 'Devotee Profiles',
-      value: `${stats.devoteesCount} Registered`,
-      change: 'Supabase Auth',
+      title: isHindi ? 'पंजीकृत भक्त' : 'Registered Devotees',
+      value: `${stats.devoteesCount} ${isHindi ? 'भक्त' : 'Devotees'}`,
+      change: isHindi ? 'गोत्र सहित पंजिका' : 'Active Profiles',
       icon: '👥',
-      color: 'from-cyan-600 to-blue-700',
-      sub: 'Gotras & Devotional Lineage',
+      color: 'from-emerald-600 to-emerald-700',
+      sub: isHindi ? 'समर्पित समुदाय' : 'Devotional Community',
       href: '/users',
     },
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-full">
-      {/* Welcome Banner with Authentic Logo */}
-      <div className="bg-gradient-to-r from-mandir-maroon via-mandir-maroon-dark to-mandir-maroon-deep rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-white shadow-divine relative overflow-hidden">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Top Banner with Quick Action Buttons */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-mandir-maroon-deep via-mandir-maroon to-mandir-maroon-dark p-4 sm:p-6 md:p-8 text-white shadow-xl border border-amber-500/30">
+        <div className="absolute top-0 right-0 -mt-6 -mr-6 w-48 sm:w-64 h-48 sm:h-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-            <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-black/30 border border-amber-400/30 p-1.5 sm:p-2 flex items-center justify-center shrink-0 shadow-xl">
+            <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-black/40 border border-amber-400/30 p-2 flex items-center justify-center shrink-0 shadow-inner">
               <img
                 src="/images/inner_logo_clean.png"
                 alt="Mandirm"
@@ -203,45 +207,58 @@ export default function AdminDashboardPage() {
             </div>
             <div>
               <div className="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-200 border border-amber-400/30 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold mb-1">
-                <span>🕉️ Sri Mandir Unified Operations</span>
+                <span>{isHindi ? '🕉️ श्री मंदिरम् एकीकृत संचालन' : '🕉️ Sri Mandir Unified Operations'}</span>
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-cinzel text-amber-100 leading-tight">
-                Command Center & Live Portal
+                {isHindi ? 'कमांड सेंटर एवं लाइव पोर्टल' : 'Command Center & Live Portal'}
               </h1>
               <p className="text-[11px] sm:text-xs text-amber-200/80 max-w-xl mt-1 leading-normal">
-                Direct production connection to Supabase & FastAPI backend. Changes made here propagate instantly to the mobile app and website.
+                {isHindi
+                  ? 'सुपाबेस डेटाबेस से सीधा उत्पादन कनेक्शन। यहाँ किए गए परिवर्तन तुरंत वेबसाइट और ऐप पर दिखाई देते हैं।'
+                  : 'Direct production connection to Supabase & FastAPI backend. Changes made here propagate instantly to the mobile app and website.'}
               </p>
             </div>
           </div>
 
-          {/* Quick Shortcuts */}
+          {/* Quick Shortcuts with prominent Add Pandit button */}
           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             <Link
               href="/temples"
               className="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-amber-500 hover:bg-amber-400 text-mandir-maroon-deep font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 active:scale-95"
             >
-              <span>🛕</span> Add Temple
+              <span>🛕</span> {isHindi ? 'मंदिर जोड़ें' : 'Add Temple'}
             </Link>
+
+            {/* User Requested: Add Pandit Button right in header banner */}
+            <Link
+              href="/astrologers?action=new"
+              className="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 active:scale-95 border border-amber-400/30"
+            >
+              <span>🧘‍♂️</span> {isHindi ? 'पंडित जोड़ें' : 'Add Pandit'}
+            </Link>
+
             <Link
               href="/puja-services"
               className="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-1.5 active:scale-95"
             >
-              <span>🪔</span> New Puja
+              <span>🪔</span> {isHindi ? 'नई पूजा' : 'New Puja'}
             </Link>
+
             <Link
               href="/products"
               className="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-1.5 active:scale-95"
             >
-              <span>📦</span> New Product
+              <span>📦</span> {isHindi ? 'नया उत्पाद' : 'New Product'}
             </Link>
+
             <button
               onClick={fetchDashboardData}
               disabled={loading}
               className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-black/30 hover:bg-black/50 text-amber-200 font-semibold text-xs rounded-xl border border-amber-400/30 transition-all flex items-center justify-center gap-1.5 active:scale-95"
-              title="Refresh Live Metrics"
+              title={isHindi ? 'लाइव डेटा रिफ्रेश करें' : 'Refresh Live Metrics'}
             >
               <span>{loading ? '⏳' : '🔄'}</span>
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="hidden sm:inline">{isHindi ? 'रिफ्रेश' : 'Refresh'}</span>
             </button>
           </div>
         </div>
@@ -249,7 +266,7 @@ export default function AdminDashboardPage() {
 
       {/* Real KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {metrics.map((m) => {
+        {metrics.map((m, idx) => {
           const content = (
             <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between h-full">
               <div>
@@ -258,150 +275,158 @@ export default function AdminDashboardPage() {
                     {m.title}
                   </span>
                   <div
-                    className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-br ${m.color} text-white flex items-center justify-center text-sm sm:text-lg shadow-sm group-hover:scale-110 transition-transform shrink-0`}
+                    className={`w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br ${m.color} text-white flex items-center justify-center text-xs sm:text-base shadow-sm shrink-0 group-hover:scale-110 transition-transform`}
                   >
                     {m.icon}
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-                  <span className="text-lg sm:text-2xl font-bold font-cinzel text-gray-900 tracking-tight">
-                    {loading ? '...' : m.value}
-                  </span>
-                  <span className="text-[9px] sm:text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-100 w-fit">
-                    {m.change}
-                  </span>
+                <div className="text-base sm:text-xl md:text-2xl font-extrabold text-gray-900 font-cinzel tracking-tight truncate">
+                  {loading ? '—' : m.value}
                 </div>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-gray-400 mt-2 font-medium line-clamp-1">{m.sub}</p>
+
+              <div className="mt-3 pt-2.5 border-t border-gray-50 flex items-center justify-between text-[10px] sm:text-xs">
+                <span className="text-gray-400 truncate max-w-[120px] sm:max-w-none">{m.sub}</span>
+                <span className="font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
+                  {m.change}
+                </span>
+              </div>
             </div>
           );
 
           return m.href ? (
-            <Link key={m.title} href={m.href} className="block h-full">
+            <Link key={idx} href={m.href} className="block transition-transform hover:-translate-y-0.5">
               {content}
             </Link>
           ) : (
-            <div key={m.title} className="h-full">{content}</div>
+            <div key={idx}>{content}</div>
           );
         })}
       </div>
 
-      {/* Live Operational Queues */}
+      {/* Real Production Queues: Recent Bookings & Astrologer Consultations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Recent Puja Bookings */}
-        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3 sm:mb-4 border-b border-gray-100 pb-3">
-            <div>
-              <h2 className="text-xs sm:text-sm font-bold font-cinzel text-gray-900 flex items-center gap-2">
-                <span>📜</span> Devotee Bookings & Sankalps Queue
-              </h2>
-              <span className="text-[10px] sm:text-[11px] text-gray-400">Live records from Supabase</span>
+        {/* Recent Devotee Sankalps & Bookings */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-sm sm:text-base font-bold font-cinzel text-gray-900 flex items-center gap-2">
+                  <span>📜</span> {isHindi ? 'नवीनतम भक्त संकल्प एवं बुकिंग' : 'Recent Devotee Sankalps & Bookings'}
+                </h2>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  {isHindi ? 'सुपाबेस डेटाबेस से सीधी लाइव कतार' : 'Direct live feed from Supabase bookings table'}
+                </p>
+              </div>
+              <Link
+                href="/bookings"
+                className="text-xs font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl transition-colors shrink-0"
+              >
+                {isHindi ? 'सभी देखें →' : 'View All →'}
+              </Link>
             </div>
-            <Link
-              href="/bookings"
-              className="text-xs text-amber-700 hover:text-amber-800 font-semibold shrink-0 ml-2"
-            >
-              View All →
-            </Link>
-          </div>
 
-          {recentBookings.length === 0 ? (
-            <div className="py-8 sm:py-10 text-center text-gray-400 text-xs">
-              <span className="text-3xl block mb-2">📜</span>
-              <span>No bookings currently in queue.</span>
-            </div>
-          ) : (
-            <div className="space-y-2.5 sm:space-y-3">
-              {recentBookings.map((b) => (
-                <div
-                  key={b.id}
-                  className="p-3 sm:p-3.5 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-amber-50/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-gray-900 truncate">
-                      {b.sankalp_name || b.user_name || 'Devotee'}
-                      {b.sankalp_gotra && (
-                        <span className="ml-1.5 font-normal text-gray-500 font-mono text-[10px]">
-                          (Gotra: {b.sankalp_gotra})
-                        </span>
-                      )}
+            {loading ? (
+              <div className="py-12 text-center text-xs text-gray-400">
+                {isHindi ? 'डेटाबेस से लोड हो रहा है...' : 'Loading bookings from database...'}
+              </div>
+            ) : recentBookings.length === 0 ? (
+              <div className="py-12 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                {isHindi ? 'डेटाबेस में कोई बुकिंग दर्ज नहीं है।' : 'No bookings in database yet.'}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {recentBookings.map((b) => (
+                  <div
+                    key={b.id}
+                    className="p-3 rounded-xl border border-gray-100 hover:border-amber-200 hover:bg-amber-50/20 transition-all flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-bold text-gray-900 truncate">
+                        {b.sankalp_name || b.user_name || (isHindi ? 'अनाम भक्त' : 'Devotee')}
+                        {b.sankalp_gotra && (
+                          <span className="ml-1 text-[10px] font-normal text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded">
+                            {b.sankalp_gotra}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-gray-500 truncate mt-0.5">
+                        {b.puja_title} • <span className="text-gray-700">{b.temple_name}</span>
+                      </div>
                     </div>
-                    <div className="text-gray-500 text-[11px] mt-0.5 truncate">
-                      {b.puja_title} • <span className="text-amber-800 font-medium">{b.temple_name}</span>
+
+                    <div className="text-right shrink-0">
+                      <div className="font-bold text-mandir-maroon">
+                        ₹ {Number(b.amount || 0).toLocaleString('en-IN')}
+                      </div>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full inline-block mt-0.5 bg-emerald-100 text-emerald-800">
+                        {b.status || (isHindi ? 'सफल' : 'Confirmed')}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                    <span className="font-bold text-gray-900 font-cinzel block text-xs sm:text-sm">
-                      ₹ {Number(b.amount || 0).toLocaleString('en-IN')}
-                    </span>
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize ${
-                        b.status === 'Completed' || b.status === 'completed'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {b.status || 'Confirmed'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Live Consultations & Chat Feed */}
-        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3 sm:mb-4 border-b border-gray-100 pb-3">
-            <div>
-              <h2 className="text-xs sm:text-sm font-bold font-cinzel text-gray-900 flex items-center gap-2">
-                <span>💬</span> Consultations & Session Activity
-              </h2>
-              <span className="text-[10px] sm:text-[11px] text-gray-400">Live records from Supabase</span>
+        {/* Recent Astrologer Consultations */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-sm sm:text-base font-bold font-cinzel text-gray-900 flex items-center gap-2">
+                  <span>💬</span> {isHindi ? 'नवीनतम पंडित परामर्श एवं संवाद' : 'Recent Pandit Consultations & Chats'}
+                </h2>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  {isHindi ? 'लाइव परामर्श सत्र एवं वार्ता' : 'Live astrological sessions & audio/chat consultations'}
+                </p>
+              </div>
+              <Link
+                href="/consultations"
+                className="text-xs font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl transition-colors shrink-0"
+              >
+                {isHindi ? 'सभी देखें →' : 'View All →'}
+              </Link>
             </div>
-            <Link
-              href="/consultations"
-              className="text-xs text-amber-700 hover:text-amber-800 font-semibold shrink-0 ml-2"
-            >
-              View Hub →
-            </Link>
-          </div>
 
-          {recentConsultations.length === 0 ? (
-            <div className="py-8 sm:py-10 text-center text-gray-400 text-xs">
-              <span className="text-3xl block mb-2">🧘‍♂️</span>
-              <span>No active consultation sessions right now.</span>
-            </div>
-          ) : (
-            <div className="space-y-2.5 sm:space-y-3">
-              {recentConsultations.map((c) => (
-                <div
-                  key={c.id}
-                  className="p-3 sm:p-3.5 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-emerald-50/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 text-xs"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-gray-900 truncate">
-                      {c.user_name || 'Devotee'} <span className="text-gray-400 font-normal">with</span> {c.astrologer_name}
+            {loading ? (
+              <div className="py-12 text-center text-xs text-gray-400">
+                {isHindi ? 'डेटाबेस से लोड हो रहा है...' : 'Loading consultations from database...'}
+              </div>
+            ) : recentConsultations.length === 0 ? (
+              <div className="py-12 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                {isHindi ? 'डेटाबेस में कोई परामर्श सत्र नहीं मिला।' : 'No consultations in database yet.'}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {recentConsultations.map((c) => (
+                  <div
+                    key={c.id}
+                    className="p-3 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/20 transition-all flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-bold text-gray-900 truncate">
+                        {c.user_name || (isHindi ? 'अनाम भक्त' : 'Devotee')}
+                        <span className="text-gray-400 font-normal mx-1">→</span>
+                        <span className="text-indigo-800 font-semibold">{c.astrologer_name}</span>
+                      </div>
+                      <div className="text-[11px] text-gray-500 truncate mt-0.5">
+                        {c.type === 'chat' ? (isHindi ? '💬 चैट' : '💬 Live Chat') : (isHindi ? '📞 कॉल' : '📞 Voice Call')} •{' '}
+                        {c.duration_minutes || 15} {isHindi ? 'मिनट' : 'mins'}
+                      </div>
                     </div>
-                    <div className="text-gray-500 text-[11px] mt-0.5 capitalize truncate">
-                      {c.type} Session • {c.duration_minutes || 0} mins
+
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full inline-block bg-blue-100 text-blue-800">
+                        {c.status || (isHindi ? 'सक्रिय' : 'Active')}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${
-                        c.status === 'active'
-                          ? 'bg-emerald-100 text-emerald-800 animate-pulse'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {c.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

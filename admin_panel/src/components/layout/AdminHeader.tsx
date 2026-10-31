@@ -4,11 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAdminAuth } from '@/components/auth/AdminAuthGuard';
 import { useSidebar } from './AdminLayoutShell';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
+import { tAdmin } from '@/lib/adminTranslations';
 
 export default function AdminHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   const { lockConsole, adminName } = useAdminAuth();
   const { toggleMobileSidebar } = useSidebar();
+  const { language, setLanguage, isHindi } = useAdminLanguage();
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm shrink-0">
@@ -36,7 +39,7 @@ export default function AdminHeader() {
           </svg>
         </button>
 
-        {/* Mobile Brand Icon (only visible on small screens when drawer is closed) */}
+        {/* Mobile Brand Icon */}
         <Link href="/" className="lg:hidden flex items-center shrink-0 mr-1">
           <img
             src="/images/inner_logo_clean.png"
@@ -54,7 +57,7 @@ export default function AdminHeader() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
+            placeholder={tAdmin('searchPlaceholder', isHindi)}
             className="w-full pl-8 sm:pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-mandir-maroon/20 focus:border-mandir-maroon transition-all placeholder-gray-400"
           />
         </div>
@@ -62,16 +65,44 @@ export default function AdminHeader() {
 
       {/* Right Controls */}
       <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        {/* Language Toggle Pill */}
+        <div className="flex items-center bg-gray-100 p-0.5 rounded-xl border border-gray-200 shadow-inner">
+          <button
+            type="button"
+            onClick={() => setLanguage('HI')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+              language === 'HI'
+                ? 'bg-gradient-to-r from-mandir-maroon to-mandir-maroon-dark text-amber-300 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+            title="हिन्दी में बदलें"
+          >
+            हिन्दी
+          </button>
+          <button
+            type="button"
+            onClick={() => setLanguage('EN')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+              language === 'EN'
+                ? 'bg-gradient-to-r from-mandir-maroon to-mandir-maroon-dark text-amber-300 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+            title="Switch to English"
+          >
+            EN
+          </button>
+        </div>
+
         {/* Real Backend & DB Status Badge (Desktop & Tablet) */}
         <div className="hidden md:flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-[11px] font-medium text-emerald-800">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Backend Live</span>
+          <span>{tAdmin('backendLive', isHindi)}</span>
         </div>
 
         {/* Mobile Live Dot Indicator */}
         <div
           className="md:hidden flex items-center justify-center p-1.5 rounded-full bg-emerald-50 text-emerald-700"
-          title="Backend & Supabase Live"
+          title={isHindi ? 'बैकएंड सक्रिय' : 'Backend & Supabase Live'}
         >
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         </div>
@@ -79,7 +110,7 @@ export default function AdminHeader() {
         {/* Passkey Verified Badge */}
         <div className="hidden lg:flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-800">
           <span>🛡️</span>
-          <span>Passkey Active</span>
+          <span>{tAdmin('passkeyActive', isHindi)}</span>
         </div>
 
         {/* Admin Profile & Lock Console */}
@@ -96,7 +127,7 @@ export default function AdminHeader() {
             </span>
             <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              Sanctum Operator
+              {tAdmin('sanctumOperator', isHindi)}
             </span>
           </div>
 
@@ -104,14 +135,15 @@ export default function AdminHeader() {
           <button
             onClick={lockConsole}
             className="p-1.5 sm:p-2 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-lg transition-colors border border-transparent hover:border-red-200 text-xs flex items-center gap-1"
-            title="Lock Console (Sign Out)"
+            title={isHindi ? 'लॉगआउट' : 'Lock Console (Sign Out)'}
           >
             <span>🔒</span>
-            <span className="hidden sm:inline text-[11px] font-medium">Lock</span>
+            <span className="hidden sm:inline text-[11px] font-medium">
+              {tAdmin('lockConsole', isHindi)}
+            </span>
           </button>
         </div>
       </div>
     </header>
   );
 }
-

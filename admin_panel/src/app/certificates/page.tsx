@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase/client';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
 interface Booking {
   id: string;
@@ -22,21 +24,27 @@ function CertCard({
   item,
   type,
   backendUrl,
+  isHindi,
 }: {
   item: Booking;
   type: CertType;
   backendUrl: string;
+  isHindi: boolean;
 }) {
-  const devoteeName = item.sankalp_name || item.devotee_name || item.user_name || 'Devotee';
-  const serviceTitle = item.puja_title || item.offering_title || 'Sacred Ritual';
+  const devoteeName = item.sankalp_name || item.devotee_name || item.user_name || (isHindi ? 'भक्त' : 'Devotee');
+  const serviceTitle = item.puja_title || item.offering_title || (isHindi ? 'पवित्र अनुष्ठान' : 'Sacred Ritual');
   const certUrl = `${backendUrl}/api/v1/certificates/${type}/${item.id}`;
 
   let dateStr = '—';
   try {
-    dateStr = new Date(item.created_at).toLocaleDateString('en-IN', {
-      day: '2-digit', month: 'long', year: 'numeric',
+    dateStr = new Date(item.created_at).toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
     });
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-amber-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow group">
@@ -53,40 +61,49 @@ function CertCard({
                 : 'bg-purple-100 text-purple-800'
             }`}
           >
-            {type === 'puja' ? '🪔 Puja' : '🌸 Chadhawa'}
+            {type === 'puja' ? (isHindi ? '🪔 पूजा' : '🪔 Puja') : (isHindi ? '🌸 चढ़ावा' : '🌸 Chadhawa')}
           </span>
-          <span className="text-xs font-mono text-gray-400">{item.id.slice(-8).toUpperCase()}</span>
+          <span className="text-xs font-mono text-gray-400">
+            {item.id.slice(-8).toUpperCase()}
+          </span>
         </div>
 
-        {/* Devotee */}
-        <h3 className="text-base font-bold text-gray-900 mb-1">{devoteeName}</h3>
-        <p className="text-sm text-orange-700 font-semibold line-clamp-1 mb-1">{serviceTitle}</p>
-        <p className="text-xs text-gray-500 mb-0.5">🏛 {item.temple_name}</p>
-        <p className="text-xs text-gray-400">📅 {dateStr}</p>
+        {/* Devotee info */}
+        <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-amber-800 transition-colors">
+          {devoteeName}
+        </h3>
+        <p className="text-xs text-amber-700 font-medium mt-0.5">{serviceTitle}</p>
+        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+          <span>🛕</span>
+          <span>{item.temple_name || (isHindi ? 'पवित्र गर्भगृह' : 'Sacred Sanctum')}</span>
+        </p>
 
-        {/* Status */}
-        {item.status && (
-          <span className="inline-block mt-2 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
-            ✅ {item.status}
-          </span>
-        )}
+        {/* Date & Amount */}
+        <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+          <span>{dateStr}</span>
+          {item.amount != null && (
+            <span className="font-bold text-gray-800">
+              ₹{Number(item.amount).toLocaleString('en-IN')}
+            </span>
+          )}
+        </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-2 mt-4">
+        {/* Actions */}
+        <div className="mt-4 flex gap-2">
           <a
             href={certUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl text-center transition-colors flex items-center justify-center gap-1.5"
           >
-            👁 Preview
+            👁 {isHindi ? 'पूर्वावलोकन' : 'Preview'}
           </a>
           <a
             href={certUrl}
             download={`certificate_${item.id}.svg`}
             className="flex-1 py-2 bg-gradient-to-r from-orange-600 to-red-700 hover:opacity-90 text-white text-xs font-bold rounded-xl text-center transition-opacity flex items-center justify-center gap-1.5"
           >
-            ⬇ Download
+            ⬇ {isHindi ? 'डाउनलोड' : 'Download'}
           </a>
         </div>
       </div>
@@ -96,6 +113,7 @@ function CertCard({
 
 // ─── Main Certificates Page ───────────────────────────────────────────────────
 export default function CertificatesPage() {
+  const { isHindi } = useAdminLanguage();
   const [pujaBookings, setPujaBookings] = useState<Booking[]>([]);
   const [chadhawaOrders, setChadhawaOrders] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,165 +124,147 @@ export default function CertificatesPage() {
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     (process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '') : '') ||
     'https://api.mandirm.in';
-  const ADMIN_TOKEN =
-    typeof window !== 'undefined' ? localStorage.getItem('adminToken') || '' : '';
-
-  // ─── Demo seed data (used when backend unavailable) ─────────────────────────
-  const DEMO_PUJA: Booking[] = [
-    { id: 'booking_demo01', puja_title: 'Pitru Dosh Shanti Mahapuja', temple_name: 'Ganga Ghat, Haridwar', sankalp_name: 'Ramesh Kumar Sharma', created_at: new Date().toISOString(), status: 'Completed', amount: 2100 },
-    { id: 'booking_demo02', puja_title: 'Mahakal Rudrabhishek Puja', temple_name: 'Mahakaleshwar, Ujjain', sankalp_name: 'Priya Agarwal', created_at: new Date().toISOString(), status: 'Completed', amount: 1100 },
-    { id: 'booking_demo03', puja_title: 'Satyanarayan Katha & Puja', temple_name: 'Siddhivinayak, Mumbai', sankalp_name: 'Sunita Joshi', created_at: new Date().toISOString(), status: 'Completed', amount: 5100 },
-  ];
-  const DEMO_CHADHAWA: Booking[] = [
-    { id: 'chadhawa_ord_demo01', offering_title: 'Mahakal Special Chadava', temple_name: 'Mahakaleshwar, Ujjain', devotee_name: 'Ankit Verma', created_at: new Date().toISOString(), status: 'Offered at Temple Sanctuary', amount: 251 },
-    { id: 'chadhawa_ord_demo02', offering_title: 'Vishnu Sahasranam Path', temple_name: 'Tirupati Balaji', devotee_name: 'Kavitha Nair', created_at: new Date().toISOString(), status: 'Offered at Temple Sanctuary', amount: 501 },
-  ];
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = { Authorization: `Bearer ${ADMIN_TOKEN}` };
-      const [pujaRes, chaRes] = await Promise.all([
-        fetch(`${API_BASE}/api/v1/bookings?limit=100`, { headers }),
-        fetch(`${API_BASE}/api/v1/chadhawa/user/orders?limit=100`, { headers }),
+      // Direct production queries to Supabase database (no mock fallbacks)
+      const [bookingsRes, ordersRes] = await Promise.all([
+        supabase.from('bookings').select('*').order('created_at', { ascending: false }).limit(100),
+        supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(100),
       ]);
-      const pujaData = pujaRes.ok ? await pujaRes.json() : { data: DEMO_PUJA };
-      const chaData = chaRes.ok ? await chaRes.json() : { data: DEMO_CHADHAWA };
-      setPujaBookings(pujaData.data || DEMO_PUJA);
-      setChadhawaOrders(chaData.data || DEMO_CHADHAWA);
-    } catch {
-      setPujaBookings(DEMO_PUJA);
-      setChadhawaOrders(DEMO_CHADHAWA);
+
+      const pujas = (bookingsRes.data || []) as Booking[];
+      const chadhawas = (ordersRes.data || []).map((o: any) => ({
+        id: o.id,
+        offering_title: o.items?.[0]?.name || (isHindi ? 'मंदिर चढ़ावा एवं अर्पण' : 'Temple Chadhawa Offering'),
+        temple_name: o.temple_name || (isHindi ? 'पवित्र मंदिर' : 'Sacred Sanctum'),
+        devotee_name: o.user_name || o.shipping_name || (isHindi ? 'भक्त' : 'Devotee'),
+        created_at: o.created_at,
+        status: o.order_status,
+        amount: o.total_amount,
+      })) as Booking[];
+
+      setPujaBookings(pujas);
+      setChadhawaOrders(chadhawas);
+    } catch (err) {
+      console.error('Error fetching certificates data:', err);
+      setPujaBookings([]);
+      setChadhawaOrders([]);
     } finally {
       setLoading(false);
     }
-  }, [API_BASE, ADMIN_TOKEN]);
+  }, [isHindi]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const activeList = activeTab === 'puja' ? pujaBookings : chadhawaOrders;
-  const filtered = activeList.filter((item) => {
-    if (!search) return true;
+  const currentList = activeTab === 'puja' ? pujaBookings : chadhawaOrders;
+  const filtered = currentList.filter((b) => {
     const q = search.toLowerCase();
-    const name = (item.sankalp_name || item.devotee_name || item.user_name || '').toLowerCase();
-    const title = (item.puja_title || item.offering_title || '').toLowerCase();
-    const temple = (item.temple_name || '').toLowerCase();
-    return name.includes(q) || title.includes(q) || temple.includes(q) || item.id.toLowerCase().includes(q);
+    const name = (b.sankalp_name || b.devotee_name || b.user_name || '').toLowerCase();
+    const title = (b.puja_title || b.offering_title || '').toLowerCase();
+    const temple = (b.temple_name || '').toLowerCase();
+    return name.includes(q) || title.includes(q) || temple.includes(q) || b.id.toLowerCase().includes(q);
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50/30">
-      <div className="max-w-6xl mx-auto px-2 sm:px-6 py-4 sm:py-8">
-        {/* Header */}
-        <div className="mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2.5 sm:gap-3">
-            <span className="text-2xl sm:text-3xl">📜</span> Sacred Certificates
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div>
+          <h1 className="text-lg sm:text-xl font-bold font-cinzel text-gray-900 flex items-center gap-2">
+            <span>📜</span> {isHindi ? 'पवित्र सहभागिता प्रमाण पत्र' : 'Sacred Participation Certificates'}
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Preview & download participation certificates for all Puja bookings and Chadhawa offerings
+          <p className="text-xs text-gray-500 mt-0.5">
+            {isHindi
+              ? 'सुपाबेस डेटाबेस से सीधे प्राप्त वास्तविक अनुष्ठान एवं चढ़ावा प्रमाण पत्र'
+              : 'Real participation certificates generated from production database bookings'}
           </p>
         </div>
 
-        {/* Info Banner */}
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-7 flex items-start gap-3 sm:gap-4">
-          <div className="text-xl sm:text-2xl">✨</div>
-          <div>
-            <p className="text-xs sm:text-sm font-semibold text-amber-900">Auto-Generated SVG Certificates</p>
-            <p className="text-[11px] sm:text-xs text-amber-700 mt-0.5 leading-normal">
-              Each certificate is dynamically generated with the devotee name, ritual title, temple, and date.
-              Certificates are available for all completed bookings and are downloadable as high-quality SVG files.
-              Devotees can also download their certificates directly from the <strong>Mandiram mobile app</strong>.
-            </p>
-          </div>
-        </div>
+        <button
+          onClick={fetchData}
+          disabled={loading}
+          className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+        >
+          <span>{loading ? '⏳' : '🔄'}</span>
+          <span>{isHindi ? 'रिफ्रेश' : 'Refresh'}</span>
+        </button>
+      </div>
 
+      {/* Tabs & Search */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Tabs */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
           <button
             onClick={() => setActiveTab('puja')}
-            className={`flex items-center justify-between sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
               activeTab === 'puja'
-                ? 'bg-orange-600 text-white shadow-md'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-300'
+                ? 'bg-white text-orange-800 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <span className="flex items-center gap-1.5">🪔 Puja Certificates</span>
-            <span
-              className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                activeTab === 'puja' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              {pujaBookings.length}
-            </span>
+            {isHindi ? `🪔 पूजा प्रमाण पत्र (${pujaBookings.length})` : `🪔 Puja Certificates (${pujaBookings.length})`}
           </button>
           <button
             onClick={() => setActiveTab('chadhawa')}
-            className={`flex items-center justify-between sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
               activeTab === 'chadhawa'
-                ? 'bg-purple-700 text-white shadow-md'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'
+                ? 'bg-white text-purple-800 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <span className="flex items-center gap-1.5">🌸 Chadhawa Certificates</span>
-            <span
-              className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                activeTab === 'chadhawa' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              {chadhawaOrders.length}
-            </span>
+            {isHindi ? `🌸 चढ़ावा प्रमाण पत्र (${chadhawaOrders.length})` : `🌸 Chadhawa Certificates (${chadhawaOrders.length})`}
           </button>
         </div>
 
         {/* Search */}
-        <div className="relative mb-6">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+        <div className="relative max-w-xs w-full">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
+            🔍
+          </span>
           <input
             type="text"
-            placeholder="Search by devotee name, puja title, temple..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm shadow-sm"
+            placeholder={isHindi ? 'भक्त, पूजा या मंदिर से खोजें...' : 'Search by devotee, ritual or temple...'}
+            className="w-full pl-8 pr-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
-
-        {/* Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center py-24">
-            <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="text-6xl mb-4">📜</div>
-            <h3 className="text-xl font-bold text-gray-700 mb-2">No certificates found</h3>
-            <p className="text-gray-500">Completed bookings and offerings will appear here</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map((item) => (
-              <CertCard
-                key={item.id}
-                item={item}
-                type={activeTab}
-                backendUrl={API_BASE}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Developer note */}
-        <div className="mt-10 p-4 bg-gray-100 rounded-xl text-xs text-gray-500">
-          <strong>Developer Note:</strong> Certificate endpoint:{' '}
-          <code className="bg-white px-1.5 py-0.5 rounded font-mono">
-            GET /api/v1/certificates/{'{puja|chadhawa}'}/{'{id}'}
-          </code>{' '}
-          — Returns SVG with{' '}
-          <code className="bg-white px-1.5 py-0.5 rounded font-mono">Content-Disposition: attachment</code>.
-          Flutter app uses <code className="bg-white px-1.5 py-0.5 rounded font-mono">url_launcher</code> to open the download link.
-        </div>
       </div>
+
+      {/* Grid of Certificates */}
+      {loading ? (
+        <div className="py-24 text-center text-xs text-gray-400">
+          {isHindi ? 'डेटाबेस से लोड हो रहा है...' : 'Loading certificates from database...'}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-24 text-center bg-white rounded-2xl border border-dashed border-gray-200 p-8">
+          <div className="text-4xl mb-3">📜</div>
+          <h3 className="text-sm font-bold text-gray-800">
+            {isHindi ? 'कोई रिकॉर्ड नहीं मिला' : 'No records found'}
+          </h3>
+          <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+            {isHindi
+              ? 'वर्तमान में कोई बुकिंग या अर्पण दर्ज नहीं है।'
+              : 'There are currently no confirmed bookings in the database.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((item) => (
+            <CertCard
+              key={item.id}
+              item={item}
+              type={activeTab}
+              backendUrl={API_BASE}
+              isHindi={isHindi}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

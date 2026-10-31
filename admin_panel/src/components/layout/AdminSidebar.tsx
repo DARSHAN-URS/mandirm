@@ -3,53 +3,93 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAdminAuth } from '@/components/auth/AdminAuthGuard';
+import { useAdminLanguage } from '@/context/AdminLanguageContext';
 
-interface NavItem {
-  name: string;
+interface NavItemDef {
+  nameEn: string;
+  nameHi: string;
   href: string;
   icon: string;
-  badge?: string;
+  badgeEn?: string;
+  badgeHi?: string;
   badgeColor?: string;
 }
 
-const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
+const NAV_GROUPS: { groupEn: string; groupHi: string; items: NavItemDef[] }[] = [
   {
-    group: 'CORE OVERVIEW',
+    groupEn: 'CORE OVERVIEW',
+    groupHi: 'मुख्य अवलोकन',
     items: [
-      { name: 'Dashboard', href: '/', icon: '📊' },
-      { name: 'Financials & Dakshina', href: '/transactions', icon: '💳' },
+      { nameEn: 'Dashboard', nameHi: 'डैशबोर्ड', href: '/', icon: '📊' },
+      { nameEn: 'Financials & Dakshina', nameHi: 'वित्तीय एवं दक्षिणा', href: '/transactions', icon: '💳' },
     ],
   },
   {
-    group: 'TEMPLE & RITUALS',
+    groupEn: 'TEMPLE & RITUALS',
+    groupHi: 'मंदिर एवं अनुष्ठान',
     items: [
-      { name: 'Temples & Live Darshan', href: '/temples', icon: '🛕', badge: 'Live', badgeColor: 'bg-emerald-500 text-white' },
-      { name: 'Puja Ceremonies', href: '/puja-services', icon: '🪔' },
-      { name: 'Bookings & Sankalps', href: '/bookings', icon: '📜', badge: 'Queue', badgeColor: 'bg-amber-500 text-white' },
-      { name: 'Chadhawa Offerings', href: '/chadhawa', icon: '🌸' },
+      {
+        nameEn: 'Temples & Sanctums',
+        nameHi: 'पवित्र मंदिर एवं दर्शन',
+        href: '/temples',
+        icon: '🛕',
+        badgeEn: 'Live',
+        badgeHi: 'लाइव',
+        badgeColor: 'bg-emerald-500 text-white',
+      },
+      { nameEn: 'Puja Ceremonies', nameHi: 'पूजा अनुष्ठान सेवाएँ', href: '/puja-services', icon: '🪔' },
+      {
+        nameEn: 'Bookings & Sankalps',
+        nameHi: 'भक्त बुकिंग एवं संकल्प',
+        href: '/bookings',
+        icon: '📜',
+        badgeEn: 'Queue',
+        badgeHi: 'कतार',
+        badgeColor: 'bg-amber-500 text-white',
+      },
+      { nameEn: 'Chadhawa Offerings', nameHi: 'चढ़ावा अर्पण', href: '/chadhawa', icon: '🌸' },
     ],
   },
   {
-    group: 'ASTROLOGY & LIVE CHAT',
+    groupEn: 'PANDITS & ASTROLOGY',
+    groupHi: 'पंडित एवं ज्योतिष',
     items: [
-      { name: 'Astrologers & KYC', href: '/astrologers', icon: '🧘‍♂️', badge: 'Verify', badgeColor: 'bg-indigo-500 text-white' },
-      { name: 'Consultations & Chat', href: '/consultations', icon: '💬', badge: 'Shield', badgeColor: 'bg-red-500 text-white' },
+      {
+        nameEn: 'Pandits & Astrologers',
+        nameHi: 'पंडित एवं ज्योतिषी',
+        href: '/astrologers',
+        icon: '🧘‍♂️',
+        badgeEn: 'Verify',
+        badgeHi: 'सत्यापित',
+        badgeColor: 'bg-indigo-500 text-white',
+      },
+      {
+        nameEn: 'Consultations & Chat',
+        nameHi: 'परामर्श एवं संवाद',
+        href: '/consultations',
+        icon: '💬',
+        badgeEn: 'Live',
+        badgeHi: 'लाइव',
+        badgeColor: 'bg-emerald-500 text-white',
+      },
     ],
   },
   {
-    group: 'COMMERCE & LOGISTICS',
+    groupEn: 'COMMERCE & LOGISTICS',
+    groupHi: 'स्टोर एवं वितरण',
     items: [
-      { name: 'Spiritual Shop Items', href: '/products', icon: '🛍️' },
-      { name: 'Prasad & Order Dispatch', href: '/orders', icon: '📦' },
+      { nameEn: 'Spiritual Shop Items', nameHi: 'आध्यात्मिक स्टोर सामग्री', href: '/products', icon: '🛍️' },
+      { nameEn: 'Prasad & Order Dispatch', nameHi: 'प्रसाद एवं ऑर्डर वितरण', href: '/orders', icon: '📦' },
     ],
   },
   {
-    group: 'CONTENT & GOVERNANCE',
+    groupEn: 'CONTENT & GOVERNANCE',
+    groupHi: 'सामग्री एवं प्रशासन',
     items: [
-      { name: 'Devotee Registry', href: '/users', icon: '👥' },
-      { name: 'Sacred Certificates', href: '/certificates', icon: '📜' },
-      { name: 'FAQs Management', href: '/faqs', icon: '❓' },
-      { name: 'Platform Settings', href: '/settings', icon: '⚙️' },
+      { nameEn: 'Devotee Registry', nameHi: 'भक्त पंजिका', href: '/users', icon: '👥' },
+      { nameEn: 'Sacred Certificates', nameHi: 'सहभागिता प्रमाण पत्र', href: '/certificates', icon: '📜' },
+      { nameEn: 'FAQs Management', nameHi: 'प्रश्नोत्तरी प्रबंधन', href: '/faqs', icon: '❓' },
+      { nameEn: 'Platform Settings', nameHi: 'प्लेटफॉर्म सेटिंग्स', href: '/settings', icon: '⚙️' },
     ],
   },
 ];
@@ -62,6 +102,7 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ isMobile, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const { lockConsole } = useAdminAuth();
+  const { isHindi } = useAdminLanguage();
 
   const handleLinkClick = () => {
     if (isMobile && onClose) {
@@ -86,7 +127,7 @@ export default function AdminSidebar({ isMobile, onClose }: AdminSidebarProps) {
               MANDIRM
             </span>
             <span className="text-[10px] uppercase font-semibold text-amber-300/80 tracking-widest block">
-              Admin Sanctum
+              {isHindi ? 'प्रशासक गर्भगृह' : 'Admin Sanctum'}
             </span>
           </div>
         </Link>
@@ -103,34 +144,44 @@ export default function AdminSidebar({ isMobile, onClose }: AdminSidebarProps) {
         )}
       </div>
 
-      {/* Nav List */}
-      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-        {NAV_GROUPS.map((group) => (
-          <div key={group.group}>
-            <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-amber-300/50 uppercase">
-              {group.group}
-            </div>
-            <div className="space-y-1">
+      {/* Navigation Group List */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin scrollbar-thumb-amber-800/40">
+        {NAV_GROUPS.map((group, idx) => (
+          <div key={idx} className="space-y-1">
+            <h3 className="px-3 text-[11px] font-bold text-amber-300/60 uppercase tracking-widest">
+              {isHindi ? group.groupHi : group.groupEn}
+            </h3>
+            <div className="space-y-0.5 pt-1">
               {group.items.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                const isActive = pathname === item.href;
+                const label = isHindi ? item.nameHi : item.nameEn;
+                const badge = isHindi ? item.badgeHi : item.badgeEn;
+
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={handleLinkClick}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all min-h-[42px] ${
+                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                       isActive
-                        ? 'bg-amber-500/25 text-amber-300 font-semibold border border-amber-500/40 shadow-sm'
-                        : 'text-amber-100/75 hover:bg-white/5 hover:text-white active:bg-white/10'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-mandir-maroon-deep font-bold shadow-md shadow-amber-900/40 scale-[1.02]'
+                        : 'text-amber-100/80 hover:bg-white/10 hover:text-white'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-base">{item.icon}</span>
-                      <span>{item.name}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-base group-hover:scale-110 transition-transform">
+                        {item.icon}
+                      </span>
+                      <span>{label}</span>
                     </div>
-                    {item.badge && (
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.badgeColor || 'bg-amber-400 text-black'}`}>
-                        {item.badge}
+
+                    {badge && (
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          item.badgeColor || 'bg-amber-400 text-mandir-maroon'
+                        }`}
+                      >
+                        {badge}
                       </span>
                     )}
                   </Link>
@@ -141,35 +192,19 @@ export default function AdminSidebar({ isMobile, onClose }: AdminSidebarProps) {
         ))}
       </div>
 
-      {/* Passkey Security & Lock */}
-      <div className="px-3 pb-2 shrink-0">
+      {/* Footer Info */}
+      <div className="p-3 border-t border-white/10 bg-black/20 shrink-0 flex items-center justify-between text-[11px] text-amber-300/70">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>{isHindi ? 'सुपाबेस कनेक्टेड' : 'Supabase v2.4 Live'}</span>
+        </span>
         <button
-          onClick={() => {
-            if (isMobile && onClose) onClose();
-            lockConsole();
-          }}
-          className="w-full py-2.5 px-3 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-200 text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-          title="Lock Admin Console"
+          onClick={lockConsole}
+          className="hover:text-red-300 transition-colors font-semibold px-2 py-0.5 rounded bg-white/5 hover:bg-red-500/20"
         >
-          <span>🔒</span>
-          <span>Lock Sanctum (Passkey)</span>
+          {isHindi ? 'लॉगआउट' : 'Lock'}
         </button>
-      </div>
-
-      {/* Safety Compliance Footer */}
-      <div className="p-3 border-t border-white/10 bg-black/20 text-xs shrink-0">
-        <div className="flex items-center justify-between text-amber-200/80 mb-1">
-          <span className="flex items-center gap-1.5 text-[11px] font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Mandirm Engine Live
-          </span>
-          <span className="text-[10px] text-amber-300/60 font-mono">v1.2.0</span>
-        </div>
-        <p className="text-[10px] text-amber-200/50 leading-tight">
-          Protected with Trust & Safety Shield.
-        </p>
       </div>
     </aside>
   );
 }
-

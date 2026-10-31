@@ -13,7 +13,7 @@ cd /d "%~dp0consumer_website"
 git status --short
 echo [*] Staging and committing changes...
 git add .
-git commit -m "fix(build): resolve Razorpay payment types in chadhawa, remove WhatsApp video references, and link all tap-to-detail pages"
+git commit -m "fix(build): resolve Astrologer metadata typing in extractMetadata and sanitizeAstrologer"
 echo [*] Pushing to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (

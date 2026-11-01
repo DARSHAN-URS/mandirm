@@ -13,7 +13,7 @@ cd /d "%~dp0consumer_website"
 git status --short
 echo [*] Staging and committing changes...
 git add .
-git commit -m "feat: add dedicated emails (booking, store, astro, helpline) across all pages"
+git commit -m "fix: temple hindi-english localization, image fallback for admin-added temples, and direct temple detail routing"
 echo [*] Pushing to origin main...
 git push origin main
 if %ERRORLEVEL% NEQ 0 (

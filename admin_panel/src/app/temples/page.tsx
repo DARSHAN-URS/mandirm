@@ -226,29 +226,61 @@ export default function TemplesPage() {
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    const nameTrim = formData.name.trim();
+    const deityTrim = formData.deity.trim();
+    const cityTrim = formData.city.trim();
+    const stateTrim = formData.state.trim();
+    const descTrim = formData.description.trim();
+
+    // Auto-derive Hindi translations if left blank
+    const nameHi = formData.name_hi.trim() || autoTranslateText(nameTrim);
+    const deityHi = formData.deity_hi.trim() || autoTranslateText(deityTrim);
+    const cityHi = formData.city_hi.trim() || autoTranslateText(cityTrim);
+    const stateHi = formData.state_hi.trim() || autoTranslateText(stateTrim);
+    const descHi = formData.description_hi.trim() || autoTranslateText(descTrim);
+    const historyHi = formData.history_hi.trim() || (formData.history ? autoTranslateText(formData.history.trim()) : undefined);
+    const sigHi = formData.significance_hi.trim() || (formData.significance ? autoTranslateText(formData.significance.trim()) : undefined);
+
+    // Sanitize image URL so broken local paths never break the UI
+    let safeImageUrl = formData.image_url.trim();
+    if (!safeImageUrl || safeImageUrl.includes('fakepath') || safeImageUrl.startsWith('C:\\') || safeImageUrl.startsWith('D:\\')) {
+      const d = (deityTrim + ' ' + nameTrim).toLowerCase();
+      if (d.includes('baglamukhi') || d.includes('devi') || d.includes('durga') || d.includes('mata')) {
+        safeImageUrl = '/images/temples/vaishno_devi.jpg';
+      } else {
+        safeImageUrl = '/images/temples/kashi_vishwanath.jpg';
+      }
+    }
+
+    const safeFaqs = formData.faqs.map(f => ({
+      ...f,
+      question_hi: f.question_hi?.trim() || autoTranslateText(f.question),
+      answer_hi: f.answer_hi?.trim() || autoTranslateText(f.answer),
+    }));
+
     const payload = {
       ...(selectedTemple ? { id: selectedTemple.id } : { id: `temple_${Date.now()}` }),
-      name: formData.name.trim(),
-      name_hi: formData.name_hi.trim() || undefined,
-      deity: formData.deity.trim(),
-      deity_hi: formData.deity_hi.trim() || undefined,
-      city: formData.city.trim(),
-      city_hi: formData.city_hi.trim() || undefined,
-      state: formData.state.trim(),
-      state_hi: formData.state_hi.trim() || undefined,
-      address: formData.address.trim() || `${formData.city.trim()}, ${formData.state.trim()}`,
-      description: formData.description.trim(),
-      description_hi: formData.description_hi.trim() || undefined,
+      name: nameTrim,
+      name_hi: nameHi || undefined,
+      deity: deityTrim,
+      deity_hi: deityHi || undefined,
+      city: cityTrim,
+      city_hi: cityHi || undefined,
+      state: stateTrim,
+      state_hi: stateHi || undefined,
+      address: formData.address.trim() || `${cityTrim}, ${stateTrim}`,
+      description: descTrim,
+      description_hi: descHi || undefined,
       history: formData.history.trim() || undefined,
-      history_hi: formData.history_hi.trim() || undefined,
+      history_hi: historyHi || undefined,
       significance: formData.significance.trim() || undefined,
-      significance_hi: formData.significance_hi.trim() || undefined,
-      image_url: formData.image_url.trim(),
+      significance_hi: sigHi || undefined,
+      image_url: safeImageUrl,
       live_darshan_url: formData.live_darshan_url.trim() || null,
       darshan_timings: formData.darshan_timings.trim(),
       aarti_timings: formData.aarti_timings.trim(),
       is_featured: formData.is_featured,
-      faqs: formData.faqs,
+      faqs: safeFaqs,
     };
 
     try {

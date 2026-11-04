@@ -155,11 +155,20 @@ class AppImage extends StatelessWidget {
 
   String? _resolveUrl() {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return imageUrl;
+      if (imageUrl!.startsWith('http://') || imageUrl!.startsWith('https://')) {
+        return imageUrl;
+      }
+      if (imageUrl!.startsWith('/')) {
+        return '${AppConstants.cdnBaseUrl}$imageUrl';
+      }
+      return AppConstants.cdnUrl(imageUrl!);
     }
     if (assetPath != null && assetPath!.isNotEmpty) {
       if (assetPath!.startsWith('http://') || assetPath!.startsWith('https://')) {
         return assetPath;
+      }
+      if (assetPath!.startsWith('/')) {
+        return '${AppConstants.cdnBaseUrl}$assetPath';
       }
       return AppConstants.cdnUrl(assetPath!);
     }

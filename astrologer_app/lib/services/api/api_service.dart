@@ -181,7 +181,7 @@ class ApiService {
   // ASTROLOGER PROFILE & AVAILABILITY
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /// Fetches all astrologers from live Supabase
+  /// Fetches all astrologers from live Supabase (strictly verified human Vedic astrologers)
   Future<List<AstrologerProfile>> getAstrologers() async {
     // 1. Live Supabase database
     if (_supabase != null) {
@@ -190,6 +190,7 @@ class ApiService {
         if (rows.isNotEmpty) {
           return rows
               .map((item) => AstrologerProfile.fromJson(Map<String, dynamic>.from(item)))
+              .where((a) => !a.id.startsWith('astro_ai_') && !a.name.toLowerCase().contains('ai '))
               .toList();
         }
       } catch (err) {
@@ -204,6 +205,7 @@ class ApiService {
       if (data is Map && data['data'] is List) {
         return (data['data'] as List)
             .map((item) => AstrologerProfile.fromJson(Map<String, dynamic>.from(item as Map)))
+            .where((a) => !a.id.startsWith('astro_ai_') && !a.name.toLowerCase().contains('ai '))
             .toList();
       }
     } catch (_) {}

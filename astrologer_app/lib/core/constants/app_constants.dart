@@ -47,6 +47,10 @@ class AppConstants {
     return '$cdnBaseUrl/$normalized';
   }
 
+  // Support & Helpline Emails
+  static const String supportEmailAstro = 'astro@mandirm.in';
+  static const String supportEmailHelpline = 'helpline@mandirm.in';
+
   // Asset paths matching consumer app exactly
   static const String logoAsset = 'assets/images/inner_logo.jpg';
   static const String flameLogoAsset = 'assets/images/mandirm_flame_logo.png';

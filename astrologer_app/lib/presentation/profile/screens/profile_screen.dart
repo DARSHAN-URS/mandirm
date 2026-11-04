@@ -160,7 +160,9 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                   ),
                                   child: ClipOval(
                                     child: AppImage.network(
-                                      AppConstants.cdnUrl(AppConstants.astroRajeshAsset),
+                                      (_profile?.avatarUrl != null && _profile!.avatarUrl!.isNotEmpty)
+                                          ? _profile!.avatarUrl!
+                                          : AppConstants.cdnUrl(AppConstants.astroRajeshAsset),
                                       fallbackAsset: AppConstants.logoAsset,
                                       width: 70,
                                       height: 70,
@@ -198,8 +200,9 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          _profile?.name ?? (LocaleService().isHindi ? 'पं. रामचन्द्र शास्त्री' : 'Pt. Ramachandra Shastri'),
-                                          style: TextStyle(fontFamily: 'Headway', 
+                                          _profile?.name ?? (AuthService().currentProfile?.name ?? (LocaleService().isHindi ? 'आचार्य' : 'Acharya')),
+                                          style: const TextStyle(
+                                            fontFamily: 'Headway', 
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
                                             color: AppColors.textPrimary,
@@ -465,9 +468,11 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
 
                   // Mandirm Partner Trust Badge
                   _buildTrustBadge(),
+                  const SizedBox(height: 16),
+
+                  // Acharya Support & Helpline Desk
+                  _buildSupportCard(),
                   const SizedBox(height: 24),
-
-
 
                   // Sign Out Button
                   SizedBox(
@@ -483,7 +488,8 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             title: Text(
                               isHi ? 'आचार्य पोर्टल से लॉग आउट करें?' : 'Sign Out of Acharya Portal?',
-                              style: TextStyle(fontFamily: 'Headway', 
+                              style: const TextStyle(
+                                fontFamily: 'Headway', 
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -657,9 +663,10 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Ashram & Vedic Certifications',
-              style: TextStyle(fontFamily: 'Headway', 
+              style: TextStyle(
+                fontFamily: 'Headway', 
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -746,6 +753,98 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
     );
   }
 
+  Widget _buildSupportCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.warmCream,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.marigoldGold.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.support_agent_rounded,
+                  color: AppColors.primaryMaroon,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Acharya Support & Verification Desk',
+                      style: TextStyle(
+                        fontFamily: 'Headway',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'For document verification, KYC, or payout assistance',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: AppColors.lightBorder, height: 1),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.support_agent_rounded, size: 14, color: AppColors.deepAmber),
+                  const SizedBox(width: 6),
+                  Text(
+                    'astro@mandirm.in',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryMaroon,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.help_outline, size: 14, color: AppColors.deepAmber),
+                  const SizedBox(width: 6),
+                  Text(
+                    'helpline@mandirm.in',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryMaroon,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTrustBadge() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -775,9 +874,10 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Mandirm Verified Acharya Seal',
-                  style: TextStyle(fontFamily: 'Headway', 
+                  style: TextStyle(
+                    fontFamily: 'Headway', 
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,

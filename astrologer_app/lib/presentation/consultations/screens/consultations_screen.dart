@@ -266,6 +266,15 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                   const SizedBox(height: 6),
                   Text(
                     'Your status is active. Incoming calls will alert here.',
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Astrologer Helpline: ${AppConstants.supportEmailAstro} • ${AppConstants.supportEmailHelpline}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryMaroon,
+                    ),
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: AppColors.textSecondary,
@@ -591,7 +600,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
   Widget _buildUpcomingBookingsView() {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _serviceBookings.length + 1,
+      itemCount: _serviceBookings.isEmpty ? 2 : _serviceBookings.length + 1,
       itemBuilder: (context, i) {
         if (i == 0) {
           return Container(
@@ -651,6 +660,56 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (_serviceBookings.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.lightBorder),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.event_note_outlined,
+                    size: 44,
+                    color: AppColors.deepAmber,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'No Special Service Requests Yet',
+                    style: TextStyle(
+                      fontFamily: 'Headway',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Devotee requests for Kundli preparation and remedial services will appear here.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Helpline: ${AppConstants.supportEmailAstro} • ${AppConstants.supportEmailHelpline}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryMaroon,
                     ),
                   ),
                 ],

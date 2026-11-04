@@ -226,6 +226,8 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
 
                   // 4. Recent Devotee Consultations & Reviews (Consultation History)
                   _buildHistorySection(),
+                  const SizedBox(height: 20),
+                  _buildSupportCard(),
                   const SizedBox(height: 28),
                 ],
               ),
@@ -267,7 +269,9 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     ),
                     child: ClipOval(
                       child: AppImage.network(
-                        AppConstants.cdnUrl(AppConstants.astroRajeshAsset),
+                        (_profile?.avatarUrl != null && _profile!.avatarUrl!.isNotEmpty)
+                            ? _profile!.avatarUrl!
+                            : AppConstants.cdnUrl(AppConstants.astroRajeshAsset),
                         fallbackAsset: AppConstants.logoAsset,
                         width: 58,
                         height: 58,
@@ -296,7 +300,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _profile?.name ?? (isHi ? 'पं. रामचन्द्र शास्त्री' : 'Pt. Ramachandra Shastri'),
+                      _profile?.name ?? (AuthService().currentProfile?.name ?? (isHi ? 'आचार्य' : 'Acharya')),
                       style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -332,7 +336,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                     const Icon(Icons.star_rounded, color: AppColors.marigoldGold, size: 16),
                     const SizedBox(width: 4),
                     Text(
-                      '4.92',
+                      (_profile?.rating ?? 4.95).toStringAsFixed(1),
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -531,7 +535,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   ),
                   _buildMetric(
                     isHi ? 'कॉल दर' : 'Call Rate',
-                    '₹35 / ${isHi ? 'मिनट' : 'min'}',
+                    '₹${(_profile?.perMinuteCallRate ?? 35).toStringAsFixed(0)} / ${isHi ? 'मिनट' : 'min'}',
                     Icons.call_outlined,
                   ),
                 ],
@@ -954,6 +958,100 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+  Widget _buildSupportCard() {
+    final isHi = LocaleService().isHindi;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.warmCream,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.marigoldGold.withOpacity(0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.support_agent_rounded,
+                  color: AppColors.primaryMaroon,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isHi ? 'आचार्य सहायता व सहयोग' : 'Astrologer Support & Helpline',
+                      style: const TextStyle(
+                        fontFamily: 'Headway',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      isHi ? 'किसी भी प्रश्न या भुगतान सहायता के लिए संपर्क करें' : 'For consultation queries, onboarding & payout assistance',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: AppColors.lightBorder, height: 1),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.email_outlined, size: 14, color: AppColors.deepAmber),
+                  const SizedBox(width: 6),
+                  Text(
+                    'astro@mandirm.in',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryMaroon,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.help_outline, size: 14, color: AppColors.deepAmber),
+                  const SizedBox(width: 6),
+                  Text(
+                    'helpline@mandirm.in',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryMaroon,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );

@@ -242,7 +242,9 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
                           ),
                           child: ClipOval(
                             child: AppImage.network(
-                              AppConstants.cdnUrl(AppConstants.astroRajeshAsset),
+                              (widget.profile.avatarUrl != null && widget.profile.avatarUrl!.isNotEmpty)
+                                  ? widget.profile.avatarUrl!
+                                  : AppConstants.cdnUrl(AppConstants.astroRajeshAsset),
                               fallbackAsset: AppConstants.logoAsset,
                               width: 88,
                               height: 88,

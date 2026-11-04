@@ -502,6 +502,20 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                   const SizedBox(width: 6),
                                   Text(
                                     'Encrypted Acharya verification via Supabase Auth',
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Center(
+                              child: Text(
+                                'Acharya Support: ${AppConstants.supportEmailAstro} • ${AppConstants.supportEmailHelpline}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primaryMaroon,
+                                ),
+                              ),
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: AppColors.textMuted,

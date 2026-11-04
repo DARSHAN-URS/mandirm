@@ -401,11 +401,11 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildTypeCard('Video Calls', '₹11,400', '60%', Icons.videocam, AppColors.primaryMaroon)),
+                      Expanded(child: _buildTypeCard('Video Calls', '₹${(_pendingSettlement * 0.55).toStringAsFixed(0)}', _pendingSettlement > 0 ? '55%' : '0%', Icons.videocam, AppColors.primaryMaroon)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildTypeCard('Voice Calls', '₹5,100', '28%', Icons.phone, AppColors.deepAmber)),
+                      Expanded(child: _buildTypeCard('Voice Calls', '₹${(_pendingSettlement * 0.35).toStringAsFixed(0)}', _pendingSettlement > 0 ? '35%' : '0%', Icons.phone, AppColors.deepAmber)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildTypeCard('Vedic Chat', '₹2,250', '12%', Icons.chat, AppColors.statusOnline)),
+                      Expanded(child: _buildTypeCard('Vedic Chat', '₹${(_pendingSettlement * 0.10).toStringAsFixed(0)}', _pendingSettlement > 0 ? '10%' : '0%', Icons.chat, AppColors.statusOnline)),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -472,6 +472,98 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
           const SizedBox(height: 8),
           Text(amount, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           Text(title, style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textSecondary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEarningsSupportCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.warmCream,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.marigoldGold.withOpacity(0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.receipt_long_rounded,
+                  color: AppColors.primaryMaroon,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Acharya Payout & Banking Help',
+                      style: const TextStyle(
+                        fontFamily: 'Headway',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Instant bank settlements, TDS inquiries & payout support',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: AppColors.lightBorder, height: 1),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.email_outlined, size: 14, color: AppColors.deepAmber),
+                  const SizedBox(width: 6),
+                  Text(
+                    'astro@mandirm.in',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryMaroon,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.help_outline, size: 14, color: AppColors.deepAmber),
+                  const SizedBox(width: 6),
+                  Text(
+                    'helpline@mandirm.in',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryMaroon,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );

@@ -71,7 +71,6 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
                   icon: Icons.headset_mic_outlined,
                   activeIcon: Icons.headset_mic_rounded,
                   label: AstroStrings.t('nav_requests'),
-                  badgeCount: 3, // Live devotees waiting in queue
                 ),
                 _buildNavItem(
                   index: 2,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class AstrologerProfile {
   final String id;
   final String name;
@@ -47,30 +49,76 @@ class AstrologerProfile {
     this.createdAt,
   });
 
-  factory AstrologerProfile.fromJson(Map<String, dynamic> json) {
+  factory AstrologerProfile.fromJson(Map<String, dynamic> rawJson) {
+    final json = Map<String, dynamic>.from(rawJson);
+    String? rawBio = json['bio']?.toString() ?? json['description']?.toString();
+    if (rawBio != null && rawBio.contains('---METADATA---')) {
+      final parts = rawBio.split('---METADATA---');
+      rawBio = parts[0].trim();
+      try {
+        final metaStr = parts[1].trim();
+        final metaJson = jsonDecode(metaStr);
+        if (metaJson is Map) {
+          json.addAll(Map<String, dynamic>.from(metaJson));
+        }
+      } catch (_) {}
+    }
+
+    // Parse specialities if List or String
+    String specialitiesStr = 'Vedic Astrology';
+    if (json['specialities'] != null) {
+      if (json['specialities'] is List) {
+        specialitiesStr = (json['specialities'] as List).join(', ');
+      } else {
+        specialitiesStr = json['specialities'].toString();
+      }
+    } else if (json['specialties'] != null) {
+      if (json['specialties'] is List) {
+        specialitiesStr = (json['specialties'] as List).join(', ');
+      } else {
+        specialitiesStr = json['specialties'].toString();
+      }
+    }
+
+    // Parse languages if List or String
+    String languagesStr = 'Hindi, English';
+    if (json['languages'] != null) {
+      if (json['languages'] is List) {
+        languagesStr = (json['languages'] as List).join(', ');
+      } else {
+        languagesStr = json['languages'].toString();
+      }
+    }
+
     return AstrologerProfile(
       id: (json['id'] ?? json['sub'] ?? '').toString(),
       name: (json['name'] ?? json['full_name'] ?? 'Acharya').toString(),
       email: json['email']?.toString(),
       phone: json['phone']?.toString(),
       role: (json['role'] ?? 'astrologer').toString(),
-      avatarUrl: json['avatar_url']?.toString(),
+      avatarUrl: json['avatar_url']?.toString() ?? json['image_url']?.toString(),
       title: json['title']?.toString() ?? 'Vedic Astrologer',
-      bio: json['bio']?.toString(),
+      bio: rawBio,
       experienceYears: json['experience_years'] is num
           ? (json['experience_years'] as num).toInt()
           : int.tryParse(json['experience_years']?.toString() ?? '5') ?? 5,
       perMinuteChatRate: (json['per_minute_chat_rate'] is num)
           ? (json['per_minute_chat_rate'] as num).toDouble()
-          : 25.0,
+          : (json['chat_price'] is num
+              ? (json['chat_price'] as num).toDouble()
+              : double.tryParse(json['chat_price']?.toString() ?? '25.0') ?? 25.0),
       perMinuteCallRate: (json['per_minute_call_rate'] is num)
           ? (json['per_minute_call_rate'] as num).toDouble()
-          : 35.0,
+          : (json['call_price'] is num
+              ? (json['call_price'] as num).toDouble()
+              : double.tryParse(json['call_price']?.toString() ?? '35.0') ?? 35.0),
       perMinuteVideoRate: (json['per_minute_video_rate'] is num)
           ? (json['per_minute_video_rate'] as num).toDouble()
-          : 45.0,
-      specialities: json['specialities']?.toString() ?? 'Vedic Astrology',
-      languages: json['languages']?.toString() ?? 'Hindi, English',
+          : (json['video_price'] is num
+              ? (json['video_price'] as num).toDouble()
+              : double.tryParse(json['video_price']?.toString() ?? '45.0') ?? 45.0),
+      specialities: specialitiesStr,
+      languages: languagesStr,
       rating: (json['rating'] is num) ? (json['rating'] as num).toDouble() : 5.0,
       consultationsCount: json['consultations_count'] is num
           ? (json['consultations_count'] as num).toInt()

@@ -182,7 +182,7 @@ class _PujasScreenState extends State<PujasScreen> {
             ),
           ),
 
-          // 2. Title & Subtitle ("Online Puja")
+          // 2. Title & Subtitle ("Online Puja") + Booking Helpline Pill
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -191,10 +191,10 @@ class _PujasScreenState extends State<PujasScreen> {
                 children: [
                   Text(
                     LocaleService().isHindi ? 'ऑनलाइन पूजा' : 'Online Puja',
-                    style: TextStyle(fontFamily: 'Headway', 
+                    style: const TextStyle(fontFamily: 'Headway', 
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF4A1005),
+                      color: Color(0xFF4A1005),
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -207,6 +207,31 @@ class _PujasScreenState extends State<PujasScreen> {
                       fontSize: 12.5,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF5A4E46),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Booking Helpline Pill (booking@mandirm.in)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF9ED),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFFFD54F)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.mail_outline_rounded, size: 14, color: Color(0xFF7A0C16)),
+                        const SizedBox(width: 5),
+                        Text(
+                          LocaleService().isHindi ? 'पूजा सहायता: ' : 'Puja Booking Support: ',
+                          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF5A1408)),
+                        ),
+                        Text(
+                          'booking@mandirm.in',
+                          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF7A0C16)),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -301,12 +326,12 @@ class _PujasScreenState extends State<PujasScreen> {
                   children: [
                     const Text('🔥', style: TextStyle(fontSize: 44)),
                     const SizedBox(height: 10),
-                    Text(
+                    const Text(
                       'No Pujas in this Category',
                       style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF4A1005),
+                        color: Color(0xFF4A1005),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -697,4 +722,3 @@ class _PujasScreenState extends State<PujasScreen> {
     );
   }
 }
-

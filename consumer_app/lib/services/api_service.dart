@@ -81,6 +81,34 @@ class ApiService {
     await prefs.remove(AppConstants.keyUserToken);
   }
 
+  /// Extracts embedded JSON metadata from HTML comments like `<!-- METADATA: {...} -->`
+  /// and merges all localized Hindi & rich shastric fields into the data map.
+  static Map<String, dynamic> extractMetadata(Map<String, dynamic> raw) {
+    final item = Map<String, dynamic>.from(raw);
+    final desc = (item['description'] ?? item['bio'] ?? '').toString();
+    final metaMatch = RegExp(r'<!--\s*METADATA:\s*([\s\S]*?)\s*-->').firstMatch(desc);
+    if (metaMatch != null) {
+      try {
+        final jsonStr = metaMatch.group(1);
+        if (jsonStr != null && jsonStr.isNotEmpty) {
+          final parsed = Map<String, dynamic>.from(jsonDecode(jsonStr) as Map);
+          final cleanDesc = desc.replaceFirst(metaMatch.group(0)!, '').trim();
+          if (item.containsKey('description')) {
+            item['description'] = cleanDesc;
+          } else if (item.containsKey('bio')) {
+            item['bio'] = cleanDesc;
+          }
+          parsed.forEach((k, v) {
+            if (v != null && (!item.containsKey(k) || item[k] == null || item[k].toString().isEmpty)) {
+              item[k] = v;
+            }
+          });
+        }
+      } catch (_) {}
+    }
+    return item;
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // TEMPLES
   // ─────────────────────────────────────────────────────────────────────────────
@@ -101,7 +129,7 @@ class ApiService {
         if (featuredOnly) query = query.eq('is_featured', true);
         final rows = await query.limit(limit);
         if (rows.isNotEmpty) {
-          final list = List<Map<String, dynamic>>.from(rows);
+          final list = List<Map<String, dynamic>>.from(rows.map((r) => extractMetadata(Map<String, dynamic>.from(r))));
           if (search != null && search.trim().isNotEmpty) {
             final q = search.trim().toLowerCase();
             return list.where((t) {
@@ -132,7 +160,8 @@ class ApiService {
       );
       final data = response.data;
       if (data is Map && data['data'] is List) {
-        return List<Map<String, dynamic>>.from(data['data'] as List);
+        final rawList = List<Map<String, dynamic>>.from(data['data'] as List);
+        return rawList.map((r) => extractMetadata(r)).toList();
       }
     } catch (_) {}
     return [];
@@ -146,7 +175,7 @@ class ApiService {
             .select()
             .eq('id', templeId)
             .maybeSingle();
-        if (row != null) return Map<String, dynamic>.from(row);
+        if (row != null) return extractMetadata(Map<String, dynamic>.from(row));
       } catch (e) {
         debugPrint('[ApiService] Supabase getTempleDetails notice: $e');
       }
@@ -154,10 +183,11 @@ class ApiService {
 
     try {
       final response = await _dio.get('/temples/$templeId');
-      return Map<String, dynamic>.from(response.data as Map);
-    } catch (_) {
-      return null;
-    }
+      if (response.data is Map) {
+        return extractMetadata(Map<String, dynamic>.from(response.data as Map));
+      }
+    } catch (_) {}
+    return null;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -184,7 +214,7 @@ class ApiService {
         if (popularOnly) query = query.eq('is_popular', true);
         final rows = await query.limit(limit);
         if (rows.isNotEmpty) {
-          final list = List<Map<String, dynamic>>.from(rows);
+          final list = List<Map<String, dynamic>>.from(rows.map((r) => extractMetadata(Map<String, dynamic>.from(r))));
           if (search != null && search.trim().isNotEmpty) {
             final q = search.trim().toLowerCase();
             return list.where((p) {
@@ -216,7 +246,8 @@ class ApiService {
       );
       final data = response.data;
       if (data is Map && data['data'] is List) {
-        return List<Map<String, dynamic>>.from(data['data'] as List);
+        final rawList = List<Map<String, dynamic>>.from(data['data'] as List);
+        return rawList.map((r) => extractMetadata(r)).toList();
       }
     } catch (_) {}
     return [];
@@ -230,7 +261,7 @@ class ApiService {
             .select()
             .eq('id', pujaId)
             .maybeSingle();
-        if (row != null) return Map<String, dynamic>.from(row);
+        if (row != null) return extractMetadata(Map<String, dynamic>.from(row));
       } catch (e) {
         debugPrint('[ApiService] Supabase getPujaDetails notice: $e');
       }
@@ -238,10 +269,11 @@ class ApiService {
 
     try {
       final response = await _dio.get('/puja/$pujaId');
-      return Map<String, dynamic>.from(response.data as Map);
-    } catch (_) {
-      return null;
-    }
+      if (response.data is Map) {
+        return extractMetadata(Map<String, dynamic>.from(response.data as Map));
+      }
+    } catch (_) {}
+    return null;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -262,7 +294,14 @@ class ApiService {
         if (onlineOnly) query = query.eq('is_online', true);
         final rows = await query.limit(limit);
         if (rows.isNotEmpty) {
-          final list = List<Map<String, dynamic>>.from(rows);
+          final list = List<Map<String, dynamic>>.from(rows.map((r) => extractMetadata(Map<String, dynamic>.from(r))));
+          // Strictly filter out any AI astrologers to match website context 100%
+          list.removeWhere((a) =>
+              a['is_ai'] == true ||
+              a['is_ai'] == 1 ||
+              a['isAi'] == true ||
+              (a['id']?.toString().startsWith('astro_ai_') ?? false) ||
+              a['id'] == 'ast_ai_jyotish');
           if (sortBy == 'rating') {
             list.sort((a, b) => ((b['rating'] as num?) ?? 0)
                 .compareTo((a['rating'] as num?) ?? 0));
@@ -294,7 +333,15 @@ class ApiService {
       );
       final data = response.data;
       if (data is Map && data['data'] is List) {
-        return List<Map<String, dynamic>>.from(data['data'] as List);
+        final rawList = List<Map<String, dynamic>>.from(data['data'] as List);
+        final list = rawList.map((r) => extractMetadata(r)).toList();
+        list.removeWhere((a) =>
+            a['is_ai'] == true ||
+            a['is_ai'] == 1 ||
+            a['isAi'] == true ||
+            (a['id']?.toString().startsWith('astro_ai_') ?? false) ||
+            a['id'] == 'ast_ai_jyotish');
+        return list;
       }
     } catch (_) {}
     return [];
@@ -308,7 +355,7 @@ class ApiService {
             .select()
             .eq('id', astrologerId)
             .maybeSingle();
-        if (row != null) return Map<String, dynamic>.from(row);
+        if (row != null) return extractMetadata(Map<String, dynamic>.from(row));
       } catch (e) {
         debugPrint('[ApiService] Supabase getAstrologerDetails notice: $e');
       }
@@ -316,10 +363,11 @@ class ApiService {
 
     try {
       final response = await _dio.get('/astrologers/$astrologerId');
-      return Map<String, dynamic>.from(response.data as Map);
-    } catch (_) {
-      return null;
-    }
+      if (response.data is Map) {
+        return extractMetadata(Map<String, dynamic>.from(response.data as Map));
+      }
+    } catch (_) {}
+    return null;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -607,7 +655,7 @@ class ApiService {
         if (featuredOnly) query = query.eq('is_featured', true);
         final rows = await query.limit(limit);
         if (rows.isNotEmpty) {
-          final list = List<Map<String, dynamic>>.from(rows);
+          final list = List<Map<String, dynamic>>.from(rows.map((r) => extractMetadata(Map<String, dynamic>.from(r))));
           if (search != null && search.trim().isNotEmpty) {
             final q = search.trim().toLowerCase();
             return list.where((p) {
@@ -635,7 +683,8 @@ class ApiService {
       );
       final data = response.data;
       if (data is Map && data['data'] is List) {
-        return List<Map<String, dynamic>>.from(data['data'] as List);
+        final rawList = List<Map<String, dynamic>>.from(data['data'] as List);
+        return rawList.map((r) => extractMetadata(r)).toList();
       }
     } catch (_) {}
     return [];
@@ -708,7 +757,7 @@ class ApiService {
         if (templeId != null && templeId.isNotEmpty) query = query.eq('temple_id', templeId);
         final rows = await query.limit(limit);
         if (rows.isNotEmpty) {
-          return List<Map<String, dynamic>>.from(rows);
+          return List<Map<String, dynamic>>.from(rows.map((r) => extractMetadata(Map<String, dynamic>.from(r))));
         }
       } catch (e) {
         debugPrint('[ApiService] Supabase getChadhawaOfferings notice: $e');
@@ -726,7 +775,8 @@ class ApiService {
       );
       final data = response.data;
       if (data is Map && data['data'] is List) {
-        return List<Map<String, dynamic>>.from(data['data'] as List);
+        final rawList = List<Map<String, dynamic>>.from(data['data'] as List);
+        return rawList.map((r) => extractMetadata(r)).toList();
       }
     } catch (_) {}
     return [];

@@ -20,14 +20,15 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
     {'title': 'Tirupati Balaji Mandir', 'subtitle': 'Tirumala • Lord Venkateswara', 'type': 'Mandir', 'icon': '🪷', 'tab': 1},
     {'title': 'Siddhivinayak Mandir', 'subtitle': 'Mumbai • Lord Ganesha', 'type': 'Mandir', 'icon': '🐘', 'tab': 1},
     {'title': 'Maa Vaishno Devi Shrine', 'subtitle': 'Katra • Pindi Darshan', 'type': 'Mandir', 'icon': '🌸', 'tab': 1},
-    {'title': 'Maha Rudrabhishek with 108 Bilva Patra', 'subtitle': '₹1,100 • Kashi Vishwanath', 'type': 'Puja', 'icon': '🔥', 'tab': 2},
-    {'title': 'Navchandi Shatru & Graha Shanti Homa', 'subtitle': '₹2,501 • Kamakhya Devi', 'type': 'Puja', 'icon': '🔥', 'tab': 2},
-    {'title': 'Kaal Sarp & Rahu-Ketu Shanti Puja', 'subtitle': '₹3,100 • Mahakaleshwar', 'type': 'Puja', 'icon': '🔥', 'tab': 2},
-    {'title': 'Mahamrityunjaya 1.25 Lakh Japa', 'subtitle': '₹5,100 • Kedarnath Dham', 'type': 'Puja', 'icon': '🔥', 'tab': 2},
-    {'title': 'Acharya AI Jyotish (24/7)', 'subtitle': 'Instant Vedic Kundli & Dosha Chatbot • Free', 'type': 'AI Astrologer', 'icon': '🔮', 'tab': 2, 'filter': 'AI Jyotish'},
-    {'title': 'Pt. Devendra Shastri', 'subtitle': 'Vedic • Kundali • Vastu • ₹25/min', 'type': 'Astrologer', 'icon': '🧘‍♂️', 'tab': 2},
-    {'title': 'Acharya Radheshyam', 'subtitle': 'Prashna Kundali • Career • ₹20/min', 'type': 'Astrologer', 'icon': '🔮', 'tab': 2},
-    {'title': 'Dr. Gayatri Devi', 'subtitle': 'Numerology • Gemology • ₹30/min', 'type': 'Astrologer', 'icon': '🪷', 'tab': 2},
+    {'title': 'Maha Rudrabhishek with 108 Bilva Patra', 'subtitle': '₹1,100 • Kashi Vishwanath', 'type': 'Puja', 'icon': '🔥', 'tab': 1},
+    {'title': 'Navchandi Shatru & Graha Shanti Homa', 'subtitle': '₹2,501 • Kamakhya Devi', 'type': 'Puja', 'icon': '🔥', 'tab': 1},
+    {'title': 'Kaal Sarp & Rahu-Ketu Shanti Puja', 'subtitle': '₹3,100 • Mahakaleshwar', 'type': 'Puja', 'icon': '🔥', 'tab': 1},
+    {'title': 'Mahamrityunjaya 1.25 Lakh Japa', 'subtitle': '₹5,100 • Kedarnath Dham', 'type': 'Puja', 'icon': '🔥', 'tab': 1},
+    {'title': 'Pt. Deepak Sharma', 'subtitle': 'Vedic Astrology • Kundli Matching • ₹25/min', 'type': 'Astrologer', 'icon': '🧘‍♂️', 'tab': 2},
+    {'title': 'Dr. Radhika Vashishta', 'subtitle': 'Career & Marriage Guidance • Numerology • ₹35/min', 'type': 'Astrologer', 'icon': '🪷', 'tab': 2},
+    {'title': 'Pt. Brijesh Narayan', 'subtitle': 'Vastu Shastra • Prashna Kundli • ₹30/min', 'type': 'Astrologer', 'icon': '🔮', 'tab': 2},
+    {'title': 'Smt. Ananya Mukherjee', 'subtitle': 'Tarot Reading • Vedic Remedies • ₹22/min', 'type': 'Astrologer', 'icon': '✨', 'tab': 2},
+    {'title': 'Swami Devanand Saraswati', 'subtitle': 'Vedic Jyotish • Graha Shanti • ₹40/min', 'type': 'Astrologer', 'icon': '🕉️', 'tab': 2},
   ];
 
   @override
@@ -86,7 +87,7 @@ class _GlobalSearchDialogState extends State<GlobalSearchDialog> {
               child: results.isEmpty
                   ? Center(
                       child: Text(
-                        'No matching Mandirs or Pujas found',
+                        'No matching Mandirs, Pujas or Astrologers found',
                         style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
                       ),
                     )

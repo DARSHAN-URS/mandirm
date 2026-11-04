@@ -79,13 +79,13 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
     );
   }
 
-  void _openCallDialog() {
+  void _openCallDialog() { /*
     final isAi = _astro['isAi'] == true ||
         _astro['is_ai'] == 1 ||
         _astro['is_ai'] == true ||
         _astro['id']?.toString().startsWith('astro_ai_') == true ||
         _astro['id'] == 'ast_ai_jyotish';
-    if (isAi) {
+*/ if (false) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Audio and video calls are only for verified live Acharyas registered via the Astrologer App or Admin.'),
@@ -284,14 +284,14 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
           ],
         ),
         child: Builder(
-          builder: (context) {
+          builder: (context) { /*
             final isAi = astro['isAi'] == true ||
                 astro['is_ai'] == 1 ||
                 astro['is_ai'] == true ||
                 astro['id']?.toString().startsWith('astro_ai_') == true ||
                 astro['id'] == 'ast_ai_jyotish';
 
-            if (isAi) {
+        */ if (false) {
               return SizedBox(
                 height: 48,
                 child: ElevatedButton(

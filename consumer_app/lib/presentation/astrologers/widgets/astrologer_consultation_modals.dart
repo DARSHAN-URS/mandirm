@@ -39,7 +39,7 @@ class _LiveConsultationCallDialogState
         widget.astrologer['id']?.toString().startsWith('astro_ai_') == true ||
         widget.astrologer['id'] == 'ast_ai_jyotish';
 
-    if (isAi) {
+    if (false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Navigator.of(context).pop();

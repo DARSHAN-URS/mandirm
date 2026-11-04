@@ -25,6 +25,36 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
   int _selectedCategoryIndex = 0;
   int _cartCount = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadLiveTemples();
+  }
+
+  Future<void> _loadLiveTemples() async {
+    try {
+      final temples = await ApiService().getTemples(limit: 20);
+      if (temples.isNotEmpty && mounted) {
+        setState(() {
+          _popularTemples.clear();
+          for (final t in temples) {
+            _popularTemples.add({
+              'id': t['id']?.toString() ?? '',
+              'name': t['name']?.toString() ?? 'Sacred Temple',
+              'name_hi': t['name_hi']?.toString() ?? t['name']?.toString() ?? 'पवित्र मंदिर',
+              'location': '${t['city'] ?? ''}, ${t['state'] ?? ''}',
+              'asset': (t['image_url'] != null && t['image_url'].toString().isNotEmpty)
+                  ? t['image_url'].toString()
+                  : AppConstants.chadavaTempleKashiAsset,
+              'category': (t['deity']?.toString().toLowerCase().contains('shiva') ?? false) ? 'shiva' : 'all',
+              'deity': t['deity']?.toString() ?? 'Sanatan Deity',
+            });
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
   // Visual Colors matching screenshot
   static const Color _primaryMaroon = Color(0xFF7A0C16);
   static const Color _darkCharcoal = Color(0xFF1E1E1E);
@@ -1699,6 +1729,32 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
 
               // 3. Trust Badges Row (Safe & Secure, Authentic Temples, Instant Photos/Videos)
               _buildTrustBadgesRow(),
+
+              // Booking & Chadhawa Support Helpline
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF9ED),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFFFD54F)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.mail_outline_rounded, size: 14, color: _primaryMaroon),
+                    const SizedBox(width: 6),
+                    Text(
+                      LocaleService().isHindi ? 'चढ़ावा सहायता: ' : 'Chadava Support: ',
+                      style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF5A1408)),
+                    ),
+                    Text(
+                      'booking@mandirm.in',
+                      style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: _primaryMaroon),
+                    ),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 8),
 

@@ -812,6 +812,32 @@ class _StoreScreenState extends State<StoreScreen> {
               // 3. Trust Badges Row (Pure & Sacred, Mantra Energized, Authentic & Genuine)
               _buildTrustBadgesRow(),
 
+              // Store Support Email Pill (store@mandirm.in)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF9ED),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFFFD54F)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.mail_outline_rounded, size: 14, color: _primaryMaroon),
+                    const SizedBox(width: 6),
+                    Text(
+                      LocaleService().isHindi ? 'पूजा स्टोर सहायता: ' : 'Store Support: ',
+                      style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF5A1408)),
+                    ),
+                    Text(
+                      'store@mandirm.in',
+                      style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: _primaryMaroon),
+                    ),
+                  ],
+                ),
+              ),
+
               // 4. Search and Filter Bar
               _buildSearchBar(),
 

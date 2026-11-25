@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../services/api_service.dart';
+import '../../../services/devotee_data_service.dart';
 import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/entity_localizer.dart';
 import '../widgets/astrologer_consultation_modals.dart';
+import '../widgets/devotee_birth_details_sheet.dart';
 import 'astrologer_detail_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../../common/widgets/app_image.dart';
@@ -51,6 +54,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
   }
 
   final List<Map<String, dynamic>> _allAstrologers = [];
+  final List<Map<String, dynamic>> _rawAstrologers = [];
   bool _isLoading = true;
 
   @override
@@ -64,6 +68,8 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
       final dbAstros = await ApiService().getAstrologers(limit: 150);
       if (mounted) {
         setState(() {
+          _rawAstrologers.clear();
+          _rawAstrologers.addAll(dbAstros);
           _allAstrologers.clear();
           for (final raw in dbAstros) {
             _allAstrologers.add(_normalizeAstrologer(raw));
@@ -83,11 +89,18 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
   }
 
   Map<String, dynamic> _normalizeAstrologer(Map<String, dynamic> raw) {
+    final isHi = LocaleService().isHindi;
     final id = raw['id']?.toString() ?? 'ast_${raw.hashCode}';
-    final name = raw['name']?.toString() ?? 'Vedic Astrologer';
-    final specialties = raw['specialties']?.toString() ??
+    final loc = EntityLocalizer.localizeAstrologer(raw, isHi);
+
+    var name = loc['name']?.toString() ?? raw['name']?.toString() ?? 'Vedic Astrologer';
+    name = name.replaceAll(RegExp(r'\bAI\b', caseSensitive: false), 'Vedic').trim();
+    if (name.isEmpty) name = isHi ? 'वैदिक ज्योतिषी' : 'Vedic Astrologer';
+
+    final specialties = loc['specialties']?.toString() ??
+        raw['specialties']?.toString() ??
         raw['specialities']?.toString() ??
-        'Vedic Astrology • Kundli Analysis';
+        (isHi ? 'वैदिक ज्योतिष • कुंडली विश्लेषण' : 'Vedic Astrology • Kundli Analysis');
 
     final ratingNum = (raw['rating'] is num)
         ? (raw['rating'] as num).toDouble()
@@ -95,23 +108,29 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
     final ratingStr = ratingNum.toStringAsFixed(1);
 
     final reviewsCount = raw['reviews_count'] ?? raw['consultations_count'] ?? 1250;
-    final reviewsStr = raw['reviews']?.toString() ?? '($reviewsCount+ reviews)';
-    final sessionsStr = raw['sessions']?.toString() ?? '$reviewsCount sessions';
+    final reviewsStr = loc['reviews']?.toString() ?? (isHi ? '($reviewsCount+ समीक्षाएं)' : '($reviewsCount+ reviews)');
+    final sessionsStr = isHi ? '$reviewsCount सत्र' : '$reviewsCount sessions';
 
     final expNum = (raw['expNumeric'] is num)
         ? (raw['expNumeric'] as num).toInt()
         : (raw['experience_years'] is num)
             ? (raw['experience_years'] as num).toInt()
             : int.tryParse(raw['experience_years']?.toString() ?? '10') ?? 10;
-    final expStr = raw['experience']?.toString() ?? '$expNum+ Years Experience';
+    final expStr = loc['experience']?.toString() ?? (isHi ? '$expNum+ वर्ष अनुभव' : '$expNum+ Years Experience');
+    final languagesStr = loc['languages']?.toString() ?? raw['languages']?.toString() ?? (isHi ? 'हिन्दी, अंग्रेज़ी' : 'Hindi, English');
+    final badgeStr = loc['badge']?.toString() ?? (isHi ? 'शीर्ष ज्योतिषी' : 'Top Rated');
 
-    final chatRate = (raw['priceNumeric'] is num)
-        ? (raw['priceNumeric'] as num).toInt()
-        : (raw['per_minute_chat_rate'] is num)
-            ? (raw['per_minute_chat_rate'] as num).toInt()
-            : int.tryParse(raw['per_minute_chat_rate']?.toString() ?? '22') ?? 22;
-    final priceStr = raw['price']?.toString() ?? '₹ $chatRate/min';
-    final origPrice = raw['originalPrice']?.toString() ?? '₹ ${(chatRate * 1.5).round()}';
+    final isAi = raw['isAi'] == true ||
+        raw['is_ai'] == 1 ||
+        raw['is_ai'] == true ||
+        id.toLowerCase().contains('ai_') ||
+        id.toLowerCase().startsWith('ai') ||
+        id == 'ast_ai_jyotish' ||
+        (name.toLowerCase().contains('ai ') ||
+            name.toLowerCase().startsWith('ai ') ||
+            name.toLowerCase().endsWith(' ai') ||
+            name.toLowerCase().contains('ai jyotish') ||
+            name.toLowerCase().contains('ai astrologer'));
 
     final isOnline = raw['isOnline'] == true ||
         raw['is_online'] == 1 ||
@@ -143,13 +162,17 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
       topics = ['Love & Relationships', 'Career & Jobs', 'Wealth & Prosperity', 'Health', 'Home & Vastu'];
     }
 
+    final chatRate = loc['chatRate'] ?? loc['priceNumeric'] ?? ((id.hashCode.abs() % 9) + 12);
+    final priceStr = loc['price']?.toString() ?? (isHi ? '₹$chatRate/मिनट' : '₹$chatRate/min');
+    final guidanceStr = loc['guidanceText']?.toString() ?? priceStr;
+
     return {
       'id': id,
       'name': name,
-      'badge': raw['badge']?.toString() ?? 'Top Rated',
+      'badge': badgeStr,
       'badgeIcon': raw['badgeIcon'] is IconData ? raw['badgeIcon'] : Icons.emoji_events_rounded,
       'isVerified': raw['isVerified'] ?? true,
-      'isAi': false,
+      'isAi': isAi,
       'specialties': specialties,
       'categories': categories,
       'topics': topics,
@@ -159,11 +182,12 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
       'sessions': sessionsStr,
       'experience': expStr,
       'expNumeric': expNum,
-      'languages': raw['languages']?.toString() ?? 'Hindi, English',
+      'languages': languagesStr,
       'isOnline': isOnline,
       'price': priceStr,
       'priceNumeric': chatRate,
-      'originalPrice': origPrice,
+      'guidanceText': guidanceStr,
+      'originalPrice': '',
       'imageAsset': imageAsset.isNotEmpty ? imageAsset : AppConstants.astroRajeshAsset,
       'avatarUrl': imageUrl,
       'bio': raw['bio']?.toString() ?? '',
@@ -171,7 +195,10 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
   }
 
   List<Map<String, dynamic>> get _filteredAstrologers {
-    var list = _allAstrologers.where((a) {
+    final source = _rawAstrologers.isNotEmpty
+        ? _rawAstrologers.map(_normalizeAstrologer).toList()
+        : _allAstrologers.map(_normalizeAstrologer).toList();
+    var list = source.where((a) {
       final categories = (a['categories'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
       final topics = (a['topics'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
 
@@ -207,12 +234,6 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
         final eB = (b['expNumeric'] as num?)?.toInt() ?? int.tryParse(b['expNumeric']?.toString() ?? '0') ?? 0;
         return eB.compareTo(eA);
       });
-    } else if (_selectedSort == 'Price: Low to High') {
-      list.sort((a, b) {
-        final pA = (a['priceNumeric'] as num?)?.toInt() ?? int.tryParse(a['priceNumeric']?.toString() ?? '0') ?? 0;
-        final pB = (b['priceNumeric'] as num?)?.toInt() ?? int.tryParse(b['priceNumeric']?.toString() ?? '0') ?? 0;
-        return pA.compareTo(pB);
-      });
     }
 
     return list;
@@ -243,7 +264,15 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
     );
   }
 
-  void _startChatConsultation(Map<String, dynamic> astrologer) {
+  void _startChatConsultation(Map<String, dynamic> astrologer) async {
+    // 1. Ask devotee details once if not already filled
+    final hasDetails = DevoteeDataService().hasBirthDetails;
+    if (!hasDetails) {
+      final saved = await DevoteeBirthDetailsSheet.show(context, astrologer: astrologer);
+      if (saved == null || !mounted) return;
+    }
+
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -264,9 +293,12 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final astrologers = _filteredAstrologers;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final astrologers = _filteredAstrologers;
 
-    return Scaffold(
+        return Scaffold(
       backgroundColor: const Color(0xFFFBF8F2),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
@@ -534,9 +566,6 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                       PopupMenuItem(
                           value: 'Experience: High to Low',
                           child: Text(LocaleService().isHindi ? 'अनुभव: अधिक से कम' : 'Experience: High to Low')),
-                      PopupMenuItem(
-                          value: 'Price: Low to High',
-                          child: Text(LocaleService().isHindi ? 'मूल्य: कम से अधिक' : 'Price: Low to High')),
                     ],
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -642,6 +671,8 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
           ),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -1008,7 +1039,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                                   ),
                                   const SizedBox(width: 3),
                                   Text(
-                                    a['badge']?.toString() ?? 'Top Rated',
+                                    a['badge']?.toString() ?? (LocaleService().isHindi ? 'शीर्ष ज्योतिषी' : 'Top Rated'),
                                     style: GoogleFonts.poppins(
                                       fontSize: 9.5,
                                       fontWeight: FontWeight.w600,
@@ -1034,7 +1065,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Online',
+                                    LocaleService().isHindi ? 'ऑनलाइन' : 'Online',
                                     style: GoogleFonts.poppins(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
@@ -1132,37 +1163,35 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
             // ─── Divider between info and actions ───
             const Divider(height: 1, color: Color(0xFFF3ECE0), thickness: 1),
 
-            // ─── Bottom Action Bar (Price on left, Call, Video & Chat on right) ───
+            // ─── Bottom Action Bar (Status on left, Action Buttons on right) ───
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Price section
+                  // Sacred Paid Rate Status
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            a['price']?.toString() ?? '₹ 22/min',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF7A0C16),
-                            ),
+                          const Icon(
+                            Icons.currency_rupee_rounded,
+                            size: 15,
+                            color: Color(0xFF7A0C16),
                           ),
-                          const SizedBox(width: 6),
                           Text(
-                            a['originalPrice']?.toString() ?? '',
+                            LocaleService().isHindi
+                                ? '${a['priceNumeric'] ?? 15}/मिनट'
+                                : '${a['priceNumeric'] ?? 15}/min',
                             style: GoogleFonts.poppins(
-                              fontSize: 10.5,
-                              color: const Color(0xFF9CA3AF),
-                              decoration: TextDecoration.lineThrough,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF7A0C16),
                             ),
                           ),
                         ],
@@ -1182,83 +1211,85 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Voice Call Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () => _startConsultation(a, isVideo: false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFBF4EA),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: const Color(0xFFE2C9A5),
-                              width: 1.1,
+                      if (a['isAi'] != true) ...[
+                        // Voice Call Button (Only for live Acharyas)
+                        InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _startConsultation(a, isVideo: false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFBF4EA),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFE2C9A5),
+                                width: 1.1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.phone_in_talk_rounded,
+                                  size: 14,
+                                  color: Color(0xFF8B2510),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  LocaleService().isHindi ? 'कॉल' : 'Call',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF8B2510),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.phone_in_talk_rounded,
-                                size: 14,
-                                color: Color(0xFF8B2510),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                LocaleService().isHindi ? 'कॉल' : 'Call',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF8B2510),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
 
-                      const SizedBox(width: 6),
+                        const SizedBox(width: 6),
 
-                      // Video Call Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () => _startConsultation(a, isVideo: true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF3E8FF),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: const Color(0xFFD8B4FE),
-                              width: 1.1,
+                        // Video Call Button (Only for live Acharyas)
+                        InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _startConsultation(a, isVideo: true),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3E8FF),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFD8B4FE),
+                                width: 1.1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.videocam_rounded,
+                                  size: 14,
+                                  color: Color(0xFF6B21A8),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  LocaleService().isHindi ? 'वीडियो' : 'Video',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF6B21A8),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.videocam_rounded,
-                                size: 14,
-                                color: Color(0xFF6B21A8),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                LocaleService().isHindi ? 'वीडियो' : 'Video',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF6B21A8),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
 
-                      const SizedBox(width: 6),
+                        const SizedBox(width: 6),
+                      ],
 
-                      // "FREE Chat →" Button
+                      // Chat Button (Always available; ONLY option for AI)
                       InkWell(
                         borderRadius: BorderRadius.circular(10),
                         onTap: () => _startChatConsultation(a),
@@ -1364,7 +1395,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  LocaleService().isHindi ? 'पहली चैट बिल्कुल मुफ्त!' : 'FIRST CHAT ABSOLUTELY FREE!',
+                  LocaleService().isHindi ? 'सत्यापित वैदिक ज्योतिषी' : 'VERIFIED VEDIC ASTROLOGERS',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -1375,8 +1406,8 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                 const SizedBox(height: 2),
                 Text(
                   LocaleService().isHindi
-                      ? 'हमारे अनुभवी वैदिक ज्योतिषियों से परामर्श लें'
-                      : 'Talk to our experienced Vedic astrologers',
+                      ? 'मात्र ₹12/मिनट से लाइव चैट परामर्श उपलब्ध'
+                      : 'Live chat consultation starting at just ₹12/min',
                   style: GoogleFonts.poppins(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w500,
@@ -1389,7 +1420,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
 
           const SizedBox(width: 8),
 
-          // Purple Button: "FREE Chat →"
+          // Purple Button: "चैट करें →"
           InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: () {
@@ -1416,7 +1447,7 @@ class _AstrologersScreenState extends State<AstrologersScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    LocaleService().isHindi ? 'मुफ्त चैट' : 'FREE Chat',
+                    LocaleService().isHindi ? 'चैट करें' : 'Chat Now',
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,

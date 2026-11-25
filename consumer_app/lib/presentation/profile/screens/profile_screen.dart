@@ -237,11 +237,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = SupabaseService().currentUser;
-    final data = DevoteeDataService();
-    final isHi = LocaleService().isHindi;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final user = SupabaseService().currentUser;
+        final data = DevoteeDataService();
+        final isHi = LocaleService().isHindi;
 
-    return Scaffold(
+        return Scaffold(
       backgroundColor: const Color(0xFFFBF8F3),
       body: Column(
         children: [
@@ -614,6 +617,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ],
 ),
 );
+      },
+    );
   }
 
   Widget _buildStatCard(String title, String count, String label, IconData icon) {

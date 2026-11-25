@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../domain/models/user_profile.dart';
 import '../../../services/supabase_service.dart';
+import '../../common/widgets/mandirm_header.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -132,8 +134,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       builder: (context, state) {
         final isLoading = state is AuthLoading;
 
-        return Scaffold(
-          backgroundColor: _warmCreamBg,
+        return ValueListenableBuilder<String>(
+          valueListenable: LocaleService().locale,
+          builder: (context, locale, _) {
+            final isHi = LocaleService().isHindi;
+
+            return Scaffold(
+              backgroundColor: _warmCreamBg,
           body: SafeArea(
             child: Column(
               children: [
@@ -181,7 +188,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Mandirm',
+                                  isHi ? '॥ मंदिरम् ॥' : 'Mandirm',
                                   style: TextStyle(fontFamily: 'Headway', 
                                     fontSize: 22,
                                     fontWeight: FontWeight.w700,
@@ -190,7 +197,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                   ),
                                 ),
                                 Text(
-                                  '— Sacred Devotee Setup —',
+                                  isHi ? '— पावन भक्त पंजीकरण —' : '— Sacred Devotee Setup —',
                                   style: GoogleFonts.poppins(
                                     fontSize: 8.5,
                                     fontWeight: FontWeight.w500,
@@ -204,8 +211,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         ),
                       ),
 
-                      if (Navigator.canPop(context))
-                        const SizedBox(width: 34),
+                      const LanguageToggleButton(),
                     ],
                   ),
                 ),
@@ -252,7 +258,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
                           Center(
                             child: Text(
-                              'Devotee Sankalp Profile',
+                              isHi ? 'भक्त संकल्प प्रोफाइल' : 'Devotee Sankalp Profile',
                               style: TextStyle(fontFamily: 'Headway', 
                                 fontSize: 21,
                                 fontWeight: FontWeight.w700,
@@ -265,7 +271,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
                           Center(
                             child: Text(
-                              'These sacred details are chanted during your puja sankalp and personalized horoscope readings.',
+                              isHi
+                                  ? 'यह पावन जानकारी आपकी पूजा संकल्प और व्यक्तिगत कुंडली मार्गदर्शन में उच्चारित की जाती है।'
+                                  : 'These sacred details are chanted during your puja sankalp and personalized horoscope readings.',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
@@ -278,7 +286,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           const SizedBox(height: 22),
 
                           // Full Name
-                          _buildFieldLabel('Full Name (as per Puja Sankalp) *'),
+                          _buildFieldLabel(isHi ? 'पूरा नाम (पूजा संकल्प अनुसार) *' : 'Full Name (as per Puja Sankalp) *'),
                           const SizedBox(height: 6),
                           Container(
                             decoration: BoxDecoration(
@@ -289,16 +297,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             child: TextFormField(
                               controller: _nameController,
                               style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal),
-                              decoration: const InputDecoration(
-                                hintText: 'e.g. Rajesh Sharma',
-                                prefixIcon: Icon(Icons.person_outline_rounded,
+                              decoration: InputDecoration(
+                                hintText: isHi ? 'उदा. राजेश शर्मा' : 'e.g. Rajesh Sharma',
+                                prefixIcon: const Icon(Icons.person_outline_rounded,
                                     color: _primaryMaroon),
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               ),
                               validator: (val) {
                                 if (val == null || val.trim().isEmpty) {
-                                  return 'Please provide your full name';
+                                  return isHi ? 'कृपया अपना पूरा नाम दर्ज करें' : 'Please provide your full name';
                                 }
                                 return null;
                               },
@@ -308,7 +316,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           const SizedBox(height: 16),
 
                           // Gotra
-                          _buildFieldLabel('Gotra (Ancestral Lineage)'),
+                          _buildFieldLabel(isHi ? 'गोत्र (कुल वंश परम्परा)' : 'Gotra (Ancestral Lineage)'),
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -320,7 +328,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButtonFormField<String>(
                                 initialValue: _selectedGotra,
-                                hint: Text('Select your Gotra',
+                                hint: Text(isHi ? 'अपना गोत्र चुनें' : 'Select your Gotra',
                                     style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
                                 decoration: const InputDecoration(
                                   prefixIcon: Icon(Icons.account_tree_outlined,
@@ -342,7 +350,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           const SizedBox(height: 16),
 
                           // Rashi
-                          _buildFieldLabel('Rashi (Moon Sign for Astrology)'),
+                          _buildFieldLabel(isHi ? 'राशि (ज्योतिषीय चंद्र राशि)' : 'Rashi (Moon Sign for Astrology)'),
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -354,7 +362,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButtonFormField<String>(
                                 initialValue: _selectedRashi,
-                                hint: Text('Select your Rashi',
+                                hint: Text(isHi ? 'अपनी राशि चुनें' : 'Select your Rashi',
                                     style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
                                 decoration: const InputDecoration(
                                   prefixIcon: Icon(Icons.auto_awesome_outlined,
@@ -376,7 +384,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           const SizedBox(height: 16),
 
                           // Date of Birth
-                          _buildFieldLabel('Date of Birth'),
+                          _buildFieldLabel(isHi ? 'जन्म तिथि (सटीक कुंडली विश्लेषण हेतु)' : 'Date of Birth (For accurate Horoscope)'),
                           const SizedBox(height: 6),
                           InkWell(
                             onTap: _pickBirthDate,
@@ -395,7 +403,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                   Text(
                                     _selectedBirthDate != null
                                         ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
-                                        : 'Select Date of Birth',
+                                        : (isHi ? 'जन्म तिथि चुनें' : 'Select Date of Birth'),
                                     style: GoogleFonts.poppins(
                                       fontSize: 13,
                                       color: _selectedBirthDate != null
@@ -414,7 +422,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           const SizedBox(height: 16),
 
                           // City
-                          _buildFieldLabel('Current City / Place of Residence'),
+                          _buildFieldLabel(isHi ? 'जन्म नगर / वर्तमान निवास' : 'Current City / Place of Residence'),
                           const SizedBox(height: 6),
                           Container(
                             decoration: BoxDecoration(
@@ -425,12 +433,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             child: TextFormField(
                               controller: _cityController,
                               style: GoogleFonts.poppins(fontSize: 13, color: _darkCharcoal),
-                              decoration: const InputDecoration(
-                                hintText: 'e.g. Varanasi, Uttar Pradesh',
-                                prefixIcon: Icon(Icons.location_on_outlined,
+                              decoration: InputDecoration(
+                                hintText: isHi ? 'उदा. वाराणसी, उत्तर प्रदेश' : 'e.g. Varanasi, Uttar Pradesh',
+                                prefixIcon: const Icon(Icons.location_on_outlined,
                                     color: _primaryMaroon),
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               ),
                             ),
                           ),
@@ -472,7 +480,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                       ),
                                     )
                                   : Text(
-                                      'Save & Enter Mandirm',
+                                      isHi ? 'सुरक्षित करें एवं मंदिरम् में प्रवेश करें' : 'Save & Enter Mandirm',
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
@@ -492,7 +500,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                   size: 13, color: Color(0xFF757575)),
                               const SizedBox(width: 4),
                               Text(
-                                '100% Confidential & Secure Sankalp Data',
+                                isHi ? '100% गोपनीय व सुरक्षित संकल्प डेटा' : '100% Confidential & Secure Sankalp Data',
                                 style: GoogleFonts.poppins(
                                   fontSize: 10.5,
                                   color: const Color(0xFF757575),
@@ -513,7 +521,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         );
       },
     );
-  }
+  },
+);
+}
 
   Widget _buildFieldLabel(String label) {
     return Text(

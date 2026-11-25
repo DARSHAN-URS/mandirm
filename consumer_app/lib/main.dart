@@ -31,6 +31,7 @@ class ConsumerApp extends StatelessWidget {
         valueListenable: LocaleService().locale,
         builder: (context, locale, _) {
           return MaterialApp.router(
+            key: ValueKey('mandirm_app_$locale'),
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,

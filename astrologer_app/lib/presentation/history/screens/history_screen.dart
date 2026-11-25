@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/app_strings.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../domain/models/consultation_model.dart';
 import '../../../services/api/api_service.dart';
 import '../../../services/auth/auth_service.dart';
@@ -59,51 +61,55 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: Column(
-        children: [
-          // Unified Mandirm Header (same as consumer app)
-          const MandirmHeader(),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        return Scaffold(
+          backgroundColor: AppColors.backgroundLight,
+          body: Column(
+            children: [
+              // Unified Mandirm Header (same as consumer app)
+              const MandirmHeader(),
 
-          // Subheader & Filter Chips
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: const BoxDecoration(
-              color: AppColors.headerBg,
-              border: Border(bottom: BorderSide(color: AppColors.lightBorder, width: 1)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Devotee Records & Kundlis',
-                  style: TextStyle(fontFamily: 'Headway', 
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+              // Subheader & Filter Chips
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                decoration: const BoxDecoration(
+                  color: AppColors.headerBg,
+                  border: Border(bottom: BorderSide(color: AppColors.lightBorder, width: 1)),
                 ),
-                Text(
-                  'Past consultations, prescribed remedies & devotee reviews',
-                  style: GoogleFonts.poppins(
-                    fontSize: 11.5,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFilterChip('All Records', 'all'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('Voice Calls', 'audio'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('Video Calls', 'video'),
+                    Text(
+                      AstroStrings.t('history_title'),
+                      style: const TextStyle(
+                        fontFamily: 'Headway', 
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      AstroStrings.t('history_subtitle'),
+                      style: GoogleFonts.poppins(
+                        fontSize: 11.5,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _buildFilterChip(AstroStrings.t('filter_all'), 'all'),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(AstroStrings.t('filter_voice'), 'audio'),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(AstroStrings.t('filter_video'), 'video'),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
           // List of Past Consultations
           Expanded(
@@ -136,7 +142,7 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
                               ),
                               const SizedBox(height: 14),
                               Text(
-                                'No consultations recorded yet.',
+                                AstroStrings.t('no_history'),
                                 style: GoogleFonts.poppins(color: AppColors.textMuted),
                               ),
                             ],
@@ -224,7 +230,7 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
                                         ),
                                       ),
                                       Text(
-                                        '${item.timeAgo} • ${item.durationMinutes} mins',
+                                        '${item.timeAgo} • ${item.durationMinutes} ${AstroStrings.t('mins')}',
                                         style: GoogleFonts.poppins(
                                           fontSize: 12,
                                           color: AppColors.textSecondary,
@@ -300,6 +306,8 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
         ],
       ),
     );
+      },
+    );
   }
 
   void _showRecordDetails(BuildContext context, PastConsultation item) {
@@ -359,18 +367,29 @@ class _AstrologerHistoryScreenState extends State<AstrologerHistoryScreen> {
             const SizedBox(height: 16),
             const Divider(color: AppColors.lightBorder),
             const SizedBox(height: 10),
-            Text('Prescribed Vedic Remedies in Session:', style: TextStyle(fontFamily: 'Headway', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            Text(
+              AstroStrings.t('prescribed_remedies_heading'),
+              style: const TextStyle(
+                fontFamily: 'Headway',
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
-                _buildRemedyThumb('Yellow Sapphire', AppConstants.catYantraAsset),
+                _buildRemedyThumb(LocaleService().isHindi ? 'पुखराज रत्न' : 'Yellow Sapphire', AppConstants.catYantraAsset),
                 const SizedBox(width: 10),
-                _buildRemedyThumb('5-Mukhi Rudraksha', AppConstants.deityRudrakshaAsset),
+                _buildRemedyThumb(LocaleService().isHindi ? '५-मुखी रुद्राक्ष' : '5-Mukhi Rudraksha', AppConstants.deityRudrakshaAsset),
               ],
             ),
             const SizedBox(height: 16),
             if (item.feedback.isNotEmpty) ...[
-              Text('Devotee Blessing & Review:', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+              Text(
+                AstroStrings.t('devotee_review_heading'),
+                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+              ),
               const SizedBox(height: 4),
               Container(
                 width: double.infinity,

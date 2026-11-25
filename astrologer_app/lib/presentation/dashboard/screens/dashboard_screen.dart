@@ -199,42 +199,47 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: Column(
-        children: [
-          // Unified Mandirm Header (identical to consumer app)
-          const MandirmHeader(),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        return Scaffold(
+          backgroundColor: AppColors.backgroundLight,
+          body: Column(
+            children: [
+              // Unified Mandirm Header (identical to consumer app)
+              const MandirmHeader(),
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 1. Acharya Profile & Duty Status (Availability Settings)
-                  _buildHeader(),
-                  const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. Acharya Profile & Duty Status (Availability Settings)
+                      _buildHeader(),
+                      const SizedBox(height: 16),
 
-                  // 2. Today's Dakshina & Performance Hub (Earnings View)
-                  _buildEarningsCard(),
-                  const SizedBox(height: 20),
+                      // 2. Today's Dakshina & Performance Hub (Earnings View)
+                      _buildEarningsCard(),
+                      const SizedBox(height: 20),
 
-                  // 3. Incoming Devotee Consultations Queue (Consultation Requests: Voice, Video, Chat)
-                  _buildQueueSection(),
-                  const SizedBox(height: 20),
+                      // 3. Incoming Devotee Consultations Queue (Consultation Requests: Voice, Video, Chat)
+                      _buildQueueSection(),
+                      const SizedBox(height: 20),
 
-                  // 4. Recent Devotee Consultations & Reviews (Consultation History)
-                  _buildHistorySection(),
-                  const SizedBox(height: 20),
-                  _buildSupportCard(),
-                  const SizedBox(height: 28),
-                ],
+                      // 4. Recent Devotee Consultations & Reviews (Consultation History)
+                      _buildHistorySection(),
+                      const SizedBox(height: 20),
+                      _buildSupportCard(),
+                      const SizedBox(height: 28),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -301,7 +306,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                   children: [
                     Text(
                       _profile?.name ?? (AuthService().currentProfile?.name ?? (isHi ? 'आचार्य' : 'Acharya')),
-                      style: TextStyle(fontFamily: 'Headway', 
+                      style: const TextStyle(fontFamily: 'Headway', 
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -481,7 +486,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
                           const Icon(Icons.currency_rupee, color: Color(0xFFFFD54F), size: 26),
                           Text(
                             _earnings.todayEarnings.toStringAsFixed(0),
-                            style: TextStyle(fontFamily: 'Headway', 
+                            style: const TextStyle(fontFamily: 'Headway', 
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
@@ -570,7 +575,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
               children: [
                 Text(
                   isHi ? 'प्रतीक्षारत भक्त कतार' : 'Live Devotee Queue',
-                  style: TextStyle(fontFamily: 'Headway', 
+                  style: const TextStyle(fontFamily: 'Headway', 
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -825,7 +830,7 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       children: [
         Text(
           isHi ? 'हाल के परामर्श व समीक्षाएं' : 'Recent Consultations & Reviews',
-          style: TextStyle(fontFamily: 'Headway', 
+          style: const TextStyle(fontFamily: 'Headway', 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
@@ -962,7 +967,6 @@ class _AstrologerDashboardScreenState extends State<AstrologerDashboardScreen> {
       ),
     );
   }
-}
 
   Widget _buildSupportCard() {
     final isHi = LocaleService().isHindi;

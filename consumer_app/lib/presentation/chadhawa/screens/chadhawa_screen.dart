@@ -12,6 +12,7 @@ import '../../common/widgets/mandirm_header.dart';
 import '../../common/widgets/faq_section.dart';
 import '../../common/widgets/app_image.dart';
 import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/entity_localizer.dart';
 
 class ChadhawaScreen extends StatefulWidget {
   final VoidCallback? onBrowsePujas;
@@ -29,6 +30,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
   void initState() {
     super.initState();
     _loadLiveTemples();
+    _loadBackendChadhawa();
   }
 
   Future<void> _loadLiveTemples() async {
@@ -111,7 +113,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
   }
 
   // Popular Chadava Cards loaded directly from database
-  final List<Map<String, dynamic>> _popularChadavas = [];
+  final List<Map<String, dynamic>> _popularChadavas = []; /*
 
   @override
   void initState() {
@@ -119,7 +121,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
     _loadBackendChadhawa();
   }
 
-  Future<void> _loadBackendChadhawa() async {
+  */ Future<void> _loadBackendChadhawa() async {
     try {
       final backendOfferings = await ApiService().getChadhawaOfferings();
       if (backendOfferings.isNotEmpty && mounted) {
@@ -129,10 +131,10 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
             final id = bo['id']?.toString() ?? 'CHD_${bo.hashCode}';
             _popularChadavas.add({
               'id': id,
-              'title': bo['title'] ?? 'Divine Chadava Offering',
-              'title_hi': bo['title'] ?? 'पवित्र चढ़ावा अर्पण',
-              'location': bo['temple_name'] ?? 'Sacred Temple Sanctum',
-              'location_hi': bo['temple_name'] ?? 'पवित्र तीर्थ स्थल',
+              'title': EntityLocalizer.localizeChadhawa(bo, false)['title'],
+              'title_hi': EntityLocalizer.localizeChadhawa(bo, true)['title'],
+              'location': EntityLocalizer.localizeChadhawa(bo, false)['location'],
+              'location_hi': EntityLocalizer.localizeChadhawa(bo, true)['location'],
               'rating': '4.9',
               'reviews': '1,250',
               'price': (bo['price'] as num?)?.toInt() ?? 251,
@@ -223,7 +225,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
   }
 
   // 4. Popular Temples (8 items)
-  final List<Map<String, dynamic>> _popularTemples = [
+  final List<Map<String, dynamic>> _popularTemples = []; /*
     {
       'id': 'temple_mahakal',
       'name': 'Mahakaleshwar',
@@ -298,7 +300,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
     },
   ];
 
-  /// Sheet 1: All Popular Chadavas with interactive category filters
+  */ /// Sheet 1: All Popular Chadavas with interactive category filters
   void _openAllPopularChadavasSheet() {
     int activeFilterIndex = _selectedCategoryIndex;
     final isHi = LocaleService().isHindi;
@@ -2451,7 +2453,7 @@ class _ChadhawaScreenState extends State<ChadhawaScreen> {
 
         const SizedBox(height: 10),
 
-        // Horizontal List of 5 Temples
+        if (_popularTemples.isEmpty) const SizedBox(height: 80, child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: _primaryMaroon))) else
         SizedBox(
           height: 112,
           child: ListView.builder(

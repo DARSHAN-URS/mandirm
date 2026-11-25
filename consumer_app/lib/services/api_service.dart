@@ -295,13 +295,6 @@ class ApiService {
         final rows = await query.limit(limit);
         if (rows.isNotEmpty) {
           final list = List<Map<String, dynamic>>.from(rows.map((r) => extractMetadata(Map<String, dynamic>.from(r))));
-          // Strictly filter out any AI astrologers to match website context 100%
-          list.removeWhere((a) =>
-              a['is_ai'] == true ||
-              a['is_ai'] == 1 ||
-              a['isAi'] == true ||
-              (a['id']?.toString().startsWith('astro_ai_') ?? false) ||
-              a['id'] == 'ast_ai_jyotish');
           if (sortBy == 'rating') {
             list.sort((a, b) => ((b['rating'] as num?) ?? 0)
                 .compareTo((a['rating'] as num?) ?? 0));
@@ -334,14 +327,7 @@ class ApiService {
       final data = response.data;
       if (data is Map && data['data'] is List) {
         final rawList = List<Map<String, dynamic>>.from(data['data'] as List);
-        final list = rawList.map((r) => extractMetadata(r)).toList();
-        list.removeWhere((a) =>
-            a['is_ai'] == true ||
-            a['is_ai'] == 1 ||
-            a['isAi'] == true ||
-            (a['id']?.toString().startsWith('astro_ai_') ?? false) ||
-            a['id'] == 'ast_ai_jyotish');
-        return list;
+        return rawList.map((r) => extractMetadata(r)).toList();
       }
     } catch (_) {}
     return [];
@@ -367,6 +353,48 @@ class ApiService {
         return extractMetadata(Map<String, dynamic>.from(response.data as Map));
       }
     } catch (_) {}
+    return null;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // AI JYOTISH & ASTROLOGER AI CONSULTATIONS (Real-Time OpenAI GPT-4o-mini)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>?> queryAiJyotish({
+    required String query,
+    String? astrologerId,
+    String? devoteeName,
+    String? rashi,
+    String? gotra,
+    String? dob,
+    String? tob,
+    String? pob,
+    String? language,
+    List<Map<String, String>>? chatHistory,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/ai/jyotish/chat',
+        data: {
+          'query': query,
+          if (astrologerId != null && astrologerId.isNotEmpty) 'astrologer_id': astrologerId,
+          if (devoteeName != null && devoteeName.isNotEmpty) 'devotee_name': devoteeName,
+          if (rashi != null && rashi.isNotEmpty) 'rashi': rashi,
+          if (gotra != null && gotra.isNotEmpty) 'gotra': gotra,
+          if (dob != null && dob.isNotEmpty) 'dob': dob,
+          if (tob != null && tob.isNotEmpty) 'tob': tob,
+          if (pob != null && pob.isNotEmpty) 'pob': pob,
+          'language': language ?? 'hi',
+          if (chatHistory != null && chatHistory.isNotEmpty) 'chat_history': chatHistory,
+        },
+      );
+
+      if (response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] queryAiJyotish notice: $e');
+    }
     return null;
   }
 

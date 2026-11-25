@@ -1,7 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 
+/// Universal image widget for Astrologer App:
+/// 1. Base64 data URLs (`data:image/...;base64,...`) uploaded via Admin/Console
+/// 2. CDN & Supabase storage network URLs (`https://...`)
+/// 3. Bundled assets (`assets/images/...`)
 class AppImage extends StatelessWidget {
   final String? assetPath;
   final String? imageUrl;
@@ -86,104 +92,149 @@ class AppImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget imageWidget;
-    final targetUrl = _resolveUrl();
+    final raw = (imageUrl ?? assetPath ?? '').trim();
 
-    if (AppConstants.enableCdnImages && targetUrl != null && targetUrl.isNotEmpty) {
-      imageWidget = CachedNetworkImage(
+    // 1. Base64 Data URLs
+    if (raw.startsWith('data:image/') || (raw.startsWith('data:') && raw.contains(';base64,'))) {
+      try {
+        final commaIdx = raw.indexOf(',');
+        if (commaIdx != -1) {
+          final b64Str = raw.substring(commaIdx + 1).trim();
+          final Uint8List bytes = base64Decode(b64Str);
+          final imgWidget = Image.memory(
+            bytes,
+            width: width,
+            height: height,
+            fit: fit,
+            color: color,
+            colorBlendMode: colorBlendMode,
+            alignment: alignment,
+            errorBuilder: (_, __, ___) => errorWidget ?? _buildFallbackWidget(),
+          );
+          return _applyBorder(imgWidget);
+        }
+      } catch (e) {
+        debugPrint('[AppImage] Base64 decode exception: $e');
+      }
+    }
+
+    // 2. Reject broken / fake paths
+    if (raw.contains('fakepath') ||
+        raw.startsWith('C:\\') ||
+        raw.startsWith('D:\\') ||
+        raw.startsWith('file://') ||
+        raw == 'null' ||
+        raw == 'undefined' ||
+        raw.isEmpty) {
+      return _applyBorder(errorWidget ?? _buildFallbackWidget());
+    }
+
+    // 3. Bundled local assets
+    if (raw.startsWith('assets/')) {
+      final imgWidget = Image.asset(
+        raw,
+        width: width,
+        height: height,
+        fit: fit,
+        color: color,
+        colorBlendMode: colorBlendMode,
+        alignment: alignment,
+        errorBuilder: (_, __, ___) => errorWidget ?? _buildFallbackWidget(),
+      );
+      return _applyBorder(imgWidget);
+    }
+
+    // 4. Resolve network / CDN URL
+    final targetUrl = _resolveUrl(raw);
+
+    if (AppConstants.enableCdnImages && targetUrl != null && (targetUrl.startsWith('http://') || targetUrl.startsWith('https://'))) {
+      final imgWidget = CachedNetworkImage(
         imageUrl: targetUrl,
         width: width,
         height: height,
         fit: fit,
-        alignment: alignment,
         color: color,
         colorBlendMode: colorBlendMode,
-        placeholder: (context, url) =>
-            placeholder ??
-            Container(
-              width: width,
-              height: height,
-              color: const Color(0xFFF7F2E8),
-              child: const Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFD97706)),
-                ),
-              ),
-            ),
-        errorWidget: (context, url, error) {
-          if (assetPath != null) {
-            return Image.asset(
-              assetPath!,
-              width: width,
-              height: height,
-              fit: fit,
-              alignment: alignment,
-              color: color,
-              colorBlendMode: colorBlendMode,
-              errorBuilder: (_, __, ___) => _defaultErrorWidget(),
-            );
-          }
-          return errorWidget ?? _defaultErrorWidget();
-        },
-      );
-    } else if (assetPath != null) {
-      imageWidget = Image.asset(
-        assetPath!,
-        width: width,
-        height: height,
-        fit: fit,
         alignment: alignment,
-        color: color,
-        colorBlendMode: colorBlendMode,
-        errorBuilder: (_, __, ___) => errorWidget ?? _defaultErrorWidget(),
+        placeholder: (context, url) => placeholder ?? _buildShimmerPlaceholder(),
+        errorWidget: (context, url, error) => errorWidget ?? _buildFallbackWidget(),
       );
-    } else {
-      imageWidget = _defaultErrorWidget();
+      return _applyBorder(imgWidget);
     }
 
+    return _applyBorder(errorWidget ?? _buildFallbackWidget());
+  }
+
+  Widget _applyBorder(Widget widget) {
     if (borderRadius != null) {
       return ClipRRect(
         borderRadius: borderRadius!,
-        child: imageWidget,
+        child: widget,
       );
     }
-
-    return imageWidget;
+    return widget;
   }
 
-  String? _resolveUrl() {
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
-      if (imageUrl!.startsWith('http://') || imageUrl!.startsWith('https://')) {
-        return imageUrl;
-      }
-      if (imageUrl!.startsWith('/')) {
-        return '${AppConstants.cdnBaseUrl}$imageUrl';
-      }
-      return AppConstants.cdnUrl(imageUrl!);
+  String? _resolveUrl(String raw) {
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return raw;
     }
-    if (assetPath != null && assetPath!.isNotEmpty) {
-      if (assetPath!.startsWith('http://') || assetPath!.startsWith('https://')) {
-        return assetPath;
-      }
-      if (assetPath!.startsWith('/')) {
-        return '${AppConstants.cdnBaseUrl}$assetPath';
-      }
-      return AppConstants.cdnUrl(assetPath!);
+    if (raw.startsWith('/')) {
+      return '${AppConstants.cdnBaseUrl}$raw';
+    }
+    if (raw.isNotEmpty) {
+      return '${AppConstants.cdnBaseUrl}/$raw';
     }
     return null;
   }
 
-  Widget _defaultErrorWidget() {
+  Widget _buildFallbackWidget() {
+    if (assetPath != null && assetPath!.isNotEmpty && assetPath!.startsWith('assets/')) {
+      return Image.asset(
+        assetPath!,
+        width: width,
+        height: height,
+        fit: fit,
+        color: color,
+        colorBlendMode: colorBlendMode,
+        alignment: alignment,
+        errorBuilder: (_, __, ___) => _buildDefaultPlaceholder(),
+      );
+    }
+    return Image.asset(
+      AppConstants.logoAsset,
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (_, __, ___) => _buildDefaultPlaceholder(),
+    );
+  }
+
+  Widget _buildShimmerPlaceholder() {
     return Container(
       width: width,
       height: height,
-      color: const Color(0xFFF7F2E8),
+      color: Colors.amber.shade50,
+      child: const Center(
+        child: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.amber),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultPlaceholder() {
+    return Container(
+      width: width,
+      height: height,
+      color: const Color(0xFFFBF4E8),
+      alignment: Alignment.center,
       child: const Icon(
-        Icons.auto_awesome,
-        color: Color(0xFFD97706),
-        size: 24,
+        Icons.account_circle_outlined,
+        size: 28,
+        color: Color(0xFF8B1E1E),
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../common/widgets/app_image.dart';
 import '../../common/widgets/mandirm_header.dart';
 
@@ -69,7 +71,17 @@ class _AstrologerNotificationsScreenState extends State<AstrologerNotificationsS
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _selectedFilterIndex == 0
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
+        final filterLabels = [
+          AstroStrings.t('notif_filter_all'),
+          AstroStrings.t('notif_filter_queue'),
+          AstroStrings.t('notif_filter_earnings'),
+          AstroStrings.t('notif_filter_reviews'),
+        ];
+        final filtered = _selectedFilterIndex == 0
         ? _notifications
         : _notifications.where((n) => n['category'] == _filters[_selectedFilterIndex]).toList();
 
@@ -97,7 +109,7 @@ class _AstrologerNotificationsScreenState extends State<AstrologerNotificationsS
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Acharya Notifications',
+                      AstroStrings.t('notifications_title'),
                       style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -113,7 +125,7 @@ class _AstrologerNotificationsScreenState extends State<AstrologerNotificationsS
                         });
                       },
                       child: Text(
-                        'Mark all read',
+                        AstroStrings.t('mark_all_read'),
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -134,7 +146,7 @@ class _AstrologerNotificationsScreenState extends State<AstrologerNotificationsS
                         child: FilterChip(
                           selected: isSelected,
                           showCheckmark: false,
-                          label: Text(_filters[index]),
+                          label: Text(index < filterLabels.length ? filterLabels[index] : _filters[index]),
                           labelStyle: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -184,7 +196,7 @@ class _AstrologerNotificationsScreenState extends State<AstrologerNotificationsS
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          'No notifications in this category.',
+                          AstroStrings.t('no_notifications'),
                           style: GoogleFonts.poppins(color: AppColors.textMuted),
                         ),
                       ],
@@ -324,6 +336,8 @@ class _AstrologerNotificationsScreenState extends State<AstrologerNotificationsS
           ),
         ],
       ),
+    );
+      },
     );
   }
 }

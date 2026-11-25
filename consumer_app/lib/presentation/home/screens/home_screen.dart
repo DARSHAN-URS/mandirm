@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/entity_localizer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -1248,11 +1249,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMandirsHorizontalList() {
-    final List<Map<String, String>> mandirs = _realTemples.map((t) => {
-      'name': (t['name'] ?? 'Sacred Temple').toString(),
-      'city': (t['city'] != null ? '${t['city']}, ${t['state'] ?? ''}' : 'Holy City').toString(),
-      'deity': (t['deity'] ?? 'Lord Shiva').toString(),
-      'status': 'Live Darshan Open',
+    final isHi = LocaleService().isHindi;
+    final List<Map<String, String>> mandirs = _realTemples.map((t) {
+      final loc = EntityLocalizer.localizeTemple(t, isHi);
+      return {
+        'name': loc['name']?.toString() ?? 'Sacred Temple',
+        'city': loc['city']?.toString() ?? 'Holy City',
+        'deity': loc['deity']?.toString() ?? 'Lord Shiva',
+        'status': isHi ? '• लाइव दर्शन उपलब्ध' : '• Live Darshan Open',
+        'image_url': (t['image_url'] ?? '').toString(),
+      };
     }).toList();
 
     if (mandirs.isEmpty) {
@@ -1265,13 +1271,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return SizedBox(
-      height: 160,
+      height: 205,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         scrollDirection: Axis.horizontal,
         itemCount: mandirs.length,
         itemBuilder: (context, i) {
           final m = mandirs[i];
+          final imgUrl = m['image_url'] ?? '';
+          final isBaglamukhi = m['name']!.toLowerCase().contains('baglamukhi') || m['name']!.contains('बगलामुखी');
+          final fallback = isBaglamukhi ? AppConstants.chadavaCatDeviAsset : AppConstants.chadavaTempleKashiAsset;
+
           return GestureDetector(
             onTap: () {
               setState(() {
@@ -1280,17 +1290,16 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             child: Container(
-              width: 240,
+              width: 220,
               margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.shade200),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(6),
-                    blurRadius: 6,
+                    color: Colors.black.withAlpha(8),
+                    blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
@@ -1298,69 +1307,109 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.warmCream,
-                          borderRadius: BorderRadius.circular(8),
+                  // Top Image with Deity Badge
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          height: 105,
+                          width: double.infinity,
+                          child: imgUrl.isNotEmpty
+                              ? AppImage.network(
+                                  imgUrl,
+                                  fit: BoxFit.cover,
+                                  fallbackAsset: fallback,
+                                )
+                              : AppImage.asset(
+                                  fallback,
+                                  fit: BoxFit.cover,
+                                ),
                         ),
-                        child: Text(
-                          m['deity']!,
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.deepAmber,
+                        Container(
+                          height: 105,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withAlpha(140),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios_rounded,
-                          size: 14, color: AppColors.saffronPrimary),
-                    ],
-                  ),
-                  const Spacer(),
-                  Text(
-                    m['name']!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimaryLight,
+                        Positioned(
+                          bottom: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFDCB06),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              m['deity']!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF5A1408),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '📍 ${m['city']!}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: AppColors.textSecondaryLight,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          m['name']!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1E1E1E),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '📍 ${m['city']!}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 10.5,
+                            color: const Color(0xFF6E6E6E),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF16A34A),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              m['status']!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF16A34A),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.success,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        LocaleService().isHindi ? 'लाइव दर्शन उपलब्ध' : m['status']!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.success,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -1372,11 +1421,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPujaCards() {
-    final List<Map<String, String>> pujas = _realPujas.map((p) => {
-      'title': (p['title'] ?? 'Vedic Puja').toString(),
-      'mandir': (p['temple_name'] ?? 'Temple Sanctum').toString(),
-      'date': 'Daily Auspicious Muhurat',
-      'price': '₹ ${p['price'] ?? 1100}',
+    final isHi = LocaleService().isHindi;
+    final List<Map<String, String>> pujas = _realPujas.map((p) {
+      final loc = EntityLocalizer.localizePuja(p, isHi);
+      return {
+        'title': loc['title']?.toString() ?? 'Vedic Puja',
+        'mandir': loc['mandir']?.toString() ?? 'Temple Sanctum',
+        'date': loc['date']?.toString() ?? (isHi ? 'दैनिक शुभ मुहूर्त' : 'Daily Auspicious Muhurat'),
+        'price': '₹ ${p['price'] ?? 1100}',
+      };
     }).toList();
 
     if (pujas.isEmpty) {

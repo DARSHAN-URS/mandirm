@@ -1,15 +1,107 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'api_service.dart';
+
 class DevoteeDataService {
   static final DevoteeDataService _instance = DevoteeDataService._internal();
   factory DevoteeDataService() => _instance;
-  DevoteeDataService._internal();
+  DevoteeDataService._internal() {
+    loadBirthDetails();
+    refreshWalletBalance();
+  }
+
+  static const String keyDevoteeBirthDetails = 'mandirm_devotee_birth_details';
 
   final List<Map<String, dynamic>> _bookings = [];
   final List<Map<String, dynamic>> _consultations = [];
   final List<Map<String, dynamic>> _prasadOrders = [];
 
+  Map<String, dynamic>? _birthDetails;
+  final ValueNotifier<double> walletBalanceNotifier = ValueNotifier<double>(0.0);
+
   List<Map<String, dynamic>> get bookings => List.unmodifiable(_bookings);
   List<Map<String, dynamic>> get consultations => List.unmodifiable(_consultations);
   List<Map<String, dynamic>> get prasadOrders => List.unmodifiable(_prasadOrders);
+
+  bool get hasBirthDetails =>
+      _birthDetails != null &&
+      (_birthDetails!['name']?.toString().trim().isNotEmpty ?? false);
+
+  Map<String, dynamic>? get birthDetails => _birthDetails;
+
+  /// Load devotee birth details saved from SharedPreferences (asked once)
+  Future<Map<String, dynamic>?> loadBirthDetails() async {
+    if (_birthDetails != null) return _birthDetails;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(keyDevoteeBirthDetails);
+      if (raw != null && raw.isNotEmpty) {
+        _birthDetails = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+        return _birthDetails;
+      }
+    } catch (e) {
+      debugPrint('[DevoteeDataService] loadBirthDetails error: $e');
+    }
+    return null;
+  }
+
+  /// Save devotee birth details permanently so they are never asked again
+  Future<void> saveBirthDetails(Map<String, dynamic> details) async {
+    _birthDetails = Map<String, dynamic>.from(details);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(keyDevoteeBirthDetails, jsonEncode(details));
+      debugPrint('[DevoteeDataService] Birth details saved: ${details['name']}');
+    } catch (e) {
+      debugPrint('[DevoteeDataService] saveBirthDetails error: $e');
+    }
+  }
+
+  /// Fetch live wallet balance from backend and update notifier
+  Future<double> refreshWalletBalance() async {
+    try {
+      final overview = await ApiService().getWalletOverview();
+      if (overview != null && overview.containsKey('balance')) {
+        final bal = (overview['balance'] as num?)?.toDouble() ?? 0.0;
+        walletBalanceNotifier.value = bal;
+        return bal;
+      }
+    } catch (e) {
+      debugPrint('[DevoteeDataService] refreshWalletBalance error: $e');
+    }
+    return walletBalanceNotifier.value;
+  }
+
+  /// Deduct per-minute rate from Sacred Wallet
+  Future<bool> deductChatMinute({
+    required double amount,
+    required String astrologerName,
+    required String consultationId,
+  }) async {
+    // Optimistically deduct locally
+    final currentBal = walletBalanceNotifier.value;
+    if (currentBal < amount) return false;
+
+    final newBal = (currentBal - amount).clamp(0.0, double.infinity);
+    walletBalanceNotifier.value = newBal;
+
+    try {
+      final res = await ApiService().deductWalletBalance(
+        amount: amount,
+        referenceType: 'astrologer_chat',
+        referenceId: consultationId,
+        description: '1 min chat consultation with $astrologerName',
+      );
+      if (res != null && res['wallet_balance'] != null) {
+        walletBalanceNotifier.value = (res['wallet_balance'] as num).toDouble();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('[DevoteeDataService] deductChatMinute backend sync notice: $e');
+    }
+    return true;
+  }
 
   void addBooking(Map<String, dynamic> booking) {
     // Avoid duplicate booking ID
@@ -58,7 +150,7 @@ class DevoteeDataService {
           'specialty': c['specialty'] ?? 'Vedic • Kundali',
           'date': c['date'] ?? 'Recent Session',
           'duration': '${c['duration_minutes'] ?? 15} mins',
-          'amount': '₹${c['amount'] ?? 300}',
+          'amount': 'Free Sacred Consultation',
           'remedy': c['notes'] ?? c['remedy'] ?? 'Chant Gayatri Mantra daily for peace and clarity.',
           'rating': (c['rating'] as num?)?.toDouble() ?? 5.0,
         });

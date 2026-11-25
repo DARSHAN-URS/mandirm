@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
@@ -20,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _pulseAnimation;
   Timer? _authTimer;
   bool _hasNavigated = false;
 
@@ -40,14 +38,7 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _pulseAnimation = Tween<double>(begin: 0.75, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: Curves.easeInOutSine,
-      ),
-    );
-
-    _animController.repeat(reverse: true);
+    _animController.forward();
 
     // Check authentication after splash delay
     _authTimer = Timer(const Duration(milliseconds: 2400), () {
@@ -114,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
                   opacity: _fadeAnimation,
                   child: Image.asset(
                     AppConstants.splashBackgroundAsset,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                     alignment: Alignment.center,
                     filterQuality: FilterQuality.high,
                     errorBuilder: (context, error, stackTrace) {
@@ -141,97 +132,6 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-
-                // 2. Subtle Divine Breathing Golden Aura near Diya & Temple
-                AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Positioned(
-                      bottom: MediaQuery.of(context).size.height * 0.14,
-                      right: MediaQuery.of(context).size.width * 0.15,
-                      child: Container(
-                        width: 90 * _pulseAnimation.value,
-                        height: 90 * _pulseAnimation.value,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFFFB300).withValues(
-                                alpha: 0.18 * _pulseAnimation.value,
-                              ),
-                              blurRadius: 36 * _pulseAnimation.value,
-                              spreadRadius: 16 * _pulseAnimation.value,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-
-                // 3. Active Golden Rotating Circular Loader & "Loading..."
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: MediaQuery.of(context).size.height * 0.082,
-                  child: AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Radiant Golden Circular Spinner
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFFEAA031).withValues(
-                                    alpha: 0.35 * _pulseAnimation.value,
-                                  ),
-                                  blurRadius: 14,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3.2,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFFF6B842),
-                              ),
-                              backgroundColor:
-                                  const Color(0xFF5D240E).withValues(alpha: 0.35),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Pulsing "Loading..." Typography
-                          Opacity(
-                            opacity: 0.75 + (0.25 * _pulseAnimation.value),
-                            child: Text(
-                              'Loading...',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFFFDE68A),
-                                letterSpacing: 0.8,
-                                shadows: const [
-                                  Shadow(
-                                    color: Color(0x99000000),
-                                    offset: Offset(0, 1),
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
                       );
                     },
                   ),

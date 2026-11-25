@@ -33,6 +33,44 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
         : ['About', 'Benefits', 'Process', 'Packages', 'FAQs'];
   }
 
+  bool get _isHi => LocaleService().isHindi;
+
+  String get _pujaTitle {
+    final p = widget.puja;
+    if (_isHi && p != null && p['title_hi'] != null) {
+      return p['title_hi'].toString();
+    }
+    return p?['title']?.toString() ?? (_isHi ? 'वैदिक पूजा अनुष्ठान' : 'Vedic Puja Ritual');
+  }
+
+  String get _pujaSubtitle {
+    final p = widget.puja;
+    if (_isHi && p != null && p['subtitle_hi'] != null) {
+      return p['subtitle_hi'].toString();
+    }
+    return p?['description']?.toString() ??
+        p?['subtitle']?.toString() ??
+        (_isHi
+            ? 'पवित्र तीर्थ पुरोहितों द्वारा संपन्न वैदिक विधि'
+            : 'Vedic sacred ceremony conducted strictly according to Shastras by verified temple priests.');
+  }
+
+  String get _pujaMandir {
+    final p = widget.puja;
+    if (_isHi && p != null && p['mandir_hi'] != null) {
+      return p['mandir_hi'].toString();
+    }
+    return p?['mandir']?.toString() ?? (_isHi ? 'पवित्र तीर्थ धाम' : 'Sacred Temple Sanctum');
+  }
+
+  String get _pujaDate {
+    final p = widget.puja;
+    if (_isHi && p != null && p['date_hi'] != null) {
+      return p['date_hi'].toString();
+    }
+    return p?['date']?.toString() ?? (_isHi ? 'दैनिक शुभ मुहूर्त' : 'Upcoming Auspicious Muhurat');
+  }
+
   final List<Map<String, dynamic>> _packages = [
     {
       'title': 'Basic Puja Package\n(Online)',
@@ -108,9 +146,9 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
 
   void _openBookingModal(Map<String, dynamic> package) {
     final pujaData = Map<String, dynamic>.from(widget.puja ?? {
-      'title': 'Haridwar Pitru Dosh Shanti Mahapuja, Ganga Aarti and Brahmin Bhojan',
-      'mandir': 'Ganga Ghat, Haridwar, Uttarakhand',
-      'date': '29 Sep, Tue • 7:00 AM',
+      'title': 'Vedic Puja Ritual',
+      'mandir': 'Sacred Temple Sanctum',
+      'date': 'Upcoming Auspicious Muhurat',
       'price': package['price'],
     });
 
@@ -140,12 +178,9 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.puja?['title'] as String? ??
-        'Pitru Dosh Shanti Mahapuja,\nGanga Aarti and Brahmin Bhojan';
-    final subtitle = widget.puja?['subtitle'] as String? ??
-        'Special puja for relief from Pitru Dosh and to receive blessings of ancestors for peace, prosperity and well-being.';
-    final date = widget.puja?['date'] as String? ??
-        '29 September, Monday\nAshwin Krishna Tritiya';
+    final title = _pujaTitle;
+    final subtitle = _pujaSubtitle;
+    final date = _pujaDate;
 
     // Calculate countdown breakdown
     final days = (_totalSeconds ~/ 86400).toString().padLeft(2, '0');
@@ -405,7 +440,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '29 September, Monday',
+                        date,
                         style: GoogleFonts.poppins(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
@@ -413,7 +448,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
                         ),
                       ),
                       Text(
-                        'Ashwin Krishna Tritiya',
+                        _pujaMandir,
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           color: const Color(0xFF6B6560),
@@ -628,7 +663,7 @@ class _PujaDetailScreenState extends State<PujaDetailScreen> {
           children: [
             Expanded(
               child: Text(
-                'This special puja is performed for the peace of ancestors, relief from Pitru Dosh and to bring happiness, prosperity and harmony in family life. It includes mantra chanting, tarpan, havan, pind daan and Brahmin bhojan.',
+                _pujaSubtitle,
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,

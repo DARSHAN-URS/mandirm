@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/l10n/locale_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/supabase_service.dart';
+import '../../../services/api_service.dart';
 
 /// Interactive AI Jyotish (एआई ज्योतिषी) Modal
 /// 24/7 Real-Time Divine Vedic Astrology Assistant powered by AI.
@@ -104,7 +105,7 @@ class _AiJyotishModalState extends State<AiJyotishModal> {
     });
   }
 
-  void _handleSend([String? presetText]) {
+  void _handleSend([String? presetText]) async {
     final query = (presetText ?? _textController.text).trim();
     if (query.isEmpty) return;
 
@@ -123,10 +124,39 @@ class _AiJyotishModalState extends State<AiJyotishModal> {
 
     _scrollToBottom();
 
-    // Generate Vedic AI response
-    Future.delayed(const Duration(milliseconds: 1200), () {
+    try {
+      // Build previous chat history for multi-turn conversational AI
+      final history = _messages
+          .where((m) => m['sender'] == 'user' || m['sender'] == 'ai')
+          .map((m) => {
+                'role': m['sender'] == 'user' ? 'user' : 'assistant',
+                'text': (m['text'] ?? '').toString(),
+              })
+          .toList();
+
+      final isHi = LocaleService().isHindi;
+      final res = await ApiService().queryAiJyotish(
+        query: query,
+        language: isHi ? 'hi' : 'en',
+        chatHistory: history,
+      );
+
       if (!mounted) return;
-      final aiResponse = _generateVedicResponse(query);
+
+      Map<String, dynamic> aiResponse;
+      if (res != null && res['text'] != null && (res['text'] as String).trim().isNotEmpty) {
+        aiResponse = {
+          'sender': 'ai',
+          'time': res['time'] ?? 'Just now',
+          'title': res['title'] ?? (isHi ? 'वैदिक ज्योतिषीय विश्लेषण' : 'Vedic Astrological Guidance'),
+          'text': res['text'],
+          if (res['mantra'] != null && (res['mantra'] as String).trim().isNotEmpty) 'mantra': res['mantra'],
+          if (res['remedy'] != null && (res['remedy'] as String).trim().isNotEmpty) 'remedy': res['remedy'],
+          if (res['suggested_puja'] != null) 'suggestedPuja': res['suggested_puja'],
+        };
+      } else {
+        aiResponse = _generateVedicResponse(query);
+      }
 
       setState(() {
         _isTyping = false;
@@ -135,7 +165,15 @@ class _AiJyotishModalState extends State<AiJyotishModal> {
 
       _scrollToBottom();
       HapticFeedback.mediumImpact();
-    });
+    } catch (_) {
+      if (!mounted) return;
+      final aiResponse = _generateVedicResponse(query);
+      setState(() {
+        _isTyping = false;
+        _messages.add(aiResponse);
+      });
+      _scrollToBottom();
+    }
   }
 
   Map<String, dynamic> _generateVedicResponse(String query) {
@@ -280,7 +318,7 @@ class _AiJyotishModalState extends State<AiJyotishModal> {
         'specialty': 'Instant 24/7 AI Vedic Guidance & Remedies',
         'date': 'Just now',
         'duration': '$_sessionQuestionCount questions',
-        'amount': 'FREE (AI Seva)',
+        'amount': '₹${15 * (_sessionQuestionCount > 0 ? _sessionQuestionCount : 1)} (₹15/min)',
         'remedy': isHi
             ? 'दैनिक सूर्य अर्घ्य, गायत्री जप (21x) व महामृत्युंजय मंत्र द्वारा ग्रह शांति।'
             : 'Daily Surya Arghya, Gayatri Mantra (21x) and Shiva worship for planetary peace.',

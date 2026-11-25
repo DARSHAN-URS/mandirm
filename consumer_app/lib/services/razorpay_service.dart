@@ -101,7 +101,7 @@ class RazorpayService {
           paymentId: 'pay_live_sim_${DateTime.now().millisecondsSinceEpoch}',
           orderId: orderId,
         ));
-        return _activeCompleter!.future;
+        return await _activeCompleter!.future;
       }
 
       final effectiveKey = apiKey;

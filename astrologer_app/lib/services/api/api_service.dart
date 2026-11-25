@@ -733,4 +733,119 @@ class ApiService {
     }
     return null;
   }
+
+  /// Create Razorpay order for wallet recharge
+  Future<Map<String, dynamic>?> createWalletRechargeOrder(double amount) async {
+    try {
+      final response = await _dio.post(
+        '/payments/wallet/recharge-order',
+        data: {'amount': amount},
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] createWalletRechargeOrder error: $e');
+    }
+    return null;
+  }
+
+  /// Verify Razorpay payment signature and credit wallet balance
+  Future<Map<String, dynamic>?> verifyWalletRechargePayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    required double amount,
+    String? referenceId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/payments/verify',
+        data: {
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+          'reference_type': 'wallet_recharge',
+          'reference_id': referenceId ?? 'wrecharge_${DateTime.now().millisecondsSinceEpoch}',
+          'amount': amount,
+        },
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] verifyWalletRechargePayment error: $e');
+    }
+    return null;
+  }
+
+  /// Verify general Razorpay payment
+  Future<Map<String, dynamic>?> verifyPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    required String referenceType,
+    required String referenceId,
+    required double amount,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/payments/verify',
+        data: {
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+          'reference_type': referenceType,
+          'reference_id': referenceId,
+          'amount': amount,
+        },
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (e) {
+      debugPrint('[ApiService] verifyPayment error: $e');
+    }
+    return null;
+  }
+
+  /// Credits top-up amount directly to astrologer's wallet on Supabase & backend
+  Future<Map<String, dynamic>?> topUpAstrologerWallet(String astrologerId, double amount, {String? paymentId}) async {
+    if (_supabase != null) {
+      try {
+        final profile = await _supabase!
+            .from('astrologers')
+            .select('wallet_balance')
+            .eq('id', astrologerId)
+            .maybeSingle();
+        final currentBal = (profile?['wallet_balance'] as num?)?.toDouble() ?? 0.0;
+        final newBal = currentBal + amount;
+        await _supabase!.from('astrologers').update({'wallet_balance': newBal}).eq('id', astrologerId);
+
+        // Record in astrologer_payouts / ledger
+        await _supabase!.from('astrologer_payouts').insert({
+          'astrologer_id': astrologerId,
+          'amount': amount,
+          'status': 'Completed',
+          'notes': 'Wallet Top-up via Razorpay ($paymentId)',
+          'created_at': DateTime.now().toUtc().toIso8601String(),
+        });
+
+        return {'wallet_balance': newBal};
+      } catch (err) {
+        debugPrint('[ApiService] Supabase topUpAstrologerWallet notice: $err');
+      }
+    }
+
+    try {
+      final response = await _dio.post(
+        '/astrologers/$astrologerId/topup',
+        data: {'amount': amount, 'payment_id': paymentId},
+      );
+      if (response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } catch (_) {}
+    return null;
+  }
 }

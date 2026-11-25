@@ -7,6 +7,7 @@ import '../../../services/api_service.dart';
 import '../../../services/cart_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/supabase_service.dart';
+import '../../../services/razorpay_service.dart';
 import 'prasad_orders_screen.dart';
 import '../widgets/cart_drawer_sheet.dart';
 import '../../common/widgets/mandirm_header.dart';
@@ -31,6 +32,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isFavorited = false;
   int _quantity = 1;
   int _cartCount = 0;
+
+  String get _productTitle {
+    final isHi = LocaleService().isHindi;
+    final p = widget.initialProduct;
+    if (isHi && p != null && p['title_hi'] != null) {
+      return p['title_hi'].toString();
+    }
+    return p?['title']?.toString() ??
+        p?['name']?.toString() ??
+        (isHi
+            ? 'महाकाल त्रिशूल नंदी पेंडेंट एवं रुद्राक्ष माला - 54+1 मनके'
+            : 'Mahakal Trishul Nandi Pendant with Rudraksha Mala - 54+1 Beads');
+  }
 
   // Primary colors matching reference
   static const Color _primaryMaroon = Color(0xFF7A0C16);
@@ -326,7 +340,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     final addr = addressController.text.trim();
                     if (addr.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -347,6 +361,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         (user?.userMetadata?['name'] as String?) ??
                         'Devotee';
                     final devoteeGotra = profile?.gotra ?? 'Devotee Gotra';
+
+                    final payRes = await RazorpayService().openPayment(
+                      amount: totalAmount.toDouble(),
+                      referenceType: 'shop_order',
+                      referenceId: orderId,
+                      devoteeName: devoteeName,
+                      devoteeEmail: user?.email,
+                      devoteePhone: profile?.phoneNumber ?? user?.phone,
+                      title: 'Mandirm Divine Store',
+                      description: 'Consecrated $itemTitle',
+                    );
+
+                    if (!payRes.isSuccess) {
+                      if (context.mounted && payRes.errorMessage != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(payRes.errorMessage!),
+                            backgroundColor: Colors.red.shade800,
+                          ),
+                        );
+                      }
+                      return;
+                    }
 
                     DevoteeDataService().addPrasadOrder({
                       'id': orderId,
@@ -718,7 +755,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           // Title
           Text(
-            'Mahakal Trishul Nandi Pendant with Rudraksha Mala - 54+1 Beads',
+            _productTitle,
             style: GoogleFonts.poppins(
               fontSize: 18.5,
               fontWeight: FontWeight.w700,

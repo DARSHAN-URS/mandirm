@@ -723,13 +723,15 @@ def main():
         sys_prompt = build_system_prompt(name, title, exp, specs, deity, mantra, "male")
         phone = f"+9198{random.randint(10000000, 99999999)}"
 
+        assigned_rate = float(random.randint(12, 20))
+
         astro = {
             "id": astro_id,
             "name": name,
             "title": title,
             "bio": bio,
             "experience_years": exp,
-            "per_minute_chat_rate": chat_rate,
+            "per_minute_chat_rate": assigned_rate,
             "per_minute_call_rate": 0.0,
             "specialities": specs,
             "languages": langs,
@@ -764,13 +766,15 @@ def main():
         sys_prompt = build_system_prompt(name, title, exp, specs, deity, mantra, "female")
         phone = f"+9198{random.randint(10000000, 99999999)}"
 
+        assigned_rate = float(random.randint(12, 20))
+
         astro = {
             "id": astro_id,
             "name": name,
             "title": title,
             "bio": bio,
             "experience_years": exp,
-            "per_minute_chat_rate": chat_rate,
+            "per_minute_chat_rate": assigned_rate,
             "per_minute_call_rate": 0.0,
             "specialities": specs,
             "languages": langs,

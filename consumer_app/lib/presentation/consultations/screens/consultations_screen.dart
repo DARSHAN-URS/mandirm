@@ -40,68 +40,73 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final consultations = DevoteeDataService().consultations;
-    final isHi = LocaleService().isHindi;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final consultations = DevoteeDataService().consultations;
+        final isHi = LocaleService().isHindi;
 
-    return Scaffold(
-      backgroundColor: _warmCreamBg,
-      body: Column(
-        children: [
-          // 1. Same Unified Header all over the app!
-          const MandirmHeader(),
+        return Scaffold(
+          backgroundColor: _warmCreamBg,
+          body: Column(
+            children: [
+              // 1. Same Unified Header all over the app!
+              const MandirmHeader(),
 
-            // 2. Scrollable Body
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _fetchBackendConsultations,
-                color: _primaryMaroon,
-                child: consultations.isEmpty
-                    ? _buildEmptyState(context)
-                    : ListView(
-                        physics: const AlwaysScrollableScrollPhysics(
-                            parent: BouncingScrollPhysics()),
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                        children: [
-                          // Summary Banner
-                          _buildSummaryBanner(consultations.length),
+              // 2. Scrollable Body
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _fetchBackendConsultations,
+                  color: _primaryMaroon,
+                  child: consultations.isEmpty
+                      ? _buildEmptyState(context)
+                      : ListView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics()),
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                          children: [
+                            // Summary Banner
+                            _buildSummaryBanner(consultations.length),
 
-                          const SizedBox(height: 16),
+                            const SizedBox(height: 16),
 
-                          // Section Title
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                isHi
-                                    ? 'पिछले सत्र (${consultations.length})'
-                                    : 'Past Sessions (${consultations.length})',
-                                style: TextStyle(fontFamily: 'Headway', 
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
-                                  color: _primaryMaroon,
+                            // Section Title
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  isHi
+                                      ? 'पिछले सत्र (${consultations.length})'
+                                      : 'Past Sessions (${consultations.length})',
+                                  style: TextStyle(fontFamily: 'Headway', 
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    color: _primaryMaroon,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                isHi ? 'सुझाए गए उपाय एवं विवरण' : 'Prescribed Remedies & Notes',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: const Color(0xFF757575),
-                                  fontWeight: FontWeight.w500,
+                                Text(
+                                  isHi ? 'सुझाए गए उपाय एवं विवरण' : 'Prescribed Remedies & Notes',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: const Color(0xFF757575),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
 
-                          const SizedBox(height: 10),
+                            const SizedBox(height: 10),
 
-                          // Consultation Cards
-                          ...consultations.map((c) => _buildConsultationCard(context, c)),
-                        ],
-                      ),
+                            // Consultation Cards
+                            ...consultations.map((c) => _buildConsultationCard(context, c)),
+                          ],
+                        ),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -259,12 +264,22 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
                   ],
                 ),
               ),
-              Text(
-                c['amount'] as String,
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFFD64D18),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFBF3EB),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFDECDB4)),
+                ),
+                child: Text(
+                  c['amount']?.toString().isNotEmpty == true
+                      ? c['amount'].toString()
+                      : (isHi ? 'वैदिक परामर्श' : 'Vedic Consultation'),
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _primaryMaroon,
+                  ),
                 ),
               ),
             ],

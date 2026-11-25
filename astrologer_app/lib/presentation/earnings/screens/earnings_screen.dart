@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/l10n/locale_service.dart';
 import '../../../services/api/api_service.dart';
 import '../../../services/auth/auth_service.dart';
+import '../../../services/razorpay/razorpay_service.dart';
 import '../../common/widgets/app_image.dart';
 import '../../common/widgets/mandirm_header.dart';
 
@@ -206,8 +207,11 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isHi = LocaleService().isHindi;
-    return Scaffold(
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
+        return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
@@ -312,6 +316,24 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
                               style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
                             ),
                             onPressed: _walletBalance > 0 ? _requestWithdrawal : null,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFFD54F),
+                              foregroundColor: const Color(0xFF4A0404),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            icon: const Icon(Icons.add_circle_outline, size: 16),
+                            label: Text(
+                              isHi ? '+ वॉलेट रीचार्ज करें (Razorpay)' : '+ Top-up Wallet (Razorpay)',
+                              style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 13),
+                            ),
+                            onPressed: _showRechargeModal,
                           ),
                         ),
                       ],
@@ -448,6 +470,8 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
         ],
       ),
     );
+      },
+    );
   }
 
   Widget _buildTypeCard(String title, String amount, String share, IconData icon, Color color) {
@@ -565,6 +589,186 @@ class _AstrologerEarningsScreenState extends State<AstrologerEarningsScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _showRechargeModal() {
+    double selectedAmount = 500.0;
+    final customCtrl = TextEditingController(text: '500');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFDF8),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: AppColors.primaryMaroon.withOpacity(0.1), shape: BoxShape.circle),
+                    child: const Icon(Icons.add_card_rounded, color: AppColors.primaryMaroon, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    LocaleService().isHindi ? 'वॉलेट रीचार्ज करें' : 'Top-up Astrologer Wallet',
+                    style: TextStyle(fontFamily: 'Headway', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                LocaleService().isHindi
+                    ? 'त्वरित रेजरपे (UPI / कार्ड / नेटबैंकिंग) भुगतान'
+                    : 'Instant Razorpay gateway (UPI, Cards, NetBanking)',
+                style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [200.0, 500.0, 1000.0, 2000.0].map((amt) {
+                  final isSelected = selectedAmount == amt;
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: InkWell(
+                        onTap: () {
+                          setModalState(() {
+                            selectedAmount = amt;
+                            customCtrl.text = amt.toInt().toString();
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.primaryMaroon : Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: isSelected ? AppColors.primaryMaroon : AppColors.lightBorder),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '₹${amt.toInt()}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: isSelected ? Colors.white : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: customCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Amount (₹)',
+                  prefixIcon: const Icon(Icons.currency_rupee, color: AppColors.primaryMaroon),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.lightBorder)),
+                ),
+                onChanged: (val) {
+                  final parsed = double.tryParse(val);
+                  if (parsed != null) setModalState(() => selectedAmount = parsed);
+                },
+              ),
+              const SizedBox(height: 22),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryMaroon,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.security, size: 18, color: Color(0xFFFFD54F)),
+                  label: Text(
+                    'Pay ₹${selectedAmount.toInt()} via Razorpay',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 14),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    final profile = AuthService().currentProfile;
+                    final rechargeRefId = 'ASTRO-TOPUP-${DateTime.now().millisecondsSinceEpoch}';
+
+                    final result = await AstrologerRazorpayService().openPayment(
+                      amount: selectedAmount,
+                      referenceType: 'wallet_recharge',
+                      referenceId: rechargeRefId,
+                      astrologerName: profile?.name,
+                      astrologerEmail: profile?.email,
+                      astrologerPhone: profile?.phone,
+                      title: 'Mandirm Astrologer Portal',
+                      description: 'Astrologer Wallet Top-up (₹${selectedAmount.toInt()})',
+                      isWalletRecharge: true,
+                    );
+
+                    if (result.isSuccess) {
+                      if (mounted) {
+                        setState(() {
+                          _walletBalance = result.updatedWalletBalance ?? (_walletBalance + selectedAmount);
+                          _payoutTransactions.insert(0, {
+                            'id': 'TOPUP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
+                            'desc': 'Wallet Top-up via Razorpay',
+                            'amount': '+₹${selectedAmount.toInt()}',
+                            'date': 'Today, Just now',
+                            'is_success': true,
+                          });
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(Icons.check_circle, color: Colors.white),
+                                const SizedBox(width: 8),
+                                Text('Wallet topped up successfully! Balance: ₹${_walletBalance.toInt()}'),
+                              ],
+                            ),
+                            backgroundColor: AppColors.statusOnline,
+                          ),
+                        );
+                      }
+                    } else if (result.errorMessage != null && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(result.errorMessage!),
+                          backgroundColor: AppColors.statusOffline,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

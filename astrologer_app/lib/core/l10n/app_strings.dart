@@ -136,6 +136,59 @@ class AstroStrings {
     'send_code': 'Send Verification Code',
     'or_continue_with': 'OR CONTINUE WITH',
     'google_signin': 'Continue with Google',
+
+    // Notifications Screen
+    'notifications_title': 'Notifications & Alerts',
+    'mark_all_read': 'Mark all read',
+    'no_notifications': 'No notifications in this category.',
+    'notif_filter_all': 'All',
+    'notif_filter_queue': 'Live Queue',
+    'notif_filter_earnings': 'Earnings',
+    'notif_filter_reviews': 'Reviews',
+
+    // History Details
+    'prescribed_remedies_heading': 'Prescribed Vedic Remedies in Session:',
+    'devotee_review_heading': 'Devotee Blessing & Review:',
+    'close': 'Close',
+    'session_details': 'Consultation Record & Remedy Details',
+    'kundli_analysis': 'Kundli Analysis & Horoscope Discussion',
+
+    // Consultations & Service Bookings
+    'no_devotees_queue': 'No Devotees in Queue',
+    'status_active_banner': 'Your status is active and visible to devotees on Mandirm Consumer App.',
+    'accept_and_start': 'Accept & Start',
+    'begin_prep': 'Begin Prep',
+    'mark_delivered': 'Mark Delivered',
+    'target_date': 'Target Date',
+    'service_details': 'Service Details',
+
+    // Earnings & Withdrawals
+    'withdraw_dakshina': 'Withdraw Dakshina',
+    'enter_payout_target': 'Enter Bank Account / UPI ID',
+    'payout_disclaimer': 'Direct NEFT/IMPS settlement to your registered bank account or verified UPI VPA.',
+    'confirm_payout': 'Confirm & Process Payout',
+    'breakdown_title': 'Dakshina Breakdown by Consultation Type',
+    'voice_calls': 'Voice Calls',
+    'video_calls': 'Video Calls',
+    'chat_consultations': 'Chat Consultations',
+    'anushthan_services': 'Vedic Anushthan & Services',
+
+    // Edit Profile
+    'edit_profile_title': 'Edit Acharya Profile',
+    'basic_info': 'Basic Information',
+    'full_name': 'Full Name',
+    'professional_title': 'Professional Vedic Title',
+    'experience_years': 'Experience (Years)',
+    'working_hours': 'Daily Availability Hours',
+    'about_bio': 'About Acharya / Vedic Bio',
+    'save_changes': 'Save Changes',
+
+    // OTP Screen
+    'otp_title': 'Verify Code',
+    'otp_subtitle': 'Enter the 6-digit verification code sent to',
+    'verify_proceed': 'Verify & Enter Portal',
+    'resend_code': 'Resend Code',
+    'resend_in': 'Resend in',
   };
 
   // ─── Hindi ───────────────────────────────────────────────────────────────
@@ -262,5 +315,58 @@ class AstroStrings {
     'send_code': 'सत्यापन कोड भेजें',
     'or_continue_with': 'अथवा इसके साथ जारी रखें',
     'google_signin': 'Google से साइन इन करें',
+
+    // Notifications Screen
+    'notifications_title': 'सूचनाएं एवं अलर्ट',
+    'mark_all_read': 'सभी को पढ़ा हुआ चिन्हित करें',
+    'no_notifications': 'इस श्रेणी में कोई सूचना उपलब्ध नहीं है।',
+    'notif_filter_all': 'सभी',
+    'notif_filter_queue': 'लाइव कतार',
+    'notif_filter_earnings': 'दक्षिणा आय',
+    'notif_filter_reviews': 'समीक्षाएं',
+
+    // History Details
+    'prescribed_remedies_heading': 'सत्र में सुझाए गए शास्त्रोक्त वैदिक उपाय:',
+    'devotee_review_heading': 'भक्त की समीक्षा एवं आशीर्वाद:',
+    'close': 'बंद करें',
+    'session_details': 'परामर्श विवरण एवं उपाय',
+    'kundli_analysis': 'कुंडली विश्लेषण एवं जन्मपत्रिका विमर्श',
+
+    // Consultations & Service Bookings
+    'no_devotees_queue': 'कतार में कोई भक्त नहीं है',
+    'status_active_banner': 'आपकी स्थिति ऑनलाइन है और भक्त मंदिरम् ऐप पर आपसे सीधे जुड़ सकते हैं।',
+    'accept_and_start': 'स्वीकार करें व शुरू करें',
+    'begin_prep': 'तैयारी शुरू करें',
+    'mark_delivered': 'संपन्न चिन्हित करें',
+    'target_date': 'नियत तिथि',
+    'service_details': 'सेवा विवरण',
+
+    // Earnings & Withdrawals
+    'withdraw_dakshina': 'दक्षिणा निकासी',
+    'enter_payout_target': 'बैंक खाता अथवा UPI आईडी दर्ज करें',
+    'payout_disclaimer': 'आपके पंजीकृत बैंक खाते या सत्यापित UPI आईडी में सीधा NEFT/IMPS ट्रांसफर।',
+    'confirm_payout': 'पुष्टि करें एवं भुगतान शुरू करें',
+    'breakdown_title': 'परामर्श प्रकार अनुसार दक्षिणा विवरण',
+    'voice_calls': 'ऑडियो कॉल',
+    'video_calls': 'वीडियो कॉल',
+    'chat_consultations': 'चैट परामर्श',
+    'anushthan_services': 'वैदिक अनुष्ठान एवं सेवाएं',
+
+    // Edit Profile
+    'edit_profile_title': 'आचार्य प्रोफ़ाइल संपादित करें',
+    'basic_info': 'सामान्य जानकारी',
+    'full_name': 'पूरा नाम',
+    'professional_title': 'पदवी / उपाधि',
+    'experience_years': 'अनुभव (वर्ष)',
+    'working_hours': 'दैनिक उपलब्धता समय',
+    'about_bio': 'आचार्य परिचय / साधना विवरण',
+    'save_changes': 'परिवर्तन सहेजें',
+
+    // OTP Screen
+    'otp_title': 'सत्यापन कोड',
+    'otp_subtitle': 'इस पते पर भेजा गया 6 अंकों का कोड दर्ज करें:',
+    'verify_proceed': 'सत्यापित करें व प्रवेश करें',
+    'resend_code': 'पुनः कोड भेजें',
+    'resend_in': 'पुनः भेजें',
   };
 }

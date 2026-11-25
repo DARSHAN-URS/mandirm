@@ -38,33 +38,37 @@ class DevotionalDrawerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = SupabaseService().currentUser;
-    final bool isLoggedIn = user != null;
-    final userName = user?.userMetadata?['full_name'] as String? ??
-        user?.userMetadata?['name'] as String? ??
-        'Devotee';
-    final userAvatar = user?.userMetadata?['avatar_url'] as String? ??
-        user?.userMetadata?['picture'] as String?;
-    final userEmail = user?.email ?? 'devotee@mandirm.in';
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, currentLocale, _) {
+        final isHi = currentLocale == LocaleService.hi;
+        final user = SupabaseService().currentUser;
+        final bool isLoggedIn = user != null;
+        final userName = user?.userMetadata?['full_name'] as String? ??
+            user?.userMetadata?['name'] as String? ??
+            (isHi ? 'भक्त' : 'Devotee');
+        final userAvatar = user?.userMetadata?['avatar_url'] as String? ??
+            user?.userMetadata?['picture'] as String?;
+        final userEmail = user?.email ?? 'devotee@mandirm.in';
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.88,
-      decoration: const BoxDecoration(
-        color: _warmCreamBg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          // Drag Handle
-          Container(
-            width: 44,
-            height: 4.5,
-            margin: const EdgeInsets.only(top: 12, bottom: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(3),
-            ),
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.88,
+          decoration: const BoxDecoration(
+            color: _warmCreamBg,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
+          child: Column(
+            children: [
+              // Drag Handle
+              Container(
+                width: 44,
+                height: 4.5,
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
 
           // Header Branding & Profile Row
           Container(
@@ -422,9 +426,13 @@ class DevotionalDrawerSheet extends StatelessWidget {
                             ),
                             Text(
                               LocaleService().isHindi
-                                  ? 'संकल्प या पंडित जी से सहायता चाहिए? संपर्क करें।'
-                                  : 'Need help with Sankalp or Pandit Ji? Call or WhatsApp anytime.',
-                              style: GoogleFonts.poppins(fontSize: 10.5, color: const Color(0xFF5D4037)),
+                                  ? 'भक्त सहायता केंद्र • helpline@mandirm.in'
+                                  : 'Devotee Helpline • helpline@mandirm.in',
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF7A0C16),
+                              ),
                             ),
                           ],
                         ),
@@ -439,6 +447,8 @@ class DevotionalDrawerSheet extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 

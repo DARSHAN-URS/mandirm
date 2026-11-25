@@ -39,10 +39,13 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final orders = DevoteeDataService().prasadOrders;
-    final isHi = LocaleService().isHindi;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final orders = DevoteeDataService().prasadOrders;
+        final isHi = LocaleService().isHindi;
 
-    return Scaffold(
+        return Scaffold(
       backgroundColor: const Color(0xFFFBF8F3),
       appBar: const MandirmHeader(isAppBar: true),
       body: orders.isEmpty
@@ -346,6 +349,8 @@ class _PrasadOrdersScreenState extends State<PrasadOrdersScreen> {
                 );
               },
             ),
+        );
+      },
     );
   }
 

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../services/auth/auth_service.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../../home/screens/main_hub_screen.dart';
@@ -132,10 +135,14 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
+        final mediaQuery = MediaQuery.of(context);
+        final screenHeight = mediaQuery.size.height;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+        return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
@@ -160,11 +167,13 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                         'assets/images/login_top_header.jpg',
                         fit: BoxFit.cover,
                         alignment: Alignment.topCenter,
+                        filterQuality: FilterQuality.high,
                         errorBuilder: (context, error, stackTrace) {
                           return Image.asset(
                             'assets/images/splash_bg_clean.jpg',
                             fit: BoxFit.cover,
                             alignment: Alignment.topCenter,
+                            filterQuality: FilterQuality.high,
                           );
                         },
                       ),
@@ -206,9 +215,9 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                   const Icon(Icons.star, color: AppColors.marigoldGold, size: 14),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'ACHARYA CONSOLE',
-                                    style: TextStyle(fontFamily: 'Headway', 
-                                      color: const Color(0xFFFFD54F),
+                                    isHi ? 'आचार्य कंसोल' : 'ACHARYA CONSOLE',
+                                    style: const TextStyle(fontFamily: 'Headway', 
+                                      color: Color(0xFFFFD54F),
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 1.2,
@@ -258,7 +267,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                               child: Column(
                                 children: [
                                   Text(
-                                    'Vedic Astrologer Portal',
+                                    AstroStrings.t('portal_title'),
                                     style: TextStyle(fontFamily: 'Headway', 
                                       fontSize: 22,
                                       fontWeight: FontWeight.w700,
@@ -268,7 +277,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    'Sign in to conduct live consultations, analyze devotee kundlis & manage dakshina.',
+                                    AstroStrings.t('acharya_signin_sub'),
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.poppins(
                                       fontSize: 12.5,
@@ -321,7 +330,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                           ),
                                           const SizedBox(width: 10),
                                           Text(
-                                            'Connecting to Google...',
+                                            isHi ? 'Google से जुड़ रहे हैं...' : 'Connecting to Google...',
                                             style: GoogleFonts.poppins(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.w600,
@@ -332,7 +341,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                           _buildGoogleLogo(),
                                           const SizedBox(width: 12),
                                           Text(
-                                            'Sign in with Google',
+                                            AstroStrings.t('google_signin'),
                                             style: GoogleFonts.poppins(
                                               fontSize: 14.5,
                                               fontWeight: FontWeight.w600,
@@ -361,7 +370,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 14),
                                   child: Text(
-                                    'OR ACHARYA EMAIL',
+                                    isHi ? 'अथवा ज्योतिषी ईमेल आईडी' : 'OR ACHARYA EMAIL',
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -383,7 +392,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
 
                             // Email Address Field
                             Text(
-                              'Registered Email Address',
+                              AstroStrings.t('email_label'),
                               style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -475,7 +484,7 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            'Send Verification Code',
+                                            AstroStrings.t('send_code'),
                                             style: GoogleFonts.poppins(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w700,
@@ -501,7 +510,11 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'Encrypted Acharya verification via Supabase Auth',
+                                    isHi ? 'सुरक्षित एवं सत्यापित आचार्य ऑथेंटिकेशन' : 'Encrypted Acharya verification via Supabase Auth',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: AppColors.textMuted,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -516,13 +529,6 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
                                   color: AppColors.primaryMaroon,
                                 ),
                               ),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      color: AppColors.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ],
                         ),
@@ -535,6 +541,8 @@ class _AstrologerLoginScreenState extends State<AstrologerLoginScreen> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../consultations/screens/consultations_screen.dart';
 import '../../history/screens/history_screen.dart';
@@ -35,66 +36,71 @@ class _AstrologerMainHubScreenState extends State<AstrologerMainHubScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x0F000000),
-              blurRadius: 16,
-              offset: Offset(0, -4),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  index: 0,
-                  icon: Icons.dashboard_outlined,
-                  activeIcon: Icons.dashboard_rounded,
-                  label: AstroStrings.t('nav_duty'),
-                ),
-                _buildNavItem(
-                  index: 1,
-                  icon: Icons.headset_mic_outlined,
-                  activeIcon: Icons.headset_mic_rounded,
-                  label: AstroStrings.t('nav_requests'),
-                ),
-                _buildNavItem(
-                  index: 2,
-                  icon: Icons.history_edu_outlined,
-                  activeIcon: Icons.history_edu_rounded,
-                  label: AstroStrings.t('nav_history'),
-                ),
-                _buildNavItem(
-                  index: 3,
-                  icon: Icons.account_balance_wallet_outlined,
-                  activeIcon: Icons.account_balance_wallet_rounded,
-                  label: AstroStrings.t('nav_earnings'),
-                ),
-                _buildNavItem(
-                  index: 4,
-                  icon: Icons.person_outline_rounded,
-                  activeIcon: Icons.person_rounded,
-                  label: AstroStrings.t('nav_profile'),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        return Scaffold(
+          backgroundColor: AppColors.backgroundLight,
+          body: IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
+          bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x0F000000),
+                  blurRadius: 16,
+                  offset: Offset(0, -4),
                 ),
               ],
             ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(
+                      index: 0,
+                      icon: Icons.dashboard_outlined,
+                      activeIcon: Icons.dashboard_rounded,
+                      label: AstroStrings.t('nav_duty'),
+                    ),
+                    _buildNavItem(
+                      index: 1,
+                      icon: Icons.headset_mic_outlined,
+                      activeIcon: Icons.headset_mic_rounded,
+                      label: AstroStrings.t('nav_requests'),
+                    ),
+                    _buildNavItem(
+                      index: 2,
+                      icon: Icons.history_edu_outlined,
+                      activeIcon: Icons.history_edu_rounded,
+                      label: AstroStrings.t('nav_history'),
+                    ),
+                    _buildNavItem(
+                      index: 3,
+                      icon: Icons.account_balance_wallet_outlined,
+                      activeIcon: Icons.account_balance_wallet_rounded,
+                      label: AstroStrings.t('nav_earnings'),
+                    ),
+                    _buildNavItem(
+                      index: 4,
+                      icon: Icons.person_outline_rounded,
+                      activeIcon: Icons.person_rounded,
+                      label: AstroStrings.t('nav_profile'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

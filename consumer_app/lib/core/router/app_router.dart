@@ -14,12 +14,14 @@ import '../../presentation/shop/screens/prasad_orders_screen.dart';
 import '../../presentation/splash/screens/splash_screen.dart';
 import '../../presentation/temples/screens/temples_screen.dart';
 import '../../services/supabase_service.dart';
+import '../l10n/locale_service.dart';
 
 class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
     initialLocation: '/splash',
+    refreshListenable: LocaleService().locale,
     redirect: (BuildContext context, GoRouterState state) {
       final auth = SupabaseService();
       final isLoggedIn = auth.isAuthenticated;

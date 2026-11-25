@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../domain/models/astrologer_profile.dart';
 import '../../../services/api/api_service.dart';
 import '../../../services/auth/auth_service.dart';
@@ -172,7 +174,11 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
+        return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
@@ -199,7 +205,7 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Edit Acharya Profile',
+                      AstroStrings.t('edit_profile_title'),
                       style: TextStyle(fontFamily: 'Headway', 
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -207,7 +213,7 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
                       ),
                     ),
                     Text(
-                      'Update your Vedic credentials, Dakshina rates & bio',
+                      isHi ? 'अपनी वैदिक साख, दक्षिणा दरें और परिचय अपडेट करें' : 'Update your Vedic credentials, Dakshina rates & bio',
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: AppColors.textSecondary,
@@ -523,6 +529,8 @@ class _EditAstrologerProfileScreenState extends State<EditAstrologerProfileScree
           ),
         ],
       ),
+    );
+      },
     );
   }
 

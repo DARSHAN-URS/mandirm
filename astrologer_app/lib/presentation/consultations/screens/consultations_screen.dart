@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../../domain/models/consultation_model.dart';
 import '../../../services/api/api_service.dart';
 import '../../../services/auth/auth_service.dart';
@@ -36,7 +37,6 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
       if (mounted) _loadQueue();
     });
   }
-
 
   Future<void> _loadQueue() async {
     final astroId = AuthService().currentAstrologerId;
@@ -84,7 +84,6 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
     super.dispose();
   }
 
-
   void _startConsultation(DevoteeConsultationRequest request) async {
     final result = await Navigator.push(
       context,
@@ -126,96 +125,102 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: Column(
-        children: [
-          // Unified Mandirm Header (same as consumer app)
-          const MandirmHeader(),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        return Scaffold(
+          backgroundColor: AppColors.backgroundLight,
+          body: Column(
+            children: [
+              // Unified Mandirm Header (same as consumer app)
+              const MandirmHeader(),
 
-          // Subheader & TabBar with consumer app styling
-          Container(
-            decoration: const BoxDecoration(
-              color: AppColors.headerBg,
-              border: Border(bottom: BorderSide(color: AppColors.lightBorder, width: 1.0)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 2),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AstroStrings.t('requests_console'),
-                        style: TextStyle(fontFamily: 'Headway', 
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        AstroStrings.t('requests_subtitle'),
-                        style: GoogleFonts.poppins(
-                          fontSize: 11.5,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
+              // Subheader & TabBar with consumer app styling
+              Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.headerBg,
+                  border: Border(bottom: BorderSide(color: AppColors.lightBorder, width: 1.0)),
                 ),
-                TabBar(
-                  controller: _tabController,
-                  indicatorColor: AppColors.primaryMaroon,
-                  indicatorWeight: 3,
-                  labelColor: AppColors.primaryMaroon,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
-                  tabs: [
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 2),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(AstroStrings.t('tab_consultations')),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryMaroon,
-                              borderRadius: BorderRadius.circular(10),
+                          Text(
+                            AstroStrings.t('requests_console'),
+                            style: const TextStyle(
+                              fontFamily: 'Headway', 
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
                             ),
-                            child: Text(
-                              '${_liveQueue.length}',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          ),
+                          Text(
+                            AstroStrings.t('requests_subtitle'),
+                            style: GoogleFonts.poppins(
+                              fontSize: 11.5,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Tab(text: AstroStrings.t('tab_services')),
+                    TabBar(
+                      controller: _tabController,
+                      indicatorColor: AppColors.primaryMaroon,
+                      indicatorWeight: 3,
+                      labelColor: AppColors.primaryMaroon,
+                      unselectedLabelColor: AppColors.textSecondary,
+                      labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
+                      tabs: [
+                        Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(AstroStrings.t('tab_consultations')),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryMaroon,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '${_liveQueue.length}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Tab(text: AstroStrings.t('tab_services')),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // Tab View Body
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildLiveQueueView(),
-                _buildUpcomingBookingsView(),
-              ],
-            ),
+              // Tab View Body
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildLiveQueueView(),
+                    _buildUpcomingBookingsView(),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -256,8 +261,9 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No Devotees in Queue',
-                    style: TextStyle(fontFamily: 'Headway', 
+                    AstroStrings.t('no_devotees_queue'),
+                    style: const TextStyle(
+                      fontFamily: 'Headway', 
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -265,7 +271,12 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Your status is active. Incoming calls will alert here.',
+                    AstroStrings.t('status_active_banner'),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -274,10 +285,6 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: AppColors.primaryMaroon,
-                    ),
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -296,276 +303,285 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
         padding: const EdgeInsets.all(16),
         itemCount: _liveQueue.length + 1,
         itemBuilder: (context, index) {
-        if (index == 0) {
-          // Devotional Guidance Banner with Image
-          return Container(
-            margin: const EdgeInsets.only(bottom: 14),
-            height: 70,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.lightBorder),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  AppImage.network(
-                    AppConstants.cdnUrl(AppConstants.astroBannerArt),
-                    fallbackAsset: AppConstants.splashBackgroundAsset,
-                    fit: BoxFit.cover,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryMaroon.withOpacity(0.92),
-                          AppColors.primaryMaroon.withOpacity(0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.verified_user_rounded, color: Color(0xFFFFD54F), size: 22),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '॥ परामर्श मर्यादा व आचार संहिता ॥',
-                                style: TextStyle(fontFamily: 'Headway', 
-                                  color: const Color(0xFFFFD54F),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Provide honest Vedic remedies. Respect devotee privacy.',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 10.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          if (index == 0) {
+            // Devotional Guidance Banner with Image
+            return Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              height: 70,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.lightBorder),
               ),
-            ),
-          );
-        }
-
-        final request = _liveQueue[index - 1];
-        final isVideo = request.type == 'video';
-        final diffMins = DateTime.now().difference(request.requestedAt).inMinutes;
-        final waitingStr = diffMins <= 1 ? 'Just now' : '$diffMins mins ago';
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isVideo ? AppColors.primaryMaroon.withOpacity(0.3) : AppColors.lightBorder,
-              width: 1.2,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x06000000),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.lightBorder, width: 1.5),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AppImage.network(
+                      AppConstants.cdnUrl(AppConstants.astroBannerArt),
+                      fallbackAsset: AppConstants.splashBackgroundAsset,
+                      fit: BoxFit.cover,
                     ),
-                    child: ClipOval(
-                      child: AppImage.network(
-                        request.devoteePhoto,
-                        width: 48,
-                        height: 48,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              request.devoteeName,
-                              style: GoogleFonts.poppins(
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isVideo
-                                    ? AppColors.primaryMaroon.withOpacity(0.1)
-                                    : AppColors.deepAmber.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isVideo ? Icons.videocam : Icons.phone_in_talk,
-                                    size: 14,
-                                    color: isVideo ? AppColors.primaryMaroon : AppColors.deepAmber,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    isVideo ? 'Video Call' : 'Voice Call',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: isVideo ? AppColors.primaryMaroon : AppColors.deepAmber,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primaryMaroon.withOpacity(0.92),
+                            AppColors.primaryMaroon.withOpacity(0.7),
                           ],
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Waiting: $waitingStr • Rate: ₹${request.perMinuteRate.toStringAsFixed(0)}/min',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.verified_user_rounded, color: Color(0xFFFFD54F), size: 22),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  '॥ परामर्श मर्यादा व आचार संहिता ॥',
+                                  style: TextStyle(
+                                    fontFamily: 'Headway', 
+                                    color: Color(0xFFFFD54F),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  LocaleService().isHindi
+                                      ? 'सत्यनिष्ठ शास्त्रोक्त उपाय बताएं व भक्त की गोपनीयता रखें।'
+                                      : 'Provide honest Vedic remedies. Respect devotee privacy.',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 10.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Devotee Details Chip
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.warmCream,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.lightBorder),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome,
-                      size: 14,
-                      color: AppColors.deepAmber,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'DOB: ${request.birthDob} • Rashi: ${request.devoteeRashi} • Topic: ${request.problemTopic}',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: AppColors.textPrimary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        // Persist rejection to backend & Supabase
-                        ApiService().updateConsultationStatus(request.id, status: 'rejected');
-                        setState(() {
-                          _liveQueue.removeWhere((r) => r.id == request.id);
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Request from ${request.devoteeName} passed.', style: GoogleFonts.poppins()),
-                            backgroundColor: AppColors.warmCream,
-                          ),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.lightBorder),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: Text(
-                        'Pass',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _startConsultation(request),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryMaroon,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      icon: Icon(
-                        isVideo ? Icons.videocam_rounded : Icons.call_rounded,
-                        size: 18,
-                      ),
-                      label: Text(
-                        'Accept & Start',
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ],
+            );
+          }
+
+          final request = _liveQueue[index - 1];
+          final isVideo = request.type == 'video';
+          final diffMins = DateTime.now().difference(request.requestedAt).inMinutes;
+          final waitingStr = diffMins <= 1 ? 'Just now' : '$diffMins mins ago';
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isVideo ? AppColors.primaryMaroon.withOpacity(0.3) : AppColors.lightBorder,
+                width: 1.2,
               ),
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x06000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.lightBorder, width: 1.5),
+                      ),
+                      child: ClipOval(
+                        child: AppImage.network(
+                          request.devoteePhoto,
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                request.devoteeName,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isVideo
+                                      ? AppColors.primaryMaroon.withOpacity(0.1)
+                                      : AppColors.deepAmber.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isVideo ? Icons.videocam : Icons.phone_in_talk,
+                                      size: 14,
+                                      color: isVideo ? AppColors.primaryMaroon : AppColors.deepAmber,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      isVideo
+                                          ? (LocaleService().isHindi ? 'वीडियो कॉल' : 'Video Call')
+                                          : (LocaleService().isHindi ? 'ऑडियो कॉल' : 'Voice Call'),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: isVideo ? AppColors.primaryMaroon : AppColors.deepAmber,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            LocaleService().isHindi
+                                ? 'प्रतीक्षा: $waitingStr • दर: ₹${request.perMinuteRate.toStringAsFixed(0)}/मिनट'
+                                : 'Waiting: $waitingStr • Rate: ₹${request.perMinuteRate.toStringAsFixed(0)}/min',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Devotee Details Chip
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.warmCream,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.lightBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: AppColors.deepAmber,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          LocaleService().isHindi
+                              ? 'जन्म: ${request.birthDob} • राशि: ${request.devoteeRashi} • विषय: ${request.problemTopic}'
+                              : 'DOB: ${request.birthDob} • Rashi: ${request.devoteeRashi} • Topic: ${request.problemTopic}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // Persist rejection to backend & Supabase
+                          ApiService().updateConsultationStatus(request.id, status: 'rejected');
+                          setState(() {
+                            _liveQueue.removeWhere((r) => r.id == request.id);
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Request from ${request.devoteeName} passed.', style: GoogleFonts.poppins()),
+                              backgroundColor: AppColors.warmCream,
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.lightBorder),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          AstroStrings.t('pass'),
+                          style: GoogleFonts.poppins(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _startConsultation(request),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryMaroon,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        icon: Icon(
+                          isVideo ? Icons.videocam_rounded : Icons.call_rounded,
+                          size: 18,
+                        ),
+                        label: Text(
+                          AstroStrings.t('accept_and_start'),
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   void _updateBookingStatus(AstrologerServiceBooking booking, String newStatus) async {
     final idx = _serviceBookings.indexWhere((b) => b.id == booking.id);
@@ -641,10 +657,11 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 '॥ विशेष सेवा अनुरोध (Special Service Requests) ॥',
-                                style: TextStyle(fontFamily: 'Headway', 
-                                  color: const Color(0xFFFFD54F),
+                                style: TextStyle(
+                                  fontFamily: 'Headway', 
+                                  color: Color(0xFFFFD54F),
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -792,7 +809,11 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                isCompleted ? 'COMPLETED' : (isInProgress ? 'IN PROGRESS' : 'REQUESTED'),
+                                isCompleted
+                                    ? (LocaleService().isHindi ? 'सफल' : 'COMPLETED')
+                                    : (isInProgress
+                                        ? (LocaleService().isHindi ? 'प्रक्रियाधीन' : 'IN PROGRESS')
+                                        : (LocaleService().isHindi ? 'अनुरोधित' : 'REQUESTED')),
                                 style: GoogleFonts.poppins(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w700,
@@ -877,7 +898,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                           ),
                           icon: const Icon(Icons.play_circle_outline, size: 16, color: AppColors.primaryMaroon),
                           label: Text(
-                            'Begin Prep',
+                            AstroStrings.t('begin_prep'),
                             style: GoogleFonts.poppins(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
@@ -898,7 +919,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                         ),
                         icon: const Icon(Icons.check_circle_outline, size: 16),
                         label: Text(
-                          'Mark Delivered',
+                          AstroStrings.t('mark_delivered'),
                           style: GoogleFonts.poppins(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
@@ -922,7 +943,7 @@ class _AstrologerConsultationsScreenState extends State<AstrologerConsultationsS
                             const Icon(Icons.check_circle, color: AppColors.statusOnline, size: 16),
                             const SizedBox(width: 6),
                             Text(
-                              'Kundli Fulfilled & Dispatched to Devotee',
+                              LocaleService().isHindi ? 'कुंडली तैयार व भक्त को प्रेषित' : 'Kundli Fulfilled & Dispatched to Devotee',
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../services/auth/auth_service.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../../home/screens/main_hub_screen.dart';
@@ -147,7 +149,11 @@ class _AstrologerOtpScreenState extends State<AstrologerOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
+        return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
@@ -186,7 +192,7 @@ class _AstrologerOtpScreenState extends State<AstrologerOtpScreen> {
                   const SizedBox(height: 18),
 
                   Text(
-                    'Enter Verification Code',
+                    AstroStrings.t('otp_title'),
                     style: TextStyle(fontFamily: 'Headway', 
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -286,7 +292,7 @@ class _AstrologerOtpScreenState extends State<AstrologerOtpScreen> {
                               ),
                             )
                           : Text(
-                              'Verify & Proceed to Live Hub',
+                              AstroStrings.t('verify_proceed'),
                               style: GoogleFonts.poppins(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
@@ -303,7 +309,7 @@ class _AstrologerOtpScreenState extends State<AstrologerOtpScreen> {
                       Text(
                         _countdown > 0
                             ? 'Resend code in ${_countdown}s'
-                            : 'Didn’t receive the code?',
+                            : isHi ? 'क्या आपको कोड नहीं मिला?' : 'Didn’t receive the code?',
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           color: AppColors.textSecondary,
@@ -313,7 +319,7 @@ class _AstrologerOtpScreenState extends State<AstrologerOtpScreen> {
                         TextButton(
                           onPressed: _resendCode,
                           child: Text(
-                            'Resend Code',
+                            AstroStrings.t('resend_code'),
                             style: GoogleFonts.poppins(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
@@ -329,6 +335,8 @@ class _AstrologerOtpScreenState extends State<AstrologerOtpScreen> {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }

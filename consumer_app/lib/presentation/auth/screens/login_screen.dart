@@ -118,62 +118,69 @@ class _LoginScreenState extends State<LoginScreen> {
               (state.message?.toLowerCase().contains('sending') ?? false);
           final isAnyLoading = isGoogleLoading || isOtpLoading;
 
-          return Scaffold(
-            backgroundColor: const Color(0xFF1E0703),
-            body: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: screenHeight,
-                ),
-                child: Column(
-                  children: [
-                    // 1. Top Section: Temple Artwork with Lotus Emblem, Mandiram Title & Feature Cards
-                    SizedBox(
-                      width: double.infinity,
-                      height: math.max(340.0, screenHeight * 0.44),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          // Devotional Header Artwork Image
-                          Image.asset(
-                            AppConstants.loginTopHeaderAsset,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.topCenter,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                AppConstants.splashBackgroundAsset,
+          return ValueListenableBuilder<String>(
+            valueListenable: LocaleService().locale,
+            builder: (context, locale, _) {
+              return Scaffold(
+                backgroundColor: const Color(0xFF1E0703),
+                body: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: screenHeight,
+                    ),
+                    child: Column(
+                      children: [
+                        // 1. Top Section: Devotional Temple Artwork with Emblem & Service Highlights
+                        SizedBox(
+                          width: double.infinity,
+                          height: math.max(300.0, screenHeight * 0.40),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              // Devotional Header Artwork Image (Crisp high-resolution cover)
+                              Image.asset(
+                                AppConstants.loginTopHeaderAsset,
                                 fit: BoxFit.cover,
                                 alignment: Alignment.topCenter,
-                              );
-                            },
-                          ),
+                                filterQuality: FilterQuality.high,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    AppConstants.splashBackgroundAsset,
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
+                                    filterQuality: FilterQuality.high,
+                                  );
+                                },
+                              ),
 
-                          // Top Bar with Language Toggle Button
-                          Positioned(
-                            top: mediaQuery.padding.top + 8,
-                            right: 16,
-                            child: const LanguageToggleButton(),
+                              // Top Bar with Language Toggle Button
+                              Positioned(
+                                top: mediaQuery.padding.top + 8,
+                                right: 16,
+                                child: const LanguageToggleButton(),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
 
-                    // 2. Bottom Section: Elevated Sign In Ivory Card with Ornamental Crest & Mandalas
-                    Transform.translate(
-                      offset: const Offset(0, -18),
-                      child: _buildSignInCard(
-                        context: context,
-                        isGoogleLoading: isGoogleLoading,
-                        isOtpLoading: isOtpLoading,
-                        isAnyLoading: isAnyLoading,
-                        screenWidth: screenWidth,
-                      ),
+                        // 2. Bottom Section: Elevated Sign In Ivory Card with Ornamental Crest & Mandalas
+                        Transform.translate(
+                          offset: const Offset(0, -18),
+                          child: _buildSignInCard(
+                            context: context,
+                            isGoogleLoading: isGoogleLoading,
+                            isOtpLoading: isOtpLoading,
+                            isAnyLoading: isAnyLoading,
+                            screenWidth: screenWidth,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),
@@ -269,12 +276,12 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Title: "Sign In / Register"
+                  // Title: Direct, non-duplicative action heading
                   Center(
                     child: Text(
-                      LocaleService().isHindi ? 'लॉग इन / पंजीकरण' : 'Sign In / Register',
+                      LocaleService().isHindi ? 'पवित्र दर्शन एवं सेवाओं के लिए आगे बढ़ें' : 'Enter Details to Continue',
                       style: TextStyle(fontFamily: 'Headway', 
-                        fontSize: 26,
+                        fontSize: 21,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF6B1118),
                         letterSpacing: 0.5,

@@ -34,9 +34,13 @@ class AstrologerDrawerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
+        final mediaQuery = MediaQuery.of(context);
 
-    return Container(
+        return Container(
       height: mediaQuery.size.height * 0.88,
       decoration: const BoxDecoration(
         color: _warmCreamBg,
@@ -141,7 +145,7 @@ class AstrologerDrawerSheet extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  'VERIFIED',
+                                  isHi ? 'सत्यापित' : 'VERIFIED',
                                   style: GoogleFonts.poppins(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w700,
@@ -416,6 +420,8 @@ class AstrologerDrawerSheet extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/app_strings.dart';
 import '../../../services/cart_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/api_service.dart';
@@ -161,247 +163,254 @@ class _CartDrawerSheetState extends State<CartDrawerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.88,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFFFBF8F3),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag Handle
-          const SizedBox(height: 12),
-          Container(
-            width: 44,
-            height: 4.5,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
 
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.88,
+          ),
+          decoration: const BoxDecoration(
+            color: Color(0xFFFBF8F3),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag Handle
+              const SizedBox(height: 12),
+              Container(
+                width: 44,
+                height: 4.5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7A0C16).withAlpha(20),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF7A0C16), size: 20),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7A0C16).withAlpha(20),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF7A0C16), size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          isHi ? 'आध्यात्मिक कार्ट (${_cart.totalCount})' : 'Spiritual Cart (${_cart.totalCount})',
+                          style: const TextStyle(
+                            fontFamily: 'Headway',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1E1E1E),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Spiritual Cart (${_cart.totalCount})',
-                      style: const TextStyle(
-                        fontFamily: 'Headway',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF1E1E1E),
+                    if (_cart.items.isNotEmpty)
+                      TextButton(
+                        onPressed: () {
+                          setState(() => _cart.clearCart());
+                        },
+                        child: Text(
+                          isHi ? 'खाली करें' : 'Clear',
+                          style: GoogleFonts.poppins(color: Colors.red.shade700, fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
                       ),
-                    ),
                   ],
                 ),
-                if (_cart.items.isNotEmpty)
-                  TextButton(
-                    onPressed: () {
-                      setState(() => _cart.clearCart());
-                    },
-                    child: Text(
-                      'Clear',
-                      style: GoogleFonts.poppins(color: Colors.red.shade700, fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
+              ),
+              const Divider(height: 1),
 
-          // Body
-          Expanded(
-            child: _cart.items.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFF9ED),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Center(
-                              child: Icon(Icons.remove_shopping_cart_outlined, color: Color(0xFF7A0C16), size: 34),
-                            ),
+              // Body
+              Expanded(
+                child: _cart.items.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 72,
+                                height: 72,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFFF9ED),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Icon(Icons.remove_shopping_cart_outlined, color: Color(0xFF7A0C16), size: 34),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                isHi ? 'आपकी आध्यात्मिक कार्ट खाली है' : 'Your Spiritual Cart is Empty',
+                                style: const TextStyle(
+                                  fontFamily: 'Headway',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF7A0C16),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                isHi ? 'पवित्र मूर्तियां, यंत्र, रुद्राक्ष एवं पूजन सामग्री देखें।' : 'Explore sacred murtis, yantras, authentic Rudraksha malas, and organic puja samagri.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'Your Spiritual Cart is Empty',
-                            style: const TextStyle(
-                              fontFamily: 'Headway',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF7A0C16),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Explore sacred murtis, yantras, authentic Rudraksha malas, and organic puja samagri.',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    children: [
-                      // Cart items list
-                      ..._cart.items.map((item) => _buildCartItemCard(item)),
-
-                      const SizedBox(height: 16),
-
-                      // Delivery Address
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFDECDB4)),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        children: [
+                          // Cart items list
+                          ..._cart.items.map((item) => _buildCartItemCard(item)),
+
+                          const SizedBox(height: 16),
+
+                          // Delivery Address
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFFDECDB4)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.location_on_rounded, color: Color(0xFF7A0C16), size: 16),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Delivery Address for Consecrated Prasad',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF1E1E1E),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on_rounded, color: Color(0xFF7A0C16), size: 16),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      isHi ? 'प्रसाद डिलीवरी का पता' : 'Delivery Address for Consecrated Prasad',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF1E1E1E),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: _addressController,
+                                  maxLines: 2,
+                                  style: GoogleFonts.poppins(fontSize: 12),
+                                  decoration: InputDecoration(
+                                    hintText: isHi ? 'पूरा पता, मकान नंबर, शहर एवं पिनकोड दर्ज करें...' : 'Enter complete flat, street, city & pincode...',
+                                    filled: true,
+                                    fillColor: const Color(0xFFFBF8F3),
+                                    contentPadding: const EdgeInsets.all(10),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.grey.shade300),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: _addressController,
-                              maxLines: 2,
-                              style: GoogleFonts.poppins(fontSize: 12),
-                              decoration: InputDecoration(
-                                hintText: 'Enter complete flat, street, city & pincode...',
-                                filled: true,
-                                fillColor: const Color(0xFFFBF8F3),
-                                contentPadding: const EdgeInsets.all(10),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.grey.shade300),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
 
-                      const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                      // Order Summary Card
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFDECDB4)),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Items Subtotal', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700)),
-                                Text('₹ ${_cart.subtotal.toInt()}', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
-                              ],
+                          // Order Summary Card
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFFDECDB4)),
                             ),
-                            const SizedBox(height: 6),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            child: Column(
                               children: [
-                                Text('Sanctum Consecration Packing', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700)),
-                                Text('FREE', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.green.shade700)),
-                              ],
-                            ),
-                            const Divider(height: 18),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total Payable',
-                                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF7A0C16)),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(isHi ? 'सामग्री उपकुल' : 'Items Subtotal', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700)),
+                                    Text('₹ ${_cart.subtotal.toInt()}', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+                                  ],
                                 ),
-                                Text(
-                                  '₹ ${_cart.subtotal.toInt()}',
-                                  style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800, color: const Color(0xFF7A0C16)),
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(isHi ? 'मंदिर संकल्प पैकिंग' : 'Sanctum Consecration Packing', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade700)),
+                                    Text(isHi ? 'निःशुल्क' : 'FREE', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.green.shade700)),
+                                  ],
+                                ),
+                                const Divider(height: 18),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      isHi ? 'कुल देय राशि' : 'Total Payable',
+                                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF7A0C16)),
+                                    ),
+                                    Text(
+                                      '₹ ${_cart.subtotal.toInt()}',
+                                      style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w800, color: const Color(0xFF7A0C16)),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+              ),
+
+              // Checkout CTA Bar
+              if (_cart.items.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 10, offset: const Offset(0, -3)),
                     ],
                   ),
-          ),
-
-          // Checkout CTA Bar
-          if (_cart.items.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 10, offset: const Offset(0, -3)),
-                ],
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _checkout,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7A0C16),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _checkout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7A0C16),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : Text(
+                              isHi ? 'पवित्र चेकआउट करें (₹ ${_cart.subtotal.toInt()})' : 'Proceed to Sacred Checkout (₹ ${_cart.subtotal.toInt()})',
+                              style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700),
+                            ),
+                    ),
                   ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : Text(
-                          'Proceed to Sacred Checkout (₹ ${_cart.subtotal.toInt()})',
-                          style: GoogleFonts.poppins(fontSize: 13.5, fontWeight: FontWeight.w700),
-                        ),
                 ),
-              ),
-            ),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/entity_localizer.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../../consultations/screens/consultations_screen.dart';
 import '../widgets/astrologer_consultation_modals.dart';
+import '../widgets/devotee_birth_details_sheet.dart';
 
 class AstrologerDetailScreen extends StatefulWidget {
   final Map<String, dynamic>? astrologer;
@@ -32,7 +35,7 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
   ];
 
   Map<String, dynamic> get _astro {
-    return widget.astrologer ?? {
+    final base = widget.astrologer ?? {
       'id': 'ast_rajesh',
       'name': 'Pandit Acharya Rajesh Sharma',
       'badge': 'Top Rated',
@@ -45,11 +48,12 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
       'experience': '15+ Years Experience',
       'languages': 'Hindi, English',
       'isOnline': true,
-      'price': '₹ 5/Min',
-      'priceNumeric': 5,
-      'originalPrice': '₹ 36/Min',
+      'price': '₹15/min',
+      'priceNumeric': 15,
+      'originalPrice': '',
       'imageAsset': AppConstants.astroRajeshAsset,
     };
+    return EntityLocalizer.localizeAstrologer(base, LocaleService().isHindi);
   }
 
   @override
@@ -60,13 +64,14 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
 
   void _onConsultationCompleted({required bool isVideo}) {
     final consultationId = 'CNS-${DateTime.now().millisecondsSinceEpoch % 10000}';
+    final rate = (_astro['priceNumeric'] is num ? (_astro['priceNumeric'] as num).toInt() : 15);
     final consultation = {
       'id': consultationId,
       'astrologerName': _astro['name'] ?? 'Vedic Astrologer',
       'specialty': _astro['specialty'] ?? 'Vedic • Kundali',
       'date': 'Today, Just Now',
       'duration': '15 mins',
-      'amount': _astro['price'] ?? '₹300',
+      'amount': '₹${rate * 15}',
       'remedy': 'Chant Om Namah Shivaya 108 times daily; donate yellow fruits or sweets on Thursdays.',
       'rating': 5.0,
     };
@@ -79,17 +84,20 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
     );
   }
 
-  void _openCallDialog() { /*
+  void _openCallDialog() {
     final isAi = _astro['isAi'] == true ||
         _astro['is_ai'] == 1 ||
         _astro['is_ai'] == true ||
         _astro['id']?.toString().startsWith('astro_ai_') == true ||
-        _astro['id'] == 'ast_ai_jyotish';
-*/ if (false) {
+        _astro['id'] == 'ast_ai_jyotish' ||
+        (_astro['name']?.toString().toLowerCase().contains('ai') ?? false);
+    if (isAi) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Audio and video calls are only for verified live Acharyas registered via the Astrologer App or Admin.'),
-          backgroundColor: Color(0xFF7A0C16),
+        SnackBar(
+          content: Text(LocaleService().isHindi
+              ? 'इस ज्योतिषी के साथ केवल टेक्स्ट चैट परामर्श उपलब्ध है।'
+              : 'Text chat consultation only is available for this astrologer.'),
+          backgroundColor: const Color(0xFF7A0C16),
         ),
       );
       _openChatModal();
@@ -108,7 +116,15 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
     );
   }
 
-  void _openChatModal() {
+  void _openChatModal() async {
+    // 1. Ask devotee details once if not already filled
+    final hasDetails = DevoteeDataService().hasBirthDetails;
+    if (!hasDetails) {
+      final saved = await DevoteeBirthDetailsSheet.show(context, astrologer: _astro);
+      if (saved == null || !mounted) return;
+    }
+
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -284,20 +300,21 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
           ],
         ),
         child: Builder(
-          builder: (context) { /*
+          builder: (context) {
             final isAi = astro['isAi'] == true ||
                 astro['is_ai'] == 1 ||
                 astro['is_ai'] == true ||
                 astro['id']?.toString().startsWith('astro_ai_') == true ||
-                astro['id'] == 'ast_ai_jyotish';
+                astro['id'] == 'ast_ai_jyotish' ||
+                (astro['name']?.toString().toLowerCase().contains('ai') ?? false);
 
-        */ if (false) {
+            if (isAi) {
               return SizedBox(
                 height: 48,
                 child: ElevatedButton(
                   onPressed: _openChatModal,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD97706),
+                    backgroundColor: const Color(0xFF7A0C16),
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -306,10 +323,12 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+                      const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'START 24/7 AI CHAT',
+                        LocaleService().isHindi
+                            ? 'चैट परामर्श शुरू करें (₹${_astro['priceNumeric'] ?? 15}/मिनट)'
+                            : 'START CHAT (₹${_astro['priceNumeric'] ?? 15}/min)',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -663,46 +682,40 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
     );
   }
 
-  /// Pricing & Gift Bar: "Trial Offer: ₹ 5/Min  ₹ 36/Min", "Gift 🎁"
+  /// Sacred Guidance & Gift Bar: "100% Authentic & Sacred", "Gift 🎁"
   Widget _buildPricingAndGiftBar(Map<String, dynamic> astro) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Left: Pricing
+        // Left: Sacred Guidance Status (No charges/rates mentioned)
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Trial Offer',
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF16A34A),
-              ),
-            ),
-            const SizedBox(height: 2),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
               children: [
+                const Icon(Icons.verified_user_rounded,
+                    size: 15, color: Color(0xFF16A34A)),
+                const SizedBox(width: 4),
                 Text(
-                  '₹ 5/Min',
+                  LocaleService().isHindi ? '100% प्रामाणिक एवं सत्यापित' : '100% Authentic & Sacred',
                   style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF231E1B),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '₹ 36/Min',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: const Color(0xFF9CA3AF),
-                    decoration: TextDecoration.lineThrough,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF16A34A),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              LocaleService().isHindi
+                  ? '₹${_astro['priceNumeric'] ?? 15}/मिनट • वैदिक चैट परामर्श'
+                  : '₹${_astro['priceNumeric'] ?? 15}/min • Vedic Chat',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF7A0C16),
+              ),
             ),
           ],
         ),

@@ -117,7 +117,11 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final isHi = locale == LocaleService.hi;
+        return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
@@ -315,7 +319,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                       ),
                       icon: const Icon(Icons.edit_note_rounded, size: 20),
                       label: Text(
-                        'Edit Acharya Profile & Vedic Details',
+                        isHi ? 'आचार्य प्रोफ़ाइल व विवरण बदलें' : 'Edit Acharya Profile & Vedic Details',
                         style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                     ),
@@ -324,21 +328,21 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
 
                   // Rate Settings Section
                   Text(
-                    'Manage Consultation Rates (Per Minute)',
-                    style: TextStyle(fontFamily: 'Headway', 
+                    isHi ? 'परामर्श दक्षिणा दरें (प्रति मिनट)' : 'Manage Consultation Rates (Per Minute)',
+                    style: const TextStyle(fontFamily: 'Headway', 
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildRateCard('Video Consultation', _videoRate, Icons.videocam, AppColors.primaryMaroon, (val) {
+                  _buildRateCard(isHi ? 'वीडियो परामर्श' : 'Video Consultation', _videoRate, Icons.videocam, AppColors.primaryMaroon, (val) {
                     setState(() => _videoRate = val);
                   }),
-                  _buildRateCard('Voice Call Consultation', _voiceRate, Icons.phone, AppColors.deepAmber, (val) {
+                  _buildRateCard(isHi ? 'ऑडियो कॉल परामर्श' : 'Voice Call Consultation', _voiceRate, Icons.phone, AppColors.deepAmber, (val) {
                     setState(() => _voiceRate = val);
                   }),
-                  _buildRateCard('Live Vedic Chat', _chatRate, Icons.chat, AppColors.statusOnline, (val) {
+                  _buildRateCard(isHi ? 'लाइव वैदिक चैट' : 'Live Vedic Chat', _chatRate, Icons.chat, AppColors.statusOnline, (val) {
                     setState(() => _chatRate = val);
                   }),
                   const SizedBox(height: 8),
@@ -362,7 +366,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                               ),
                             )
                           : Text(
-                              'Save & Update Rates',
+                              isHi ? 'दरें सहेजें व अपडेट करें' : 'Save & Update Rates',
                               style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
                             ),
                     ),
@@ -374,8 +378,8 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Vedic Specializations',
-                        style: TextStyle(fontFamily: 'Headway', 
+                        isHi ? 'वैदिक विशेषज्ञता' : 'Vedic Specializations',
+                        style: const TextStyle(fontFamily: 'Headway', 
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -384,7 +388,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                       InkWell(
                         onTap: _openEditProfile,
                         child: Text(
-                          'Modify',
+                          isHi ? 'बदलें' : 'Modify',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -422,8 +426,8 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Consultation Languages',
-                        style: TextStyle(fontFamily: 'Headway', 
+                        isHi ? 'परामर्श भाषाएं' : 'Consultation Languages',
+                        style: const TextStyle(fontFamily: 'Headway', 
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -432,7 +436,7 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
                       InkWell(
                         onTap: _openEditProfile,
                         child: Text(
-                          'Modify',
+                          isHi ? 'बदलें' : 'Modify',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -552,6 +556,8 @@ class _AstrologerProfileScreenState extends State<AstrologerProfileScreen> {
           ),
         ],
       ),
+    );
+      },
     );
   }
 

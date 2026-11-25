@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_strings.dart';
+import '../../../core/l10n/locale_service.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -144,8 +145,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       builder: (context, state) {
         final isLoading = state is AuthLoading || _isSubmitting;
 
-        return Scaffold(
-          backgroundColor: AppColors.backgroundLight,
+        return ValueListenableBuilder<String>(
+          valueListenable: LocaleService().locale,
+          builder: (context, locale, _) {
+            return Scaffold(
+              backgroundColor: AppColors.backgroundLight,
           appBar: AppBar(
             backgroundColor: const Color(0xFFFFFDF9),
             elevation: 0.5,
@@ -392,6 +396,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ],
             ),
           ),
+            );
+          },
         );
       },
     );

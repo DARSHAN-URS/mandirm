@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../services/api_service.dart';
 import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/entity_localizer.dart';
 import 'puja_detail_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
 import '../../common/widgets/app_image.dart';
@@ -74,21 +75,24 @@ class _PujasScreenState extends State<PujasScreen> {
               ];
             }
 
+            final locEn = EntityLocalizer.localizePuja(bp, false);
+            final locHi = EntityLocalizer.localizePuja(bp, true);
+
             _allPujas.add({
               'id': id,
-              'title': bp['title'] ?? bp['name'] ?? 'Vedic Puja Ritual',
-              'title_hi': bp['title_hi'] ?? bp['title'] ?? 'वैदिक पूजा अनुष्ठान',
-              'subtitle': bp['description'] ?? bp['subtitle'] ?? 'Holy ceremony conducted by certified temple priests',
-              'subtitle_hi': bp['subtitle_hi'] ?? bp['description'] ?? 'पवित्र तीर्थ पुरोहितों द्वारा संपन्न वैदिक विधि',
+              'title': locEn['title'],
+              'title_hi': locHi['title'],
+              'subtitle': locEn['subtitle'],
+              'subtitle_hi': locHi['subtitle'],
               'badge': bp['is_popular'] == true ? 'Most Popular' : 'Special Seva',
               'badge_hi': bp['is_popular'] == true ? 'सर्वाधिक लोकप्रिय' : 'विशेष सेवा',
               'badgeColor': const Color(0xFFFDE68A),
               'badgeTextColor': const Color(0xFF78350F),
               'badgeIcon': Icons.spa_rounded,
-              'mandir': bp['temple_name'] ?? bp['mandir'] ?? 'Sacred Temple Sanctum',
-              'mandir_hi': bp['mandir_hi'] ?? bp['temple_name'] ?? 'पवित्र तीर्थ धाम',
-              'date': bp['date'] ?? 'Upcoming Auspicious Muhurat',
-              'date_hi': bp['date_hi'] ?? 'आगामी शुभ मुहूर्त',
+              'mandir': locEn['mandir'],
+              'mandir_hi': locHi['mandir'],
+              'date': 'Daily Auspicious Muhurat',
+              'date_hi': 'दैनिक शुभ मुहूर्त',
               'category': bp['category'] ?? 'All Pujas',
               'price': '₹${(bp['price'] as num?)?.toInt() ?? 1100}',
               'numericPrice': (bp['price'] as num?)?.toInt() ?? 1100,
@@ -97,7 +101,7 @@ class _PujasScreenState extends State<PujasScreen> {
                   : AppConstants.pujaGangaDiyaAsset,
               'pandits': bp['pandits'] ?? '3 Vedic Purohits',
               'duration': '${bp['duration_minutes'] ?? 60} mins',
-              'benefits': bp['benefits'] ?? 'Spiritual peace, obstacle removal, divine blessings.',
+              'benefits': locHi['benefits'] ?? bp['benefits'] ?? 'Spiritual peace, obstacle removal, divine blessings.',
               'inclusions': inclusions,
             });
           }

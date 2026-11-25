@@ -3,9 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/entity_localizer.dart';
 import '../../../services/api_service.dart';
 import '../../../services/devotee_data_service.dart';
 import '../../../services/supabase_service.dart';
+import '../../../services/razorpay_service.dart';
 import 'prasad_orders_screen.dart';
 import 'product_detail_screen.dart';
 import '../../common/widgets/mandirm_header.dart';
@@ -152,13 +154,18 @@ class _StoreScreenState extends State<StoreScreen> {
           for (final bp in backendProducts) {
             final id = bp['id']?.toString() ?? 'prod_${bp.hashCode}';
             final catStr = (bp['category'] ?? 'idols').toString().toLowerCase();
+            final locEn = EntityLocalizer.localizeProduct(bp, false);
+            final locHi = EntityLocalizer.localizeProduct(bp, true);
             _featuredProducts.add({
               'id': id,
-              'title': bp['name'] ?? 'Sacred Item',
-              'subtitle': bp['material'] ?? bp['category'] ?? 'Consecrated Spiritual Item',
+              'title': locEn['title'],
+              'title_hi': locHi['title'],
+              'subtitle': locEn['subtitle'],
+              'subtitle_hi': locHi['subtitle'],
               'price': (bp['price'] as num?)?.toInt() ?? 999,
               'originalPrice': (bp['original_price'] as num?)?.toInt() ?? 1499,
               'badge': bp['is_featured'] == true ? 'Bestseller' : null,
+              'badge_hi': bp['is_featured'] == true ? 'सर्वाधिक लोकप्रिय' : null,
               'badgeBg': const Color(0xFFFFE082),
               'badgeText': const Color(0xFF4A3000),
               'asset': bp['image_url'] ?? AppConstants.prodRudrakshaAsset,
@@ -166,8 +173,8 @@ class _StoreScreenState extends State<StoreScreen> {
               'mandir': 'Vedic Temple Blessed',
               'rating': (bp['rating'] as num?)?.toDouble() ?? 4.9,
               'reviews': (bp['reviews_count'] as num?)?.toInt() ?? 108,
-              'description': bp['description'] ??
-                  'Pure authentic spiritual store item consecrated at sacred temple.',
+              'description': locEn['description'],
+              'description_hi': locHi['description'],
             });
           }
         });
@@ -511,7 +518,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     Navigator.pop(ctx);
                                     _proceedToCartCheckout(List<Map<String, dynamic>>.from(_cartItems));
                                   },
@@ -668,7 +675,7 @@ class _StoreScreenState extends State<StoreScreen> {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     final addr = addressController.text.trim();
                     if (addr.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -684,6 +691,30 @@ class _StoreScreenState extends State<StoreScreen> {
                         (user?.userMetadata?['name'] as String?) ??
                         'Devotee';
                     final devoteeGotra = profile?.gotra ?? 'Devotee Gotra';
+
+                    final cartOrderId = 'CART-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+                    final payRes = await RazorpayService().openPayment(
+                      amount: grandTotal.toDouble(),
+                      referenceType: 'shop_order',
+                      referenceId: cartOrderId,
+                      devoteeName: devoteeName,
+                      devoteeEmail: user?.email,
+                      devoteePhone: profile?.phoneNumber ?? user?.phone,
+                      title: 'Mandirm Divine Store',
+                      description: 'Consecrated Spiritual Samagri (${items.length} items)',
+                    );
+
+                    if (!payRes.isSuccess) {
+                      if (context.mounted && payRes.errorMessage != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(payRes.errorMessage!),
+                            backgroundColor: Colors.red.shade800,
+                          ),
+                        );
+                      }
+                      return;
+                    }
 
                     for (final product in items) {
                       final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch % 1000000}';
@@ -1360,7 +1391,7 @@ class _StoreScreenState extends State<StoreScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Mantra Energized Divine Idols',
+                          LocaleService().isHindi ? 'अभिमंत्रित दिव्य विग्रह व मूर्तियां' : 'Mantra Energized Divine Idols',
                           style: TextStyle(fontFamily: 'Headway', 
                             color: Colors.white,
                             fontSize: 14,
@@ -1368,7 +1399,7 @@ class _StoreScreenState extends State<StoreScreen> {
                           ),
                         ),
                         Text(
-                          'Bring divinity & prosperity home',
+                          LocaleService().isHindi ? 'घर लाएं सुख, शांति और समृद्धि' : 'Bring divinity & prosperity home',
                           style: GoogleFonts.poppins(
                             color: Colors.white70,
                             fontSize: 11,
@@ -1524,7 +1555,9 @@ class _StoreScreenState extends State<StoreScreen> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  prod['badge'] as String,
+                                  LocaleService().isHindi
+                                      ? (prod['badge_hi']?.toString() ?? 'सर्वाधिक लोकप्रिय')
+                                      : prod['badge'] as String,
                                   style: GoogleFonts.poppins(
                                     fontSize: 8.5,
                                     fontWeight: FontWeight.w700,
@@ -1543,7 +1576,7 @@ class _StoreScreenState extends State<StoreScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              prod['title'] as String,
+                              (LocaleService().isHindi ? prod['title_hi'] : null) as String? ?? prod['title'] as String,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
@@ -1553,7 +1586,7 @@ class _StoreScreenState extends State<StoreScreen> {
                               ),
                             ),
                             Text(
-                              prod['subtitle'] as String,
+                              (LocaleService().isHindi ? prod['subtitle_hi'] : null) as String? ?? prod['subtitle'] as String,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(

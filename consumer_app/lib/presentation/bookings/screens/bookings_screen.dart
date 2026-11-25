@@ -50,42 +50,47 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final bookings = DevoteeDataService().bookings;
-    final activeBookings = bookings.where((b) => b['status'] != 'Completed').toList();
-    final completedBookings = bookings.where((b) => b['status'] == 'Completed').toList();
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final bookings = DevoteeDataService().bookings;
+        final activeBookings = bookings.where((b) => b['status'] != 'Completed').toList();
+        final completedBookings = bookings.where((b) => b['status'] == 'Completed').toList();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFBF8F3),
-      body: Column(
-        children: [
-          const MandirmHeader(),
-          Container(
-            color: const Color(0xFFFBF8F3),
-            child: TabBar(
-              controller: _tabController,
-              labelColor: _primaryMaroon,
-              unselectedLabelColor: Colors.grey.shade600,
-              indicatorColor: _primaryMaroon,
-              indicatorWeight: 3,
-              labelStyle: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700),
-              unselectedLabelStyle: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-              tabs: [
-                Tab(text: '${AppStrings.t('pending')} (${activeBookings.length})'),
-                Tab(text: '${AppStrings.t('completed')} (${completedBookings.length})'),
-              ],
-            ),
+        return Scaffold(
+          backgroundColor: const Color(0xFFFBF8F3),
+          body: Column(
+            children: [
+              const MandirmHeader(),
+              Container(
+                color: const Color(0xFFFBF8F3),
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: _primaryMaroon,
+                  unselectedLabelColor: Colors.grey.shade600,
+                  indicatorColor: _primaryMaroon,
+                  indicatorWeight: 3,
+                  labelStyle: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700),
+                  unselectedLabelStyle: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                  tabs: [
+                    Tab(text: '${AppStrings.t('pending')} (${activeBookings.length})'),
+                    Tab(text: '${AppStrings.t('completed')} (${completedBookings.length})'),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildBookingsList(activeBookings, isActive: true),
+                    _buildBookingsList(completedBookings, isActive: false),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildBookingsList(activeBookings, isActive: true),
-                _buildBookingsList(completedBookings, isActive: false),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

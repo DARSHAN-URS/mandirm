@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/l10n/locale_service.dart';
+import '../../../core/l10n/entity_localizer.dart';
 import '../../../services/api_service.dart';
 import '../../puja/screens/pujas_screen.dart';
 import '../../shop/screens/prasad_orders_screen.dart';
@@ -44,10 +46,20 @@ class _TemplesScreenState extends State<TemplesScreen> {
 
   // Live Temples loaded exclusively from database
   final List<Map<String, dynamic>> _allTemples = [];
+  final List<Map<String, dynamic>> _rawTemples = [];
 
   Map<String, dynamic> _normalizeTemple(Map<String, dynamic> raw) {
-    final deity = raw['deity']?.toString() ?? 'Lord Shiva';
-    final deityLower = deity.toLowerCase();
+    final isHi = LocaleService().isHindi;
+    final loc = EntityLocalizer.localizeTemple(raw, isHi);
+    final rawName = raw['name']?.toString() ?? 'Sacred Mandir';
+    final rawDeity = raw['deity']?.toString() ?? 'Lord Shiva';
+
+    final name = loc['name']?.toString() ?? rawName;
+    final deity = loc['deity']?.toString() ?? rawDeity;
+    final city = loc['city']?.toString() ?? 'Holy City';
+    final desc = loc['description']?.toString() ?? 'Ancient sacred temple sanctum.';
+
+    final deityLower = rawDeity.toLowerCase();
     String icon = '🔱';
     String category = 'Lord Shiva';
 
@@ -63,7 +75,9 @@ class _TemplesScreenState extends State<TemplesScreen> {
     } else if (deityLower.contains('devi') ||
         deityLower.contains('durga') ||
         deityLower.contains('lakshmi') ||
-        deityLower.contains('vaishno')) {
+        deityLower.contains('vaishno') ||
+        deityLower.contains('baglamukhi') ||
+        deityLower.contains('बगलामुखी')) {
       icon = '🌸';
       category = 'Maa Durga / Devi';
     } else if (deityLower.contains('hanuman')) {
@@ -81,36 +95,44 @@ class _TemplesScreenState extends State<TemplesScreen> {
       for (var part in parts) {
         final colonIdx = part.indexOf(':');
         if (colonIdx != -1) {
-          final name = part.substring(0, colonIdx).trim();
-          final time = part.substring(colonIdx + 1).trim();
-          aartis.add({'name': name, 'time': time});
+          final aName = part.substring(0, colonIdx).trim();
+          final aTime = part.substring(colonIdx + 1).trim();
+          String finalName = aName;
+          if (isHi) {
+            if (aName.toLowerCase().contains('mangala')) finalName = 'मंगला';
+            else if (aName.toLowerCase().contains('suprabhatam')) finalName = 'सुप्रभातम्';
+            else if (aName.toLowerCase().contains('kakad')) finalName = 'काकड़ आरती';
+            else if (aName.toLowerCase().contains('bhasma')) finalName = 'भस्म आरती';
+            else if (aName.toLowerCase().contains('bhog')) finalName = 'भोग आरती';
+            else if (aName.toLowerCase().contains('sandhya')) finalName = 'संध्या आरती';
+            else if (aName.toLowerCase().contains('shringar')) finalName = 'श्रृंगार आरती';
+            else if (aName.toLowerCase().contains('shejarati')) finalName = 'शेजारती';
+            else if (aName.toLowerCase().contains('morning')) finalName = 'प्रातः आरती';
+          }
+          aartis.add({'name': finalName, 'time': aTime});
         }
       }
     }
     if (aartis.isEmpty) {
       aartis = [
-        {'name': 'Mangala Aarti', 'time': '04:00 AM'},
-        {'name': 'Bhog Aarti', 'time': '12:00 PM'},
-        {'name': 'Sandhya Aarti', 'time': '07:00 PM'},
+        {'name': isHi ? 'मंगला आरती' : 'Mangala Aarti', 'time': '04:00 AM'},
+        {'name': isHi ? 'भोग आरती' : 'Bhog Aarti', 'time': '12:00 PM'},
+        {'name': isHi ? 'संध्या आरती' : 'Sandhya Aarti', 'time': '07:00 PM'},
       ];
     }
 
-    final city = raw['city']?.toString() ?? 'Holy City';
-    final state = raw['state']?.toString() ?? '';
-    final fullLocation = state.isNotEmpty ? '$city, $state' : city;
-
     return {
       'id': raw['id']?.toString() ?? 'temple_${raw.hashCode}',
-      'name': raw['name']?.toString() ?? 'Sacred Mandir',
-      'city': fullLocation,
+      'name': name,
+      'city': city,
       'deity': deity,
       'category': category,
       'icon': icon,
-      'status': 'Live Darshan Streaming',
+      'status': isHi ? 'लाइव दर्शन उपलब्ध' : 'Live Darshan Streaming',
       'live': true,
       'viewers': '${((raw['reviews_count'] as num?)?.toInt() ?? 1200) * 3}',
       'timings': raw['darshan_timings']?.toString() ?? '04:00 AM - 11:00 PM',
-      'description': raw['description']?.toString() ?? 'Ancient sacred temple sanctum.',
+      'description': desc,
       'aartis': aartis,
       'image_url': raw['image_url']?.toString() ?? '',
       'live_darshan_url': raw['live_darshan_url']?.toString() ?? '',
@@ -128,6 +150,8 @@ class _TemplesScreenState extends State<TemplesScreen> {
       final backendTemples = await ApiService().getTemples();
       if (backendTemples.isNotEmpty && mounted) {
         setState(() {
+          _rawTemples.clear();
+          _rawTemples.addAll(backendTemples);
           _allTemples.clear();
           for (final bt in backendTemples) {
             _allTemples.add(_normalizeTemple(bt));
@@ -144,7 +168,10 @@ class _TemplesScreenState extends State<TemplesScreen> {
   }
 
   List<Map<String, dynamic>> get _filteredTemples {
-    return _allTemples.where((t) {
+    final list = _rawTemples.isNotEmpty
+        ? _rawTemples.map(_normalizeTemple).toList()
+        : _allTemples.map(_normalizeTemple).toList();
+    return list.where((t) {
       final matchesCategory = _selectedCategory == 'All' || t['category'] == _selectedCategory;
       final query = _searchQuery.toLowerCase();
       final matchesSearch = query.isEmpty ||
@@ -181,13 +208,16 @@ class _TemplesScreenState extends State<TemplesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final temples = _filteredTemples;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService().locale,
+      builder: (context, locale, _) {
+        final temples = _filteredTemples;
 
-    return Scaffold(
-      backgroundColor: _warmCreamBg,
-      body: SafeArea(
-        child: Column(
-          children: [
+        return Scaffold(
+          backgroundColor: _warmCreamBg,
+          body: SafeArea(
+            child: Column(
+              children: [
             // 1. Top Custom App Bar
             _buildTopAppBar(),
 
@@ -328,6 +358,8 @@ class _TemplesScreenState extends State<TemplesScreen> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 
@@ -520,7 +552,7 @@ class _TemplesScreenState extends State<TemplesScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    cat,
+                    EntityLocalizer.localizeCategory(cat, LocaleService().isHindi),
                     style: GoogleFonts.poppins(
                       fontSize: 11.5,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
